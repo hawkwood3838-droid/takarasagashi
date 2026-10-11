@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>注文する｜{sugo}</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="sugoroku.css">
+<script src="../assets/config.js"></script>
+<script src="config.js"></script>
+</head>
+<body class="sg">
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="./"><svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="4" fill="#F2B705" stroke="#1C2836" stroke-width="2"/><circle cx="8" cy="8" r="1.8" fill="#1C2836"/><circle cx="12" cy="12" r="1.8" fill="#1C2836"/><circle cx="16" cy="16" r="1.8" fill="#1C2836"/></svg>なりたい自分すごろく<span class="brand-tag">名前入り</span></a>
+  </div>
+</header>
+
+<main class="wrap narrow">
+  <h1 class="page-title">注文する</h1>
+  <ol class="steps" aria-label="注文の流れ">
+    <li id="step-input" aria-current="step">1 入力</li>
+    <li id="step-confirm">2 確認</li>
+    <li>3 お支払い</li>
+  </ol>
+
+  <div id="notice-area"></div>
+
+  <!-- 1. 入力 -->
+  <form id="order-form" novalidate>
+    <fieldset class="field">
+      <legend><span class="q-num"></span>種類</legend>
+      <p class="hint" id="plan-hint">どれも名前入り・PDFでのお届けです。<a href="./#plans" target="_blank" rel="noopener">ちがいを見る</a></p>
+      <div class="plan-pick" id="plan-list" role="radiogroup" aria-describedby="plan-hint plan-err"></div>
+      <p class="err" id="plan-err" hidden></p>
+    </fieldset>
+
+    <!-- 1人の名前入り（やさしい版・デラックス版） -->
+    <div id="single-block">
+      <fieldset class="field">
+        <legend><span class="q-num"></span>主役の名前</legend>
+        <p class="hint" id="name-hint">ひらがな・カタカナ8文字まで。表紙や盤、人生シートに この名前が入ります。</p>
+        <div class="name-row">
+          <input type="text" id="me-name" class="kid-name" inputmode="kana" autocomplete="off" placeholder="ゆうき" maxlength="16" aria-describedby="name-hint name-err">
+          <div class="seg seg-sm" role="radiogroup" aria-label="呼び方" id="me-hon"></div>
+        </div>
+        <p class="err" id="name-err" hidden></p>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend><span class="q-num"></span>年齢</legend>
+        <p class="hint" id="age-hint">遊ぶときの年齢です。</p>
+        <select id="me-age" aria-describedby="age-hint age-err" style="max-width:220px"></select>
+        <p class="err" id="age-err" hidden></p>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend><span class="q-num"></span>なりたい職業</legend>
+        <p class="hint" id="job-hint">主役の人生シートと、表紙の「なりたい自分」になります。</p>
+        <div class="job-pick" id="job-list" role="radiogroup" aria-describedby="job-hint job-err"></div>
+        <p class="err" id="job-err" hidden></p>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend><span class="q-num"></span>好きなもの<span class="opt">なくても大丈夫</span></legend>
+        <p class="hint" id="likes-hint">ひらがな・カタカナ8文字まで、3つまで。人生シートの こどもの ころの できごとに「サッカーが 大すき！」のように入ります。</p>
+        <div class="likes-row">
+          <input type="text" class="like" autocomplete="off" placeholder="サッカー" maxlength="16" aria-label="好きなもの1つめ" aria-describedby="likes-hint likes-err">
+          <input type="text" class="like" autocomplete="off" placeholder="ねこ" maxlength="16" aria-label="好きなもの2つめ">
+          <input type="text" class="like" autocomplete="off" placeholder="ラーメン" maxlength="16" aria-label="好きなもの3つめ">
+        </div>
+        <p class="err" id="likes-err" hidden></p>
+      </fieldset>
+    </div>
+
+    <!-- 家族の名前入り（〇〇家版） -->
+    <div id="family-block" hidden>
+      <fieldset class="field">
+        <legend><span class="q-num"></span>みょうじ</legend>
+        <p class="hint" id="fam-hint">ひらがな・カタカナ6文字まで。題が「〜たかぎ家の場合〜」になります。</p>
+        <div class="name-row"><input type="text" id="fam-name" inputmode="kana" autocomplete="off" placeholder="たかぎ" maxlength="12" aria-describedby="fam-hint fam-err"><span style="font-weight:900;font-size:18px">家</span></div>
+        <p class="err" id="fam-err" hidden></p>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend><span class="q-num"></span>家族</legend>
+        <p class="hint" id="members-hint">2〜6人。1人ずつ、名前入りの人生シートができます。パパ・ママのような呼び名でも大丈夫です。</p>
+        <div id="member-rows"></div>
+        <button class="btn btn-ghost btn-sm" type="button" id="add-member">＋ 1人ふやす</button>
+        <p class="err" id="members-err" hidden></p>
+      </fieldset>
+    </div>
+
+    <fieldset class="field">
+      <legend><span class="q-num"></span>リストにない職業のリクエスト<span class="opt">なくても大丈夫</span></legend>
+      <p class="hint" id="req-hint">ほんとうは なりたい職業が リストにないときは、教えてください（20文字まで）。追加の職業を作るときの参考にします。このご注文の内容は変わりません。</p>
+      <input type="text" id="job-request" autocomplete="off" placeholder="うちゅうひこうし" maxlength="40" aria-describedby="req-hint req-err">
+      <p class="err" id="req-err" hidden></p>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend><span class="q-num"></span>表紙のメッセージ<span class="opt">なくても大丈夫</span></legend>
+      <p class="hint" id="msg-hint">60文字まで。表紙に入ります。贈る人の名前は16文字まで（「ゆめの しょうめいしょ」にも入ります）。</p>
+      <textarea id="message" rows="3" maxlength="120" placeholder="9さいの おたんじょうび おめでとう！ ゆめに むかって すすめ！" aria-describedby="msg-hint msg-err"></textarea>
+      <p class="count" id="msg-count" aria-live="polite"></p>
+      <input type="text" id="from" autocomplete="off" placeholder="パパと ママより" maxlength="32" aria-label="贈る人" style="margin-top:8px">
+      <p class="err" id="msg-err" hidden></p>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend><span class="q-num"></span>確認</legend>
+      <label class="agree">
+        <input type="checkbox" id="agree" aria-describedby="agree-err">
+        <span>デジタル商品のため、お届け後の返品・キャンセルはできないことを確認しました。（<a href="../tokushoho.html" target="_blank" rel="noopener">特定商取引法に基づく表記</a>・<a href="../privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>）</span>
+      </label>
+      <p class="err" id="agree-err" hidden></p>
+    </fieldset>
+
+    <div class="form-actions">
+      <button class="btn" type="submit">確認へ進む</button>
+    </div>
+  </form>
+
+  <!-- 2. 確認 -->
+  <section id="confirm" hidden aria-labelledby="confirm-title">
+    <div class="summary">
+      <h2 id="confirm-title">ご注文の内容</h2>
+      <dl id="summary-order"></dl>
+    </div>
+    <div class="summary">
+      <h2>お支払いとお届け</h2>
+      <dl>
+        <dt>商品</dt><dd>なりたい自分すごろく（<span id="summary-plan"></span>・PDF）</dd>
+        <dt>数量</dt><dd>1</dd>
+        <dt>価格</dt><dd><span class="big-price"><span id="summary-price"></span>円</span>（税込・送料なし）</dd>
+        <dt>支払い方法</dt><dd>クレジットカード</dd>
+        <dt>支払いの時期</dt><dd>次の画面でカード情報を入れたときに決済されます</dd>
+        <dt>お届け</dt><dd>決済のあと、ふつうは数分でPDFをメールでお送りします（遅くとも24時間以内）</dd>
+        <dt>返品・キャンセル</dt><dd>デジタル商品のため、お届け後はできません。ファイルの不具合や内容の誤りは、作り直しか返金で対応します</dd>
+      </dl>
+    </div>
+    <p class="hint">次の画面（Stripeの支払い画面）で、カード情報と、PDFを受け取るメールアドレスを入れます。</p>
+    <p class="err" id="submit-err" hidden></p>
+    <div class="form-actions">
+      <button class="btn btn-ghost" type="button" id="back-btn">入力にもどる</button>
+      <button class="btn" type="button" id="pay-btn">支払いへ進む（<span id="pay-price"></span>円）</button>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="サイトの情報">
+      <a href="../tokushoho.html">特定商取引法に基づく表記</a>
+      <a href="../privacy.html">プライバシーポリシー</a>
+      <a href="#" data-kit-mail>お問い合わせ</a>
+    </nav>
+    <p style="margin:0"><span data-kit="shop">ひなた あそび工房</span>（販売：<span data-kit="seller">髙木大資</span>）</p>
+  </div>
+</footer>
+
+<script src="order.js"></script>
+</body>
+</html>
