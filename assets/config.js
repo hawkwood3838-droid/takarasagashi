@@ -6,7 +6,7 @@ window.KIT = {
   SELLER: '髙木大資',
   CONTACT: 'hawkwood3838@gmail.com',
   // 受付の仕組み（Apps Script ウェブアプリ）のURL。空のあいだは支払いボタンが「準備中」になる
-  API_URL: '',
+  API_URL: 'https://script.google.com/macros/s/AKfycbw1iDJKzfDWksZPnbNmDfRAX9ipbbwVlo_1CgePaHks8NQpIzshOXSw4oCSZVxGbSvFDw/exec',
   NAME_MAX: 8,
   NAMES_MAX: 4,
   LIKES_MAX: 10,
