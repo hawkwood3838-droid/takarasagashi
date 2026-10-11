@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>注文する｜{product}</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/config.js"></script>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="./"><svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="#B5452F" stroke-width="4" stroke-linecap="round"/></svg><span data-kit="product">おうちクエスト</span><span class="brand-tag">名前入り</span></a>
+  </div>
+</header>
+
+<main class="wrap narrow">
+  <h1 class="page-title">注文する</h1>
+  <ol class="steps" aria-label="注文の流れ">
+    <li id="step-input" aria-current="step">1 入力</li>
+    <li id="step-confirm">2 確認</li>
+    <li>3 お支払い</li>
+  </ol>
+
+  <div id="notice-area"></div>
+
+  <!-- 1. 入力 -->
+  <form id="order-form" novalidate>
+    <fieldset class="field">
+      <legend><span class="q-num">1</span>お話</legend>
+      <p class="hint" id="story-hint">どのお話で遊びますか。</p>
+      <div class="story-pick" id="story-list" role="radiogroup" aria-describedby="story-hint story-err"></div>
+      <p class="err" id="story-err" hidden></p>
+    </fieldset>
+
+    <fieldset class="field" id="occasion-field">
+      <legend><span class="q-num">2</span>いつ遊びますか</legend>
+      <div class="seg" id="occasion-list" role="radiogroup" aria-describedby="occasion-hint occasion-err"></div>
+      <p class="hint" id="occasion-hint" style="margin-top:8px"></p>
+      <p class="err" id="occasion-err" hidden></p>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend><span class="q-num">3</span>お子さまの名前</legend>
+      <p class="hint" id="name-hint">ひらがな8文字まで。手紙やカードにこの名前が入ります。きょうだいで遊ぶときは4人まで入れられます。</p>
+      <div id="name-rows"></div>
+      <button class="btn btn-ghost btn-sm" type="button" id="add-name">＋ 名前をふやす</button>
+      <p class="hint" id="bday-note" hidden style="margin-top:8px">おたんじょうびのときは、1人目がおたんじょうびの子です。</p>
+      <p class="err" id="name-err" hidden></p>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend><span class="q-num">4</span>年齢</legend>
+      <p class="hint" id="age-hint">年齢に合わせて、謎の難しさが変わります。3〜4さいは字を読まなくても解ける絵のなぞ（隠し場所4か所）、5さい以上は文字の暗号（5か所）です。</p>
+      <div class="seg" id="age-list" role="radiogroup" aria-describedby="age-hint age-err"></div>
+      <p class="hint" id="age-multi" hidden style="margin-top:8px">きょうだいで遊ぶときは、下の子の年齢に合わせるのがおすすめです。</p>
+      <p class="err" id="age-err" hidden></p>
+      <div id="bday-age-box" hidden>
+        <p class="hint" style="margin:14px 0 6px">おたんじょうびの子は、なんさいになりますか（手紙に入ります）</p>
+        <select id="bday-age" aria-label="おたんじょうびの年齢"></select>
+      </div>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend><span class="q-num">5</span>好きなもの<span class="opt">なくても大丈夫</span></legend>
+      <p class="hint" id="likes-hint">ひらがな・カタカナ10文字まで。手紙の中に「きょうりゅうが だいすきな きみ」のように入ります。</p>
+      <input id="likes" name="likes" type="text" autocomplete="off" placeholder="きょうりゅう" maxlength="20" aria-describedby="likes-hint likes-err">
+      <p class="err" id="likes-err" hidden></p>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend><span class="q-num">6</span>プレゼントを隠す場所</legend>
+      <p class="hint" id="treasure-hint">最後の宝の場所です。プレゼントが入る場所を選んでください。</p>
+      <div class="spots" id="treasure-list" role="radiogroup" aria-describedby="treasure-hint treasure-err"></div>
+      <p class="err" id="treasure-err" hidden></p>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend><span class="q-num">7</span>カードを隠す場所を<span id="need-n">5</span>つ</legend>
+      <p class="hint" id="cards-hint">家にある場所を選んでください。どの順番でめぐるかは、こちらで決めます。</p>
+      <div class="spots" id="card-list" aria-describedby="cards-hint cards-err"></div>
+      <p class="counter" id="card-counter" aria-live="polite"></p>
+      <p class="err" id="cards-err" hidden></p>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend><span class="q-num">8</span>確認</legend>
+      <label class="agree">
+        <input type="checkbox" id="agree" aria-describedby="agree-err">
+        <span>デジタル商品のため、お届け後の返品・キャンセルはできないことを確認しました。（<a href="tokushoho.html" target="_blank" rel="noopener">特定商取引法に基づく表記</a>・<a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>）</span>
+      </label>
+      <p class="err" id="agree-err" hidden></p>
+    </fieldset>
+
+    <div class="form-actions">
+      <button class="btn" type="submit">確認へ進む</button>
+    </div>
+  </form>
+
+  <!-- 2. 確認 -->
+  <section id="confirm" hidden aria-labelledby="confirm-title">
+    <div class="summary">
+      <h2 id="confirm-title">ご注文の内容</h2>
+      <dl id="summary-order"></dl>
+    </div>
+    <div class="summary">
+      <h2>お支払いとお届け</h2>
+      <dl>
+        <dt>商品</dt><dd><span data-kit="product">おうちクエスト</span>「<span id="summary-story"></span>」（名前入り・PDF）</dd>
+        <dt>数量</dt><dd>1</dd>
+        <dt>価格</dt><dd><span class="big-price"><span data-kit="price">980</span>円</span>（税込・送料なし）</dd>
+        <dt>支払い方法</dt><dd>クレジットカード</dd>
+        <dt>支払いの時期</dt><dd>次の画面でカード情報を入れたときに決済されます</dd>
+        <dt>お届け</dt><dd>決済のあと、ふつうは数分でPDFをメールでお送りします（遅くとも24時間以内）</dd>
+        <dt>返品・キャンセル</dt><dd>デジタル商品のため、お届け後はできません。ファイルの不具合や内容の誤りは、作り直しか返金で対応します</dd>
+      </dl>
+    </div>
+    <p class="hint">次の画面（Stripeの支払い画面）で、カード情報と、PDFを受け取るメールアドレスを入れます。</p>
+    <p class="err" id="submit-err" hidden></p>
+    <div class="form-actions">
+      <button class="btn btn-ghost" type="button" id="back-btn">入力にもどる</button>
+      <button class="btn" type="button" id="pay-btn">支払いへ進む（<span data-kit="price">980</span>円）</button>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="サイトの情報">
+      <a href="tokushoho.html">特定商取引法に基づく表記</a>
+      <a href="privacy.html">プライバシーポリシー</a>
+      <a href="#" data-kit-mail>お問い合わせ</a>
+    </nav>
+    <p style="margin:0"><span data-kit="shop">ひなた あそび工房</span>（販売：<span data-kit="seller">髙木大資</span>）</p>
+  </div>
+</footer>
+
+<script src="assets/order.js"></script>
+</body>
+</html>

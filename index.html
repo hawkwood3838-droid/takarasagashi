@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{product}｜名前入りの宝さがし（3〜8さい）</title>
+<meta name="description" content="お子さまの名前を入れて注文すると、その子のための暗号と宝の地図がPDFで届きます。12のお話から選べて、3〜8さいまで。印刷して家の中に隠すだけ。準備は5分。980円（税込）。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="前の晩でも間に合う、名前入りの宝さがし">
+<meta property="og:description" content="名前を入れて注文すると、その子のための暗号と宝の地図がPDFで届きます。12のお話・3〜8さい・980円。">
+<meta property="og:image" content="img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/config.js"></script>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="./"><svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="#B5452F" stroke-width="4" stroke-linecap="round"/></svg><span data-kit="product">おうちクエスト</span><span class="brand-tag">名前入り</span></a>
+    <a class="btn btn-sm" href="#lineup">お話をえらぶ</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <h1><span class="ph">前の晩でも</span><span class="ph">間に合う、</span><br><span class="ph">名前入りの</span><span class="ph">宝さがし。</span></h1>
+        <p class="lead">お誕生日やクリスマスのプレゼントを、宝さがしにして渡しませんか。お子さまの名前を入れて注文すると、その子のための暗号と宝の地図がPDFで届きます。印刷して、家の中に隠すだけ。準備は5分です。</p>
+
+        <div class="try">
+          <label for="try-name">お子さまの名前で見てみる</label>
+          <div class="try-row">
+            <input id="try-name" type="text" inputmode="kana" autocomplete="off" placeholder="ゆうき" maxlength="8" aria-describedby="try-hint">
+            <select id="try-suffix" aria-label="呼び方">
+              <option value="くん">くん</option>
+              <option value="ちゃん">ちゃん</option>
+              <option value="">なし</option>
+            </select>
+          </div>
+          <p id="try-hint" class="hint" style="margin-top:6px">ひらがなで入れると、手紙の見本に名前が入ります。</p>
+        </div>
+
+        <div class="hero-cta">
+          <a class="btn" href="#lineup"><span class="price-tag"><span data-kit="price">980</span>円</span>・お話をえらぶ</a>
+          <span class="hero-note"><span data-kit="stories">12</span>のお話・3〜8さい・A4で印刷・クレジットカード払い</span>
+        </div>
+      </div>
+
+      <article class="letter" aria-label="キットの1枚目、キャプテンからの手紙の見本">
+        <div class="letter-head">
+          <div class="letter-badge" aria-hidden="true">S</div>
+          <p class="letter-title"><span class="letter-name js-who">ゆうきくん</span>へ　キャプテンからの てがみ</p>
+        </div>
+        <div class="letter-body">
+          <img src="img/captain.webp" width="520" height="633" alt="ひげの船長、キャプテン・ひげまる">
+          <div>
+            <p><span class="letter-name js-who">ゆうきくん</span>、たんじょうび おめでとう！</p>
+            <p>わしは かいぞくせんの せんちょう、キャプテン・ひげまる。</p>
+            <p>とっておきの たからものを、この いえの どこかに かくしたぞ。</p>
+            <p>さあ、あんごうを といて すすむのだ！</p>
+            <div class="letter-tiles" aria-hidden="true">
+              <span><small>④</small>う</span><span><small>⑤</small>こ</span><span><small>②</small>い</span><span><small>①</small>れ</span><span><small>③</small>ぞ</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="lineup">
+    <div class="wrap">
+      <h2>お話をえらぶ</h2>
+      <p class="sub">どのお話も、年齢に合わせて謎の難しさが変わります。おたんじょうび用と、ふだんの日（ごほうび・雨の日）用が選べます。</p>
+      <div class="lineup" id="lineup-year"></div>
+
+      <h3 class="lineup-head">季節のお話：クリスマス</h3>
+      <p class="sub">3本は同じなかまが出てくるシリーズです。続けて遊ぶと、お話がつながります。</p>
+      <div class="lineup" id="lineup-christmas"></div>
+    </div>
+  </section>
+
+  <section class="section section-sea">
+    <div class="wrap narrow">
+      <h2>遊び方</h2>
+      <p class="sub">暗号の答えが、次のカードの隠し場所。家の中を4〜5か所めぐって、最後に宝（プレゼント）を見つけます。</p>
+      <ol class="route">
+        <li><div class="isle">1</div><div><h3>注文する</h3><p>お話・名前・年齢・家の中の隠し場所を選んで、カードで支払います。</p></div></li>
+        <li><div class="isle">2</div><div><h3>メールでPDFが届く</h3><p>支払いが済むと、ふつうは数分でキットのPDFが届きます。</p></div></li>
+        <li><div class="isle">3</div><div><h3>印刷して切る</h3><p>A4で6ページ。家のプリンターでも、コンビニのネットプリントでも印刷できます。</p></div></li>
+        <li><div class="isle">4</div><div><h3>カードを隠す</h3><p>1ページ目の表のとおりに、冷蔵庫や玄関へ。5分ほどで終わります。</p></div></li>
+        <li><div class="isle goal" aria-label="ゴール">×</div><div><h3>冒険スタート</h3><p>手紙と地図を渡したら、あとは見守るだけ。合言葉を唱えたら、プレゼントを開けて終わりです。</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <h2>中身</h2>
+      <p class="sub">どのカードにも、その子の名前が入ります。見本は「かいぞくの たから」を「ゆうきくん・6さい」で作ったものです。</p>
+      <div class="cards">
+        <figure><img src="img/card-letter.jpg" width="1100" height="783" loading="lazy" alt="キャプテンからの手紙。数字の順に文字を並べる最初の暗号つき"><figcaption>最初の手紙。暗号を解くと、1つめの隠し場所がわかります。</figcaption></figure>
+        <figure><img src="img/card-map.jpg" width="1100" height="783" loading="lazy" alt="宝の地図。5つの島と、文字を書きこむ5つの箱"><figcaption>宝の地図。カードで見つけた文字を書きこむと、最後に合言葉ができあがります。</figcaption></figure>
+        <figure><img src="img/card-maze.jpg" width="1100" height="783" loading="lazy" alt="めいろの暗号のカード"><figcaption>めいろの暗号。通った道の文字を順に読みます。</figcaption></figure>
+        <figure><img src="img/card-little.jpg" width="1100" height="783" loading="lazy" alt="3〜4さい向けの、絵で答える謎のカード"><figcaption>3〜4さい向けは、字を読まなくても解ける絵のなぞ。答えの場所の絵に○をつけます。</figcaption></figure>
+      </div>
+      <dl class="contents-list">
+        <dt>大人用の準備ページ（1ページ）</dt>
+        <dd>どのカードをどこに隠すかの一覧と、遊び方の流れ。</dd>
+        <dt>カード7〜8枚（4ページ）</dt>
+        <dd>手紙・地図・謎のカード・宝のカード。点線で切って使います。</dd>
+        <dt>こたえとヒント（1ページ）</dt>
+        <dd>詰まったときの助け舟。お子さまには見せないでください。</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section section-sea">
+    <div class="wrap">
+      <h2>年齢に合わせて、難しさが変わります</h2>
+      <p class="sub">きょうだいで遊ぶときは、下の子の年齢に合わせるのがおすすめです。</p>
+      <div class="ages ages-3">
+        <div class="age">
+          <h3>3〜4さい</h3>
+          <ul>
+            <li>字を読まなくても解ける、絵のなぞ（ならびかた・なかまはずれ・かずくらべ・線たどり など）</li>
+            <li>答えは場所の絵を選ぶだけ。隠し場所は4か所</li>
+            <li>カードの文は大人が読み上げます</li>
+          </ul>
+        </div>
+        <div class="age">
+          <h3>5〜6さい</h3>
+          <ul>
+            <li>数字の順に並べる、さかさに読む、めいろ、★の文字だけ読む、など</li>
+            <li>どのカードにも読み方のヒントつき</li>
+            <li>隠し場所は5か所</li>
+          </ul>
+        </div>
+        <div class="age">
+          <h3>7〜8さい</h3>
+          <ul>
+            <li>あいうえお表を使う暗号が入ります</li>
+            <li>ヒントが減り、めいろも大きくなります</li>
+            <li>ひとりで解き進められる難しさ</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap narrow">
+      <h2>用意するもの</h2>
+      <p class="sub">遊ぶ時間は、15〜30分がめやすです。</p>
+      <ul class="need">
+        <li><b>A4に印刷できるプリンター</b>　なければ、コンビニのネットプリントで印刷できます。カラーがおすすめです（3〜4さい向けは色と形で解くなぞがあるので、カラーで印刷してください）。</li>
+        <li><b>はさみ</b>　点線にそって、カードを切り分けます。</li>
+        <li><b>プレゼント</b>　これが最後の宝です。注文のときに選んだ場所に隠しておきます。</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section-sea">
+    <div class="wrap narrow faq">
+      <h2>よくある質問</h2>
+      <details><summary>いつ届きますか？</summary><p>お支払いが済んでから、ふつうは数分でメールが届きます。届かないときは、迷惑メールのフォルダも確かめてください。</p></details>
+      <details><summary>支払い方法は？</summary><p>クレジットカードです。Stripe（ストライプ）の支払い画面で入力します。カード番号は販売者には届きません。</p></details>
+      <details><summary>きょうだいで遊べますか？</summary><p>遊べます。名前は4人まで入れられます。難しさは1つの年齢に合わせるので、下の子に合わせるのがおすすめです。</p></details>
+      <details><summary>字がまだ読めなくても遊べますか？</summary><p>3〜4さいを選ぶと、字を読まなくても解ける絵のなぞになります。カードの文は大人の方が読み上げてください。</p></details>
+      <details><summary>白黒で印刷しても遊べますか？</summary><p>5さい以上のキットは遊べます（マークは形でも見分けられます）。3〜4さい向けは色で解くなぞがあるので、カラーで印刷してください。</p></details>
+      <details><summary>クリスマスのお話はいつまで買えますか？</summary><p>12月25日までです。クリスマス当日の朝に注文しても、数分で届きます。</p></details>
+      <details><summary>何回印刷してもいいですか？</summary><p>ご家庭の中で使う分には何回でも。ほかの人への配布や販売はご遠慮ください。</p></details>
+      <details><summary>名前に漢字は使えますか？</summary><p>お子さまが自分で読めるよう、ひらがなで入ります。カタカナで入れた場合も、ひらがなに直します。</p></details>
+      <details><summary>返品やキャンセルはできますか？</summary><p>デジタル商品のため、お届け後の返品・キャンセルはできません。ファイルが開けない、内容に誤りがあるときは、メールでご連絡ください。作り直すか、返金します。</p></details>
+    </div>
+  </section>
+
+  <section class="goal-band">
+    <div class="wrap">
+      <svg class="goal-x" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="#F6EBD9" stroke="#E0A526" stroke-width="4"/><path d="M20 20l24 24M44 20L20 44" stroke="#B5452F" stroke-width="7" stroke-linecap="round"/></svg>
+      <h2>その子の名前で作ります</h2>
+      <p><span data-kit="stories">12</span>のお話・3〜8さい・PDFでお届け・<span data-kit="price">980</span>円（税込）</p>
+      <a class="btn" href="#lineup">お話をえらぶ</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="サイトの情報">
+      <a href="tokushoho.html">特定商取引法に基づく表記</a>
+      <a href="privacy.html">プライバシーポリシー</a>
+      <a href="#" data-kit-mail>お問い合わせ</a>
+    </nav>
+    <p style="margin:0"><span data-kit="shop">ひなた あそび工房</span>（販売：<span data-kit="seller">髙木大資</span>）</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var K = window.KIT;
+  // お話の一覧を、設定（config.js）から作る
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function card(s) {
+    var open = K.inSeason(s.occasions);
+    var season = s.line === 'christmas' ? '<span class="story-badge">クリスマス</span>' : '';
+    var soon = (K.SEASONS[s.occasions[0]] || {}).soon || '';
+    var btn = open
+      ? '<a class="btn btn-sm" href="order.html?story=' + encodeURIComponent(s.key) + '">このお話で注文する</a>'
+      : '<span class="btn btn-sm" aria-disabled="true">' + esc(soon) + '販売</span>';
+    return '<article class="story"><div class="story-pic"><img src="img/stories/' + esc(s.key) + '.webp" alt="' + esc(s.host) + '" loading="lazy"></div>'
+      + '<div class="story-body">' + season + '<h3>' + esc(s.name) + '</h3><p class="story-host">' + esc(s.host) + '</p>'
+      + '<p class="story-blurb">' + esc(s.blurb) + '</p>' + btn + '</div></article>';
+  }
+  document.getElementById('lineup-year').innerHTML = K.STORIES.filter(function (s) { return s.line === 'year'; }).map(card).join('');
+  document.getElementById('lineup-christmas').innerHTML = K.STORIES.filter(function (s) { return s.line === 'christmas'; }).map(card).join('');
+
+  // 手紙の見本に名前を入れる
+  var nameEl = document.getElementById('try-name');
+  var sufEl = document.getElementById('try-suffix');
+  function toHira(s) {
+    return s.replace(/[ァ-ヶ]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0x60); });
+  }
+  function update() {
+    var n = toHira(nameEl.value.trim()).replace(/[^ぁ-ゖー]/g, '').slice(0, 8);
+    var who = (n || 'ゆうき') + (n ? sufEl.value : 'くん');
+    document.querySelectorAll('.js-who').forEach(function (el) { el.textContent = who; });
+  }
+  nameEl.addEventListener('input', update);
+  sufEl.addEventListener('change', update);
+})();
+</script>
+</body>
+</html>
