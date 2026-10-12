@@ -12,6 +12,12 @@ window.KIT = {
   LIKES_MAX: 10,
   AGES: [3, 4, 5, 6, 7, 8],
   LITTLE_AGE: 4, // この年齢以下は字を読まない版（隠し場所は4か所）
+  // むずかしさえらび（受付の CONFIG.LEVELS・キット作成の LEVELS と同じ）。謎の年齢を本当の年齢から shift だけずらす
+  LEVELS: [
+    { key: 'easy', label: 'やさしめ', shift: -1 },
+    { key: 'normal', label: 'ふつう', shift: 0 },
+    { key: 'hard', label: 'むずかしめ', shift: 1 },
+  ],
   OCCASIONS: {
     birthday: { label: 'おたんじょうび', note: '手紙に「〇さいの たんじょうび おめでとう」が入り、合言葉は「おめでとう」' },
     everyday: { label: 'ふだんの日', note: 'ごほうびや雨の日の遊びに。合言葉はお話ごとにちがいます' },

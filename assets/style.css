@@ -122,6 +122,8 @@ a:hover { color: var(--rust); }
 @media (min-width: 700px) { .ages { grid-template-columns: 1fr 1fr; } }
 .age { border: 2px solid var(--ink); border-radius: var(--radius); padding: 18px 20px; background: var(--white); }
 .age h3 { margin: 0 0 6px; font-size: 21px; font-weight: 900; }
+.age h3 small { display: block; font-size: 12px; font-weight: 700; color: var(--ink-soft); letter-spacing: .04em; }
+.seg input:disabled + span { opacity: .35; cursor: not-allowed; }
 .age ul { margin: 0; padding-left: 1.2em; }
 
 /* ── 用意するもの ── */

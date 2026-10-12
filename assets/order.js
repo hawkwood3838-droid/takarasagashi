@@ -78,7 +78,30 @@
   $('age-list').innerHTML = K.AGES.map(a => `<label><input type="radio" name="age" value="${a}"><span>${a}さい</span></label>`).join('');
   for (let a = 1; a <= 15; a++) $('bday-age').insertAdjacentHTML('beforeend', `<option value="${a}">${a}さい</option>`);
   const age = () => Number((form.querySelector('input[name="age"]:checked') || {}).value || 0);
-  const need = () => (age() && age() <= K.LITTLE_AGE ? 4 : 5);
+
+  // ── むずかしさ（謎だけ1さい上・下にずらす。3〜8におさめる） ──
+  $('level-list').innerHTML = K.LEVELS.map(l => `<label><input type="radio" name="level" value="${l.key}"${l.key === 'normal' ? ' checked' : ''}><span>${l.label}</span></label>`).join('');
+  const levelOf = key => K.LEVELS.find(l => l.key === key) || K.LEVELS[1];
+  const level = () => (form.querySelector('input[name="level"]:checked') || {}).value || 'normal';
+  const ageMin = Math.min(...K.AGES), ageMax = Math.max(...K.AGES);
+  const puzzleAgeOf = (a, lv) => (a ? Math.min(Math.max(a + levelOf(lv).shift, ageMin), ageMax) : 0);
+  const puzzleAge = () => puzzleAgeOf(age(), level());
+  const need = () => (puzzleAge() && puzzleAge() <= K.LITTLE_AGE ? 4 : 5);
+  // 3さいの「やさしめ」、8さいの「むずかしめ」は変わらないので選べなくする
+  function refreshLevel() {
+    const a = age();
+    form.querySelectorAll('input[name="level"]').forEach(i => {
+      i.disabled = !!a && i.value !== 'normal' && puzzleAgeOf(a, i.value) === a;
+      if (i.disabled && i.checked) form.querySelector('input[name="level"][value="normal"]').checked = true;
+    });
+    const p = puzzleAge();
+    const kind = p && p <= K.LITTLE_AGE ? '（字を読まない絵のなぞ・隠し場所4か所）' : '（文字の暗号・隠し場所5か所）';
+    $('level-note').textContent = !a ? 'やさしめは1さい下、むずかしめは1さい上の謎になります。'
+      : `${levelOf(level()).label}：${p}さい向けの謎${kind}になります。`
+        + (a === ageMin ? '3さいは、いまの版がいちばんやさしい謎です。' : '')
+        + (a === ageMax ? `${ageMax}さいは、いまの版がいちばんむずかしい謎です。` : '');
+  }
+  refreshLevel();
   // おたんじょうびで2人以上のときだけ、おたんじょうびの子の年齢をたずねる（1人なら年齢と同じ）
   function refreshBirthday() {
     const multi = document.querySelectorAll('.name-row').length > 1;
@@ -124,7 +147,8 @@
     const nm = e.target.name;
     if (nm === 'story') refreshOccasions();
     if (nm === 'occasion') refreshOccasionNote();
-    if (nm === 'age') { refreshBirthday(); refreshSpots(); }
+    if (nm === 'age') { refreshBirthday(); refreshLevel(); refreshSpots(); }
+    if (nm === 'level') { refreshLevel(); refreshSpots(); }
     if (nm === 'treasure' || nm === 'cards') refreshSpots();
   });
   $('likes').addEventListener('blur', () => { $('likes').value = $('likes').value.trim().replace(/\s/g, ''); });
@@ -145,6 +169,7 @@
       occasion: occasion(),
       names: ns,
       age: age(),
+      level: level(),
       birthday_age: occasion() === 'birthday' ? (multi ? Number($('bday-age').value) : age()) : age(),
       likes: $('likes').value.trim().replace(/\s/g, ''),
       treasure: treasure(),
@@ -200,7 +225,8 @@
       ['お話', st.name],
       ['いつ遊ぶか', K.OCCASIONS[o.occasion].label],
       ['お子さまの名前', who],
-      ['年齢', o.age + 'さい' + (o.names.length > 1 ? '（むずかしさ）' : '') + (o.age <= K.LITTLE_AGE ? '・字を読まない版' : '')],
+      ['年齢', o.age + 'さい' + (o.names.length > 1 ? '（むずかしさ）' : '') + (o.level !== 'normal' ? '・' + levelOf(o.level).label : '')
+        + (puzzleAgeOf(o.age, o.level) <= K.LITTLE_AGE ? '・字を読まない版' : '')],
     ];
     if (o.occasion === 'birthday' && o.names.length > 1) rows.push(['おたんじょうび', `${o.names[0].name}${o.names[0].suffix}・${o.birthday_age}さい`]);
     rows.push(['好きなもの', o.likes || '（なし）'], ['プレゼントの場所', labelOf(o.treasure)], ['カードの場所', o.card_spots.map(labelOf).join('、')]);
@@ -261,6 +287,9 @@
     (o.names && o.names.length ? o.names : [{}]).slice(0, K.NAMES_MAX).forEach(n => nameRow(n));
     const a = form.querySelector(`input[name="age"][value="${o.age}"]`);
     if (a) a.checked = true;
+    const lv = form.querySelector(`input[name="level"][value="${o.level || 'normal'}"]`);
+    if (lv) lv.checked = true;
+    refreshLevel();
     if (o.birthday_age) { $('bday-age').value = String(o.birthday_age); $('bday-age').dataset.touched = '1'; }
     $('likes').value = o.likes || '';
     const t = form.querySelector(`input[name="treasure"][value="${o.treasure}"]`);
