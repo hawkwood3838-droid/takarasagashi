@@ -11,7 +11,7 @@
 
 ## なりたい自分すごろく（2026-10-11 追加）
 - `sugoroku/index.html` … 商品ページ（種類と値段・届くもの・職業・よくある質問）
-- `sugoroku/order.html`・`order.js` … 注文フォーム（やさしい版・デラックス版。家族版は値段が入ると選べる）
+- `sugoroku/order.html`・`order.js` … 注文フォーム（やさしい版 1,480円・デラックス版 1,980円・家族版 2,480円）
 - `sugoroku/thanks.html` … 支払いのあとの完了ページ
 - `sugoroku/request.html`・`request.js` … 「作ってほしい職業」アンケート
 - `sugoroku/config.js` … 値段・職業・文字数の決まり。`OPEN: true` で支払いボタンが押せる（`?test=1` を付けると いつでも ためせる）
