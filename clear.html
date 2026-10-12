@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>クリア証をつくる｜{product}</title>
+<meta name="description" content="おうちクエストを遊びおわったら、お子さまの名前でクリア証を作って印刷できます（無料）。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/config.js"></script>
+<style>
+/* クリア証（A4よこの比率）。印刷のときは証だけを出す */
+.cert-wrap { margin: 18px 0 8px; }
+.cert { position: relative; width: 100%; aspect-ratio: 297 / 210; background: #FFFBF2; border-radius: 6px; overflow: hidden;
+  container-type: inline-size; box-shadow: 0 2px 10px rgba(31, 58, 95, .15); color: var(--ink); font-family: var(--font); }
+.cert .frame { position: absolute; inset: 2.6cqw; border: .7cqw solid var(--gold); border-radius: 2cqw; box-shadow: inset 0 0 0 .5cqw #FFFBF2, inset 0 0 0 .8cqw var(--rust); }
+.cert .inner { position: absolute; inset: 5cqw 7cqw 12cqw; display: grid; grid-template-columns: 1fr 23cqw; gap: 3cqw; align-items: center; }
+.cert .head { font-size: 5.6cqw; font-weight: 900; letter-spacing: .35em; white-space: nowrap; color: var(--rust); margin-bottom: 1.2cqw; }
+.cert .who { font-size: 6cqw; font-weight: 900; line-height: 1.2; border-bottom: .35cqw solid var(--ink); display: inline-block; padding: 0 1cqw .4cqw; }
+.cert .body { font-size: 2.3cqw; font-weight: 700; line-height: 1.7; margin-top: 1.6cqw; }
+.cert .rank { display: inline-block; white-space: nowrap; margin-top: 1.4cqw; font-size: 2.7cqw; font-weight: 900; color: #fff; background: var(--rust); border-radius: 3cqw; padding: .4cqw 2.4cqw; }
+.cert .side { text-align: center; }
+.cert .side img { max-width: 100%; max-height: 31cqw; width: auto; height: auto; display: block; margin: 0 auto; }
+.cert .from { font-size: 1.8cqw; font-weight: 900; margin-top: .6cqw; white-space: nowrap; }
+.cert .foot { position: absolute; left: 7cqw; right: 7cqw; bottom: 4.6cqw; display: flex; justify-content: space-between; align-items: flex-end; font-size: 1.9cqw; font-weight: 700; }
+.cert .seal { width: 9cqw; height: 9cqw; border-radius: 50%; border: .45cqw solid var(--rust); color: var(--rust); display: grid; place-items: center; text-align: center; font-size: 1.5cqw; font-weight: 900; line-height: 1.25; transform: rotate(-8deg); }
+.cert-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0 6px; }
+.privacy-note { font-size: 13px; color: var(--ink-soft); }
+.promo { margin-top: 32px; padding: 18px 20px; border: 2px solid var(--line); border-radius: var(--radius); background: var(--white); }
+.promo h2 { font-size: 18px; margin: 0 0 6px; }
+@media print {
+  @page { size: A4 landscape; margin: 0; }
+  body * { visibility: hidden; }
+  .cert, .cert * { visibility: visible; }
+  .cert { position: fixed; left: 0; top: 0; width: 297mm; height: 210mm; box-shadow: none; border-radius: 0; aspect-ratio: auto; }
+  .site-head, .site-foot { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="./"><svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="#B5452F" stroke-width="4" stroke-linecap="round"/></svg><span data-kit="product">おうちクエスト</span><span class="brand-tag">名前入り</span></a>
+  </div>
+</header>
+
+<main class="wrap narrow">
+  <h1 class="page-title">クリア証をつくる（無料）</h1>
+  <p class="hint">宝さがしを クリアした子の名前で、クリア証を作れます。印刷して わたしてあげてください。</p>
+
+  <form id="cert-form" novalidate>
+    <fieldset class="field">
+      <legend>あそんだ お話</legend>
+      <select id="c-story" aria-label="あそんだ お話"></select>
+    </fieldset>
+    <fieldset class="field">
+      <legend>名前（ひらがな）</legend>
+      <input id="c-name" type="text" autocomplete="off" maxlength="8" placeholder="ゆうき" aria-describedby="c-name-err">
+      <div class="seg seg-sm" id="c-suffix" role="radiogroup" aria-label="呼び方" style="margin-top:10px">
+        <label><input type="radio" name="c-suffix" value="くん" checked><span>くん</span></label>
+        <label><input type="radio" name="c-suffix" value="ちゃん"><span>ちゃん</span></label>
+        <label><input type="radio" name="c-suffix" value=""><span>なし</span></label>
+      </div>
+      <p class="err" id="c-name-err" hidden></p>
+    </fieldset>
+  </form>
+
+  <div class="cert-wrap">
+    <div class="cert" id="cert" role="img" aria-label="クリア証">
+      <div class="frame"></div>
+      <div class="inner">
+        <div>
+          <div class="head">クリアしょう</div>
+          <div class="who" id="cert-who">ゆうきくん</div>
+          <div class="body" id="cert-body"></div>
+          <div class="rank" id="cert-rank"></div>
+        </div>
+        <div class="side"><img id="cert-img" alt="" crossorigin="anonymous"><div class="from" id="cert-from"></div></div>
+      </div>
+      <div class="foot"><span id="cert-date"></span><div class="seal">ひなた<br>あそび<br>こうぼう</div></div>
+    </div>
+  </div>
+
+  <div class="cert-actions">
+    <button class="btn" type="button" id="print-btn">印刷する</button>
+    <button class="btn btn-ghost" type="button" id="save-btn">画像で保存</button>
+  </div>
+  <p class="privacy-note">入れた名前は、この画面の中だけで使います。どこにも送りません。</p>
+
+  <section class="promo">
+    <h2>名前入りの宝さがしも あります</h2>
+    <p style="margin:0 0 12px">おうちクエストは、お子さまの名前が入った暗号と宝の地図で遊ぶ、おうちの宝さがしです。12のお話・3〜8さい。おたんじょうびや、ごほうびに。</p>
+    <a class="btn btn-sm" href="./">お話を見る</a>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="サイトの情報">
+      <a href="tokushoho.html">特定商取引法に基づく表記</a>
+      <a href="privacy.html">プライバシーポリシー</a>
+      <a href="#" data-kit-mail>お問い合わせ</a>
+    </nav>
+    <p style="margin:0"><span data-kit="shop">ひなた あそび工房</span>（販売：<span data-kit="seller">髙木大資</span>）</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="assets/clear.js"></script>
+</body>
+</html>
