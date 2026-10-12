@@ -23,6 +23,10 @@ window.KIT = {
     everyday: { label: 'ふだんの日', note: 'ごほうびや雨の日の遊びに。合言葉はお話ごとにちがいます' },
     christmas: { label: 'クリスマス', note: 'クリスマスだけのお話です' },
   },
+  // ほかの通販サイトで買った人の引き換え（order.html?redeem=booth）。受付の仕組みの CONFIG.REDEEM.CHANNELS と同じキー
+  REDEEM: {
+    booth: { label: 'BOOTH', where: 'BOOTHの「購入履歴」で、この商品の注文番号（数字）を見られます。' },
+  },
   // 季節のお話を売る期間（月-日）。期間の外は「〇月から」と出して選べなくする
   SEASONS: {
     christmas: { from: '11-01', until: '12-25', soon: '11月から' },

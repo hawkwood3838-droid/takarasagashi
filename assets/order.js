@@ -10,6 +10,11 @@
   const labelOf = key => (K.SPOTS.find(s => s.key === key) || {}).label || key;
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const toHira = s => s.replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
+  // ほかの通販サイト（BOOTHなど）で買った人の引き換え：?redeem=booth のとき、支払いのかわりに注文番号とメールを入れる
+  const RD_KEY = new URLSearchParams(location.search).get('redeem') || '';
+  const RD = (K.REDEEM || {})[RD_KEY] || null;
+  const rdNo = () => $('redeem-no').value.trim().replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[#＃\s]/g, '');
+  const rdEmail = () => $('redeem-email').value.trim();
 
   // ── お話 ──
   K.STORIES.forEach(s => {
@@ -180,6 +185,10 @@
   function validate(o) {
     let first = null;
     const bad = (id, msg, input) => { showErr(id, msg, input); if (msg && !first) first = input || $(id); };
+    if (RD) {
+      bad('redeem-no-err', /^[0-9]{5,12}$/.test(rdNo()) ? '' : RD.label + 'の注文番号を、数字で入れてください', $('redeem-no'));
+      bad('redeem-email-err', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rdEmail()) ? '' : 'PDFを受け取るメールアドレスを入れてください', $('redeem-email'));
+    }
     bad('story-err', o.story ? '' : 'お話を選んでください', form.querySelector('input[name="story"]:not(:disabled)'));
     bad('occasion-err', o.occasion ? '' : 'いつ遊ぶかを選んでください', form.querySelector('input[name="occasion"]'));
     const nameInputs = Array.from(document.querySelectorAll('.kid-name'));
@@ -230,8 +239,9 @@
     ];
     if (o.occasion === 'birthday' && o.names.length > 1) rows.push(['おたんじょうび', `${o.names[0].name}${o.names[0].suffix}・${o.birthday_age}さい`]);
     rows.push(['好きなもの', o.likes || '（なし）'], ['プレゼントの場所', labelOf(o.treasure)], ['カードの場所', o.card_spots.map(labelOf).join('、')]);
+    if (RD) rows.unshift([RD.label + 'の注文番号', rdNo()], ['PDFの届け先', rdEmail()]);
     $('summary-order').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('');
-    $('summary-story').textContent = st.name;
+    if ($('summary-story')) $('summary-story').textContent = st.name;  // 引き換えのときは この欄がない
     form.hidden = true;
     confirmBox.hidden = false;
     $('step-input').removeAttribute('aria-current');
@@ -253,6 +263,7 @@
   // ── 確認 → 支払い画面 ──
   $('pay-btn').addEventListener('click', async () => {
     if (!current) return;
+    if (RD) { redeem(); return; }
     const btn = $('pay-btn');
     btn.disabled = true;
     const label = btn.innerHTML;
@@ -269,6 +280,52 @@
       btn.innerHTML = label;
     }
   });
+
+  // ── 確認 → 引き換えの受付（支払いはなし） ──
+  async function redeem() {
+    const btn = $('pay-btn');
+    btn.disabled = true;
+    const label = btn.innerHTML;
+    btn.textContent = '受け付けています…';
+    showErr('submit-err', '');
+    try {
+      const res = await fetch(K.API_URL, { method: 'POST', body: JSON.stringify({ action: 'redeem', channel: RD_KEY, channel_order: rdNo(), email: rdEmail(), order: current }) });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || '受け付けられませんでした');
+      try { sessionStorage.removeItem(STORE); } catch (err) { /* 何もしない */ }
+      confirmBox.hidden = true;
+      $('redeem-done').hidden = false;
+      $('redeem-done-id').textContent = data.order_id;
+      $('redeem-done-msg').textContent = data.pending
+        ? `${RD.label}のご注文を確かめています。確かめられたら、すぐにキットを作って ${data.email} にPDFをお送りします（ふつうは10〜20分ほど）。`
+        : `キットを作っています。ふつうは数分で ${data.email} にPDFが届きます。`;
+      document.querySelectorAll('.steps li').forEach(li => li.removeAttribute('aria-current'));
+      document.querySelector('.steps li:last-child').setAttribute('aria-current', 'step');
+      window.scrollTo({ top: 0 });
+      $('redeem-done-title').focus();
+    } catch (err) {
+      showErr('submit-err', (err && err.message && !/fetch|network/i.test(err.message) ? err.message : '通信がうまくいきませんでした。電波のよい所で、もう一度お試しください。'));
+      btn.disabled = false;
+      btn.innerHTML = label;
+    }
+  }
+
+  // 引き換えのときは、支払いの説明を引き換えの説明に入れかえる
+  if (RD) {
+    document.title = document.title.replace('注文する', '引き換える');
+    $('redeem-field').hidden = false;
+    $('redeem-legend').textContent = RD.label + 'で買った方';
+    $('redeem-hint').textContent = RD.where + ' 名前などは、このページで入れてください。お支払いは' + RD.label + 'で済んでいるので、ここではかかりません。';
+    document.querySelector('.page-title').textContent = '名前入りキットに引き換える';
+    document.querySelector('.steps li:last-child').textContent = '3 お届け';
+    const pay = $('pay-btn').closest('section').querySelectorAll('.summary')[1];
+    pay.innerHTML = `<h2>お届け</h2><dl><dt>お支払い</dt><dd>${esc(RD.label)}で済んでいます</dd>`
+      + `<dt>お届け</dt><dd>${esc(RD.label)}のご注文を確かめてから、名前入りのPDFをメールでお送りします（ふつうは10〜20分ほど。遅くとも24時間以内）</dd>`
+      + '<dt>引き換え</dt><dd>1つの注文番号につき1回です</dd></dl>';
+    const note = $('pay-btn').closest('section').querySelector(':scope > .hint');
+    if (note) note.remove();
+    $('pay-btn').textContent = 'この内容で作る';
+  }
 
   // ── お知らせ（準備中／支払いを中断して戻ってきた） ──
   const notice = (cls, text) => { $('notice-area').innerHTML = `<p class="notice ${cls}">${text}</p>`; };

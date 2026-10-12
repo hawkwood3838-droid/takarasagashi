@@ -124,6 +124,9 @@ a:hover { color: var(--rust); }
 .age h3 { margin: 0 0 6px; font-size: 21px; font-weight: 900; }
 .age h3 small { display: block; font-size: 12px; font-weight: 700; color: var(--ink-soft); letter-spacing: .04em; }
 .seg input:disabled + span { opacity: .35; cursor: not-allowed; }
+.redeem-field { background: var(--sea); border-radius: 12px; padding: 14px 16px; }
+.redeem-field .sub-label { display: block; font-weight: 900; margin: 12px 0 6px; }
+.redeem-field input { width: 100%; }
 .age ul { margin: 0; padding-left: 1.2em; }
 
 /* ── 用意するもの ── */
@@ -166,11 +169,11 @@ a:hover { color: var(--rust); }
 .hint { margin: 0 0 10px; font-size: 14px; color: var(--ink-soft); }
 .opt { font-size: 13px; font-weight: 700; color: var(--ink-soft); margin-left: 6px; }
 
-input[type="text"], select {
+input[type="text"], input[type="email"], select {
   font: inherit; font-size: 18px; font-weight: 700; color: var(--ink); width: 100%; max-width: 360px;
   min-height: 50px; padding: 8px 14px; border: 2px solid var(--ink); border-radius: 10px; background: #fff;
 }
-input[type="text"]::placeholder { color: #9AA8B6; font-weight: 500; }
+input[type="text"]::placeholder, input[type="email"]::placeholder { color: #9AA8B6; font-weight: 500; }
 input[aria-invalid="true"] { border-color: var(--rust); background: #FFF6F3; }
 
 .seg { display: flex; flex-wrap: wrap; gap: 8px; }
