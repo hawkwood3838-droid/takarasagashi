@@ -101,7 +101,7 @@
   <section class="section">
     <div class="wrap">
       <h2>中身</h2>
-      <p class="sub">どのカードにも、その子の名前が入ります。見本は「かいぞくの たから」を「ゆうきくん・6さい」で作ったものです。</p>
+      <p class="sub">どのカードにも、その子の名前が入ります。見本は「海賊の宝」を「ゆうきくん・6さい」で作ったものです。</p>
       <div class="cards">
         <figure><img src="img/card-letter.jpg" width="1100" height="783" loading="lazy" alt="キャプテンからの手紙。数字の順に文字を並べる最初の暗号つき"><figcaption>最初の手紙。暗号を解くと、1つめの隠し場所がわかります。</figcaption></figure>
         <figure><img src="img/card-map.jpg" width="1100" height="783" loading="lazy" alt="宝の地図。5つの島と、文字を書きこむ5つの箱"><figcaption>宝の地図。カードで見つけた文字を書きこむと、最後に合言葉ができあがります。</figcaption></figure>
@@ -213,7 +213,7 @@
       ? '<a class="btn btn-sm" href="order.html?story=' + encodeURIComponent(s.key) + '">このお話で注文する</a>'
       : '<span class="btn btn-sm" aria-disabled="true">' + esc(soon) + '販売</span>';
     return '<article class="story"><div class="story-pic"><img src="img/stories/' + esc(s.key) + '.webp" alt="' + esc(s.host) + '" loading="lazy"></div>'
-      + '<div class="story-body">' + season + '<h3>' + esc(s.name) + '</h3><p class="story-host">' + esc(s.host) + '</p>'
+      + '<div class="story-body">' + season + '<h3>' + K.rubyOf(s) + '</h3><p class="story-host">' + esc(s.host) + '</p>'
       + '<p class="story-blurb">' + esc(s.blurb) + '</p>' + btn + '</div></article>';
   }
   document.getElementById('lineup-year').innerHTML = K.STORIES.filter(function (s) { return s.line === 'year'; }).map(card).join('');

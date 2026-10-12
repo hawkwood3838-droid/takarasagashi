@@ -22,30 +22,33 @@ window.KIT = {
     christmas: { from: '11-01', until: '12-25', soon: '11月から' },
   },
   // お話（キット作成の stories.py と同じキー）
+  // title は {漢字|よみ} の形で書く。販売ページでは漢字の上に小さくふりがなが付き、
+  // 半角スペースは「ここで改行してよい」の印（表示では空白にならない）。
+  // 確認画面などでは漢字だけ（name）になる。受付の仕組み（Code.gs）の name と同じ漢字にそろえること
   STORIES: [
-    { key: 'kaizoku', name: 'かいぞくの たから', host: 'キャプテン・ひげまる', line: 'year', occasions: ['birthday', 'everyday'],
+    { key: 'kaizoku', title: '{海賊|かいぞく}の {宝|たから}', host: 'キャプテン・ひげまる', line: 'year', occasions: ['birthday', 'everyday'],
       blurb: 'ひげの船長が隠した宝を、暗号をといて探します。' },
-    { key: 'ninja', name: 'にんじゃの しゅぎょう', host: 'にんじゃの せんせい くろまめ', line: 'year', occasions: ['birthday', 'everyday'],
+    { key: 'ninja', title: '{忍者|にんじゃ}の {修行|しゅぎょう}', host: 'にんじゃの せんせい くろまめ', line: 'year', occasions: ['birthday', 'everyday'],
       blurb: '忍者の先生の修行をこなして、ひみつの巻物へ。' },
-    { key: 'mahou', name: 'まほうつかいの でし', host: 'まほうつかいの ミモザ', line: 'year', occasions: ['birthday', 'everyday'],
+    { key: 'mahou', title: '{魔法使|まほうつか}いの {弟子|でし}', host: 'まほうつかいの ミモザ', line: 'year', occasions: ['birthday', 'everyday'],
       blurb: '見習いまほうつかいと、まほうの宝石を探します。' },
-    { key: 'kyouryuu', name: 'きょうりゅうの たまご', host: 'きょうりゅうはかせ ホネホネ', line: 'year', occasions: ['birthday', 'everyday'],
+    { key: 'kyouryuu', title: '{恐竜|きょうりゅう}の たまご', host: 'きょうりゅうはかせ ホネホネ', line: 'year', occasions: ['birthday', 'everyday'],
       blurb: 'はかせと一緒に、めずらしい恐竜の卵を発掘。' },
-    { key: 'uchuu', name: 'うちゅうの ぼうけん', host: 'ほしの こ ピピ', line: 'year', occasions: ['birthday', 'everyday'],
+    { key: 'uchuu', title: '{宇宙|うちゅう}の {冒険|ぼうけん}', host: 'ほしの こ ピピ', line: 'year', occasions: ['birthday', 'everyday'],
       blurb: '遠い星から来たピピの、星のかけらを探します。' },
-    { key: 'tantei', name: 'めいたんていの じけんぼ', host: 'めいたんてい ハテナ', line: 'year', occasions: ['birthday', 'everyday'],
+    { key: 'tantei', title: '{名探偵|めいたんてい}の {事件簿|じけんぼ}', host: 'めいたんてい ハテナ', line: 'year', occasions: ['birthday', 'everyday'],
       blurb: '怪盗に隠された宝物を、推理で取りもどします。' },
-    { key: 'yousei', name: 'ようせいの もり', host: 'はなの ようせい リリ', line: 'year', occasions: ['birthday', 'everyday'],
+    { key: 'yousei', title: '{妖精|ようせい}の {森|もり}', host: 'はなの ようせい リリ', line: 'year', occasions: ['birthday', 'everyday'],
       blurb: '花の妖精がくれた、ひみつのおくりものを探します。' },
-    { key: 'ningyo', name: 'にんぎょの うみ', host: 'にんぎょの マリン', line: 'year', occasions: ['birthday', 'everyday'],
+    { key: 'ningyo', title: '{人魚|にんぎょ}の {海|うみ}', host: 'にんぎょの マリン', line: 'year', occasions: ['birthday', 'everyday'],
       blurb: '人魚のマリンと、しんじゅの宝箱を探します。' },
-    { key: 'okashi', name: 'おかしの くに', host: 'パティシエの ショコラ', line: 'year', occasions: ['birthday', 'everyday'],
+    { key: 'okashi', title: 'お{菓子|かし}の {国|くに}', host: 'パティシエの ショコラ', line: 'year', occasions: ['birthday', 'everyday'],
       blurb: 'おかしの家をめぐって、とびきりのごほうびへ。' },
-    { key: 'xmas_minarai', name: 'みならいサンタの おてつだい', host: 'みならいサンタ ポポ', line: 'christmas', occasions: ['christmas'],
+    { key: 'xmas_minarai', title: '{見習|みなら}いサンタの お{手伝|てつだ}い', host: 'みならいサンタ ポポ', line: 'christmas', occasions: ['christmas'],
       blurb: '地図をなくした見習いサンタを助けて、プレゼントを探します。' },
-    { key: 'xmas_tonakai', name: 'いたずらトナカイ', host: 'トナカイの ベル', line: 'christmas', occasions: ['christmas'],
+    { key: 'xmas_tonakai', title: 'いたずらトナカイ', host: 'トナカイの ベル', line: 'christmas', occasions: ['christmas'],
       blurb: 'いたずら好きのトナカイが隠したプレゼントを追いかけます。' },
-    { key: 'xmas_santa', name: 'サンタからの ちょうせんじょう', host: 'サンタクロース', line: 'christmas', occasions: ['christmas'],
+    { key: 'xmas_santa', title: 'サンタからの {挑戦状|ちょうせんじょう}', host: 'サンタクロース', line: 'christmas', occasions: ['christmas'],
       blurb: 'サンタクロースからの挑戦状。暗号をといてプレゼントへ。' },
   ],
   // 隠し場所（キット作成側の SPOTS と同じ並び・同じキー）
@@ -76,6 +79,17 @@ window.KIT.inSeason = function (occasions) {
   });
 };
 window.KIT.storyOf = key => window.KIT.STORIES.find(s => s.key === key);
+
+// お話の題：name は漢字だけ（例：海賊の宝）、rubyOf はふりがなつきのHTML
+// ふりがなは漢字の上にはみ出して置く（<ruby> だと読みが長いとき漢字の間があいてしまうため）
+(function () {
+  const RUBY_RE = /\{([^|}]+)\|([^}]+)\}/g;
+  const esc = t => t.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  window.KIT.STORIES.forEach(s => { s.name = s.title.replace(RUBY_RE, '$1').replace(/ /g, ''); });
+  window.KIT.rubyOf = s => '<span class="kanji-title" aria-label="' + esc(s.name) + '">'
+    + esc(s.title).split(' ').map(t => t.replace(RUBY_RE, '<span class="rb">$1<span class="rt" aria-hidden="true">$2</span></span>')).join('<wbr>')
+    + '</span>';
+})();
 
 // 商品名などを、ページ内の data-kit="..." の場所に入れる
 document.addEventListener('DOMContentLoaded', () => {

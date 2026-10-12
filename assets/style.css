@@ -228,6 +228,10 @@ input[aria-invalid="true"] { border-color: var(--rust); background: #FFF6F3; }
 .story { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: center; border: 2px solid var(--ink); border-radius: var(--radius); padding: 12px 14px; background: #fff; }
 .story-pic img { width: 92px; height: 112px; object-fit: contain; }
 .story h3 { margin: 0; font-size: 17px; font-weight: 900; line-height: 1.4; }
+/* お話の題のふりがな（漢字の上に小さく）。改行は <wbr> の所だけ */
+.kanji-title { display: inline-block; line-height: 2.1; padding-top: .1em; word-break: keep-all; overflow-wrap: anywhere; }
+.kanji-title .rb { position: relative; }
+.kanji-title .rt { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); white-space: nowrap; font-size: .5em; line-height: 1; font-weight: 700; color: var(--ink-soft); letter-spacing: 0; }
 .story-host { margin: 0; font-size: 13px; color: var(--ink-soft); font-weight: 700; line-height: 1.5; }
 .story-blurb { margin: 4px 0 10px; font-size: 14px; line-height: 1.6; }
 .story-badge { display: inline-block; font-size: 11px; font-weight: 900; color: #fff; background: #2E7D4F; border-radius: 4px; padding: 0 6px; margin-bottom: 2px; }
@@ -240,7 +244,7 @@ input[aria-invalid="true"] { border-color: var(--rust); background: #FFF6F3; }
 .story-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 8px; }
 .story-opt { position: relative; }
 .story-opt input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; z-index: 1; }
-.story-opt span { display: flex; flex-direction: column; align-items: center; text-align: center; height: 100%; padding: 8px 6px 10px; border: 2px solid var(--line); border-radius: 10px; background: #fff; line-height: 1.35; }
+.story-opt > span { display: flex; flex-direction: column; align-items: center; text-align: center; height: 100%; padding: 8px 6px 10px; border: 2px solid var(--line); border-radius: 10px; background: #fff; line-height: 1.35; }
 .story-opt img { width: 60px; height: 72px; object-fit: contain; margin-bottom: 4px; }
 .story-opt b { font-weight: 900; font-size: 14px; }
 .story-opt small { color: var(--ink-soft); font-size: 11.5px; margin-top: 2px; }

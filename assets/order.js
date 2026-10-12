@@ -18,7 +18,7 @@
     const el = document.createElement('label');
     el.className = 'story-opt';
     el.innerHTML = `<input type="radio" name="story" value="${esc(s.key)}"${open ? '' : ' disabled'}>`
-      + `<span><img src="img/stories/${esc(s.key)}.webp" alt="" loading="lazy"><b>${esc(s.name)}</b>`
+      + `<span><img src="img/stories/${esc(s.key)}.webp" alt="" loading="lazy"><b>${K.rubyOf(s)}</b>`
       + `<small>${open ? esc(s.host) : esc(soon) + '販売'}</small></span>`;
     $('story-list').appendChild(el);
   });
