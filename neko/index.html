@@ -1,0 +1,1093 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>6億分の1のねこ</title>
+<meta name="description" content="世界のどこかのねこに生まれて、一生を生きる。どの国に、誰の子として生まれるかは選べません。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="6億分の1のねこ">
+<meta property="og:description" content="世界のどこかのねこに生まれて、一生を生きる。どの国に、誰の子として生まれるかは選べません。">
+<meta property="og:image" content="https://hawkwood3838-droid.github.io/takarasagashi/neko/og.png">
+<meta property="og:url" content="https://hawkwood3838-droid.github.io/takarasagashi/neko/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="6億分の1のねこ">
+<meta name="twitter:description" content="世界のどこかのねこに生まれて、一生を生きる。">
+<meta name="twitter:image" content="https://hawkwood3838-droid.github.io/takarasagashi/neko/og.png">
+<link rel="icon" href="favicon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<style>
+/* Layout: one centered column (max 560px). Picture, age line and four stat bars stay pinned at the top;
+   the newest turn appears right under them (newest first), older turns below. Action chips + speed control + つぎへ in a bar fixed to the bottom. */
+:root{
+  --bg:#17152a; --panel:#242140; --panel2:#2d2a4b; --line:#3d3960;
+  --fg:#f1e9d8; --muted:#aaa2c0;
+  --amber:#f2b35c; --mint:#8fd6a8; --rose:#ec93a6; --sky:#8fc1ea; --danger:#e26d6d;
+  --display:'DotGothic16','Zen Maru Gothic',sans-serif;
+  --body:'Zen Maru Gothic','Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.75;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:560px;margin:0 auto;padding-block:16px calc(150px + env(safe-area-inset-bottom,0px))}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;letter-spacing:.02em;margin:0}
+h1{font-size:2.1rem;line-height:1.3}
+h2{font-size:1.3rem}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+.eyebrow{font-family:var(--display);font-size:.8rem;letter-spacing:.14em;color:var(--amber)}
+.stack{display:flex;flex-direction:column;gap:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button{font-family:var(--body);font-size:1rem;font-weight:700;border:2px solid var(--amber);background:var(--amber);color:#1a1409;
+  border-radius:6px;padding:10px 18px;cursor:pointer;line-height:1.3;box-shadow:0 3px 0 #a3722f}
+button:active{transform:translateY(2px);box-shadow:0 1px 0 #a3722f}
+button.ghost{background:transparent;color:var(--fg);border-color:var(--line);box-shadow:0 3px 0 #0e0d14}
+button.ghost:active{box-shadow:0 1px 0 #0e0d14}
+button:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+button[disabled]{opacity:.4;cursor:default}
+canvas{display:block;width:100%;max-width:100%;image-rendering:pixelated;image-rendering:crisp-edges;border-radius:8px;border:2px solid var(--line);background:#0e0d14}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-bottom:8px;margin-bottom:6px;box-shadow:0 10px 12px -10px rgba(0,0,0,.6)}
+.scenebox{position:relative}
+.scenebox .cap{position:absolute;left:8px;top:6px;font-family:var(--display);font-size:.8rem;background:rgba(23,21,42,.78);padding:2px 8px;border-radius:4px;max-width:calc(100% - 16px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ageline{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-family:var(--display);font-size:.9rem;padding:6px 2px 4px;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.ageline .w{color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.stat{background:var(--panel);border-radius:6px;padding:5px 8px 7px;min-width:0}
+.stat .lab{font-family:var(--display);font-size:.72rem;letter-spacing:.04em;display:flex;justify-content:space-between;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar{height:6px;background:#0e0d14;border-radius:3px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;border-radius:3px;transition:width .4s ease}
+.bar.hp i{background:var(--mint)}.bar.joy i{background:var(--rose)}.bar.food i{background:var(--amber)}.bar.bond i{background:var(--sky)}
+.log{display:flex;flex-direction:column;gap:10px}
+.year{background:var(--panel);border-radius:8px;padding:10px 14px;border-left:4px solid var(--line);opacity:.78}
+.year.cur{opacity:1;border-left-color:var(--amber);box-shadow:0 0 0 1px var(--line)}
+.year.birth{border-left-color:var(--amber)}
+.year.death{border-left-color:var(--danger)}
+.year.good{border-left-color:var(--mint)}
+.year .age{font-family:var(--display);color:var(--amber);font-size:.9rem;margin-bottom:2px;letter-spacing:.06em}
+.year p+p{margin-top:3px}
+.year .delta{font-family:var(--display);font-size:.78rem;color:var(--muted);margin-top:5px;letter-spacing:.04em}
+.year .act{color:var(--sky)}
+.choice{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.choice .q{font-weight:700}
+.choice button{text-align:left;background:var(--panel2);color:var(--fg);border-color:var(--amber);box-shadow:none}
+.choice button:active{transform:none}
+.choice .picked{color:var(--amber);font-weight:700}
+.actions{position:fixed;left:0;right:0;bottom:0;z-index:6;background:linear-gradient(to top,rgba(23,21,42,.98) 80%,rgba(23,21,42,0));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:14px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+.actions .inner{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:0 0 auto;font-size:.85rem;padding:6px 10px;background:var(--panel2);color:var(--fg);border-color:var(--line);box-shadow:none;border-radius:999px}
+.chips button:active{transform:none}
+.ctl{display:flex;gap:8px;align-items:center}
+.speed{display:flex;gap:2px;background:var(--panel);border-radius:6px;padding:2px}
+.speed button{font-size:.78rem;padding:6px 7px;background:transparent;color:var(--muted);border:none;box-shadow:none;border-radius:4px;font-family:var(--display)}
+.speed button.on{background:var(--amber);color:#1a1409}
+.speed button:active{transform:none}
+.ctl .main{flex:1}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:18px 18px 20px}
+.card.epitaph{border-color:var(--amber);background:linear-gradient(180deg,#2c2748,#1f1c33)}
+.card.ending{border-color:var(--line);background:#1d1a30}
+.ending p+p{margin-top:8px}
+.epitaph .flag{font-size:2.4rem;line-height:1}
+.epitaph .big{font-family:var(--display);font-size:1.5rem;line-height:1.4}
+.title-badge{display:inline-block;font-family:var(--display);background:var(--amber);color:#1a1409;padding:2px 10px;border-radius:4px;letter-spacing:.06em}
+.nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.num{background:var(--panel2);border-radius:6px;padding:8px 10px;min-width:0}
+.num b{font-family:var(--display);font-size:1.3rem;display:block;font-variant-numeric:tabular-nums;color:var(--amber)}
+.num span{font-size:.76rem;color:var(--muted)}
+input[type=text],textarea{width:100%;font-family:var(--body);font-size:1rem;background:#0e0d14;color:var(--fg);border:2px solid var(--line);border-radius:6px;padding:10px 12px}
+textarea{min-height:150px;line-height:1.6;resize:vertical}
+input:focus-visible,textarea:focus-visible{outline:3px solid var(--sky);outline-offset:1px}
+details{background:var(--panel);border-radius:8px;padding:10px 14px}
+summary{cursor:pointer;font-weight:700}
+.hero .lead{font-size:1.05rem}
+.rarity{font-family:var(--display);color:var(--sky);font-size:.95rem}
+.note{font-size:.85rem;color:var(--muted)}
+.joyline{font-family:var(--display);color:var(--rose)}
+@media (max-width:420px){h1{font-size:1.8rem}.stat .lab{font-size:.66rem}.speed button{padding:6px 5px}}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+.btn-x,.btn-gift,.btn-link{display:inline-block;font-weight:700;border-radius:6px;padding:10px 16px;text-decoration:none;line-height:1.3;border:2px solid var(--line);color:var(--fg)}
+.btn-x{background:#000;border-color:#000;color:#fff}
+.btn-gift{background:var(--panel2);border-color:var(--rose);color:var(--fg)}
+.btn-link{background:transparent;font-size:.9rem;padding:6px 12px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(160px + env(safe-area-inset-bottom,0px));background:var(--mint);color:#0b1a12;padding:8px 14px;border-radius:6px;font-weight:700;z-index:7}
+</style>
+
+<div class="wrap">
+  <section id="title" class="stack">
+    <div class="scenebox"><canvas id="titleCanvas" width="320" height="180" aria-label="夜の路地にすわるねこたちのドット絵"></canvas></div>
+    <div class="hero stack">
+      <p class="eyebrow">ねこ人生シミュレーター</p>
+      <h1>6億分の1のねこ</h1>
+      <p class="lead">世界には、推定6億匹のねこがいます。<br>家で暮らすねこは、そのうちの半分より少し少ないくらい。<br>残りは、街や野山で生きています。</p>
+      <p class="lead">あなたは今から、そのうちの1匹として生まれます。<br>どの国に、誰の子として生まれるかは選べません。</p>
+      <div class="row"><button id="btnBirth">生まれる</button><span class="note">1歳までは1か月ごと、そのあとは季節ごとに進みます</span></div>
+    </div>
+    <details><summary>このゲームの数字について</summary>
+      <div class="small muted stack" style="gap:6px;margin-top:8px">
+        <p>生まれる国は、各国の飼いねこ・野良ねこの推定頭数（40か国、合計およそ5億9千万匹）の比率で決まります。飼いねこの数は各国の公表推計を、野良ねこの数は世界推計（約4億8千万匹）を国ごとに割り振った概算を使っています。</p>
+        <p>寿命は、日本のペットフード協会「全国犬猫飼育実態調査」（外に出ないねこ16歳前後、外に出るねこ14歳前後）、野良ねこは一般に言われる3〜5年、子ねこの生存率は野良の子ねこの75%が生後6か月までに死ぬか姿を消すという米国の研究（Nutter, 2004）を元に、国ごとの環境（寒さ・交通量・動物医療・保護活動）で調整しています。</p>
+        <p>保護施設の数字は環境省の統計（2024年度：ねこの引取り22,010匹、殺処分4,866匹）を参考にしています。出来事はすべてフィクションです。</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="game" hidden>
+    <div class="top">
+      <div class="scenebox"><canvas id="scene" width="320" height="140" aria-label="いまの暮らしの場面"></canvas><div class="cap" id="cap"></div></div>
+      <div class="ageline"><span id="ageTxt"></span><span class="w" id="wTxt"></span></div>
+      <div class="stats">
+        <div class="stat"><div class="lab"><span>けんこう</span><span id="vhp">0</span></div><div class="bar hp"><i id="bhp"></i></div></div>
+        <div class="stat"><div class="lab"><span>おなか</span><span id="vfood">0</span></div><div class="bar food"><i id="bfood"></i></div></div>
+        <div class="stat"><div class="lab"><span>ごきげん</span><span id="vjoy">0</span></div><div class="bar joy"><i id="bjoy"></i></div></div>
+        <div class="stat"><div class="lab"><span>ひと</span><span id="vbond">0</span></div><div class="bar bond"><i id="bbond"></i></div></div>
+      </div>
+    </div>
+    <div id="endArea" class="stack" style="margin-bottom:14px" hidden></div>
+    <div class="log" id="log"></div>
+  </section>
+</div>
+
+<div class="actions" id="actions" hidden>
+  <div class="inner">
+    <div class="chips" id="chips"></div>
+    <div class="ctl">
+      <div class="speed" id="speed" role="group" aria-label="次の選択肢までの早送り">
+        <button data-sp="0" class="on">OFF</button><button data-sp="1">1倍</button><button data-sp="2">2倍</button><button data-sp="4">4倍</button><button data-sp="16">16倍</button><button data-sp="skip">スキップ</button>
+      </div>
+      <button class="main" id="btnNext">つぎへ</button>
+    </div>
+  </div>
+</div>
+
+<script id="logic">
+/* ========== データ ========== */
+const COUNTRIES = [
+{id:'us',name:'アメリカ',flag:'🇺🇸',pet:74,stray:40,indoor:.65,vet:.9,rescue:.8,cold:.4,traffic:.7,kill:.11,adopt:.7,tnr:.7,food:'ツナの缶詰',
+ wild:['ニューヨーク、ブルックリンの空き地の廃車の下','テキサスの牧場のはずれの納屋','ロサンゼルスの住宅街のガレージ'],home:['シカゴ郊外の一軒家','サンフランシスコのアパートの一室','フロリダの海辺の家'],
+ flavor:['感謝祭の七面鳥のにおいが、一日じゅう漂っていた','ハロウィンの夜、庭のかぼちゃの陰から人間の子どもたちを眺めた','庭にリスが来るたび、窓に張りついた']},
+{id:'cn',name:'中国',flag:'🇨🇳',pet:53,stray:52,indoor:.8,vet:.6,rescue:.4,cold:.4,traffic:.6,kill:.2,adopt:.5,tnr:.2,food:'蒸した魚の残り',
+ wild:['上海の団地の自転車置き場','成都の市場の魚屋の裏','広州の古い路地'],home:['北京の高層マンションの一室','杭州の小さな雑貨店','深圳のワンルーム'],
+ flavor:['春節の爆竹の音に、一晩じゅう机の下でふるえた','団地の「猫おばさん」が、残りごはんを置いていってくれた','中秋節の月餅を、ひとかけらだけもらった']},
+{id:'ru',name:'ロシア',flag:'🇷🇺',pet:23,stray:8,indoor:.7,vet:.6,rescue:.5,cold:.9,traffic:.5,kill:.2,adopt:.5,tnr:.2,food:'スメタナ（サワークリーム）',
+ wild:['モスクワの集合住宅の地下、暖房のパイプのそば','サンクトペテルブルクの運河沿いの倉庫'],home:['モスクワ郊外の団地','ウラル地方の木の家'],
+ flavor:['冬、気温はマイナス20度。地下の暖房パイプだけが頼りだった','エルミタージュ美術館には、地下に住む猫たちがいると聞いた'],coatBias:{gray:2.5}},
+{id:'br',name:'ブラジル',flag:'🇧🇷',pet:13,stray:15,indoor:.5,vet:.5,rescue:.4,cold:.1,traffic:.6,kill:.15,adopt:.55,tnr:.2,food:'魚のフライ',
+ wild:['リオデジャネイロの丘の町の階段','サンパウロの市場の裏通り'],home:['リオの海沿いのアパート','ミナスジェライスの農家'],
+ flavor:['カーニバルの夜は、ドラムの音で眠れなかった','午後の雨が通り過ぎると、路地に水たまりができた']},
+{id:'in',name:'インド',flag:'🇮🇳',pet:4,stray:30,indoor:.6,vet:.4,rescue:.3,cold:.3,traffic:.8,kill:.1,adopt:.4,tnr:.1,food:'チャパティのかけら',
+ wild:['ムンバイの線路わきの集落','デリーのチャイ屋台の下','コルカタの市場の裏'],home:['バンガロールのマンション','コルカタの商店の2階'],
+ flavor:['モンスーンが来て、3日間ずっと雨宿りした','野良犬の群れが来るたび、塀の上に逃げた'],rain:true},
+{id:'id',name:'インドネシア',flag:'🇮🇩',pet:5,stray:15,indoor:.4,vet:.4,rescue:.4,cold:0,traffic:.7,kill:.1,adopt:.4,tnr:.1,food:'揚げた小魚',
+ wild:['ジャカルタの屋台通りの軒下','バリ島の寺院の石段'],home:['スラバヤの家族の家','ジョグジャカルタの小さな店'],
+ flavor:['夕方のスコールのあと、カエルを追いかけた','モスクのそばで、礼拝帰りの人がごはんをくれた'],rain:true},
+{id:'de',name:'ドイツ',flag:'🇩🇪',pet:15,stray:2,indoor:.5,vet:.95,rescue:.8,cold:.5,traffic:.5,kill:.02,adopt:.85,tnr:.6,food:'チーズのかけら',
+ wild:['ベルリンの工業地帯の倉庫','バイエルンの農場の干し草の山'],home:['ミュンヘンのアパート','ハンブルクの一軒家'],
+ flavor:['ティアハイム（動物保護施設）のボランティアが見回りに来た','冬の夜、暖炉の前がいちばんの特等席だった']},
+{id:'fr',name:'フランス',flag:'🇫🇷',pet:15,stray:2,indoor:.5,vet:.9,rescue:.7,cold:.4,traffic:.5,kill:.05,adopt:.8,tnr:.5,food:'バターのにおいのするパン',
+ wild:['マルセイユの港の倉庫','パリの中庭の植え込み'],home:['パリのアパルトマン','ブルターニュの石の家'],
+ flavor:['パン屋の前に座っていると、通る人がみんな話しかけてきた','ラベンダー畑をわたる風が、気持ちよかった']},
+{id:'gb',name:'イギリス',flag:'🇬🇧',pet:12,stray:1,indoor:.25,vet:.9,rescue:.85,cold:.4,traffic:.6,kill:.03,adopt:.85,tnr:.7,food:'ミルクティーの残り',
+ wild:['ロンドンの運河沿いの茂み','ヨークシャーの農場の納屋'],home:['ロンドン郊外のテラスハウス','スコットランドのコテージ'],
+ flavor:['キャットフラップから庭に出て、雨の中を散歩した','隣の家の犬とは、塀をはさんで毎日にらみ合った']},
+{id:'it',name:'イタリア',flag:'🇮🇹',pet:10,stray:3,indoor:.5,vet:.85,rescue:.7,cold:.3,traffic:.6,kill:.05,adopt:.7,tnr:.6,food:'パスタの残り',
+ wild:['ローマの遺跡の猫コロニー','ナポリの路地裏'],home:['フィレンツェのアパート','トスカーナの農家'],
+ flavor:['遺跡に住む猫たちに、毎朝「猫おばさん」がごはんを運んできた','夏の石畳は熱くて、噴水の陰で昼寝した']},
+{id:'jp',name:'日本',flag:'🇯🇵',pet:9,stray:1.5,indoor:.8,vet:.9,rescue:.7,cold:.4,traffic:.6,kill:.22,adopt:.7,tnr:.6,food:'ちゅ〜る',
+ wild:['東京の下町の神社の裏','宮崎の港町の船着き場','大阪の商店街のアーケードの裏'],home:['横浜のマンション','福岡の一軒家','宮崎の家'],
+ flavor:['地域猫のボランティアさんが、耳の先をさくらの花びらの形に切ってくれた','冬はこたつの中が、世界でいちばんの場所だった','ちゅ〜るの袋の音で、どこにいても飛んで帰った','2月22日、人間が「ねこの日」だと言って、いつもよりおやつが多かった'],coatBias:{mike:1.6}},
+{id:'tr',name:'トルコ',flag:'🇹🇷',pet:4,stray:8,indoor:.5,vet:.6,rescue:.9,cold:.4,traffic:.6,kill:.05,adopt:.5,tnr:.5,food:'イワシの頭',
+ wild:['イスタンブールの魚市場の裏','カッパドキアの洞窟の町'],home:['イスタンブールのアパート','アンカラの家'],
+ flavor:['街じゅうの人が猫にごはんをくれる。魚屋さんは毎日イワシの頭をくれた','モスクの中庭で、礼拝の時間を待つ人たちになでられた'],coatBias:{shiro:2}},
+{id:'ua',name:'ウクライナ',flag:'🇺🇦',pet:7,stray:3,indoor:.6,vet:.6,rescue:.5,cold:.7,traffic:.4,kill:.2,adopt:.5,tnr:.2,food:'サーロ（豚の脂身）のかけら',
+ wild:['キーウの集合住宅の地下','オデーサの港'],home:['リヴィウのアパート','キーウ郊外の家'],
+ flavor:['空襲警報のたび、人間たちと一緒に地下室に降りた','ひまわり畑の夏は、バッタを追いかけて過ごした']},
+{id:'pl',name:'ポーランド',flag:'🇵🇱',pet:7,stray:1.5,indoor:.5,vet:.8,rescue:.6,cold:.6,traffic:.5,kill:.05,adopt:.7,tnr:.4,food:'ピエロギの皮',
+ wild:['ワルシャワの団地の裏庭','クラクフの旧市街の中庭'],home:['ワルシャワのアパート','田舎の農家'],
+ flavor:['雪の日、団地のおじさんが段ボールの家を作ってくれた','クリスマスイブの食卓の下で、魚のにおいにそわそわした']},
+{id:'ca',name:'カナダ',flag:'🇨🇦',pet:8.5,stray:2,indoor:.65,vet:.9,rescue:.8,cold:.9,traffic:.5,kill:.08,adopt:.75,tnr:.6,food:'サーモンの切れ端',
+ wild:['トロントの倉庫街','バンクーバーの公園の茂み'],home:['モントリオールのアパート','郊外の家'],
+ flavor:['冬はマイナス30度。外のねこにとって、冬は毎年が命がけだった','庭にアライグマが来て、網戸ごしににらみ合った']},
+{id:'mx',name:'メキシコ',flag:'🇲🇽',pet:8,stray:10,indoor:.4,vet:.5,rescue:.4,cold:.1,traffic:.7,kill:.2,adopt:.4,tnr:.2,food:'トルティーヤ',
+ wild:['メキシコシティの市場の裏','オアハカの町の屋上'],home:['グアダラハラの家','メキシコシティのアパート'],
+ flavor:['死者の日の祭壇に、マリーゴールドの花びらが散っていた','昼下がり、タコス屋台の下は肉のにおいでいっぱいだった']},
+{id:'es',name:'スペイン',flag:'🇪🇸',pet:6,stray:2,indoor:.5,vet:.85,rescue:.6,cold:.2,traffic:.5,kill:.1,adopt:.6,tnr:.5,food:'生ハムの切れ端',
+ wild:['バルセロナの港の倉庫','アンダルシアのオリーブ畑'],home:['マドリードのアパート','バレンシアの家'],
+ flavor:['シエスタの時間、街ぜんたいが静かになって日向ぼっこした','バルの前で、タパスのおすそ分けを待った']},
+{id:'ar',name:'アルゼンチン',flag:'🇦🇷',pet:5,stray:4,indoor:.4,vet:.6,rescue:.5,cold:.3,traffic:.5,kill:.1,adopt:.5,tnr:.3,food:'焼き肉のかけら',
+ wild:['ブエノスアイレスの公園','パタゴニアの牧場'],home:['ブエノスアイレスのアパート','コルドバの家'],
+ flavor:['日曜のアサード（焼き肉）の日は、庭じゅうが肉のにおいだった','公園には、ねこを世話する人たちが毎日来た']},
+{id:'au',name:'オーストラリア',flag:'🇦🇺',pet:5,stray:3,indoor:.5,vet:.9,rescue:.6,cold:.2,traffic:.5,kill:.15,adopt:.7,tnr:.3,food:'カンガルー肉のキャットフード',cull:true,
+ wild:['シドニー郊外のブッシュ（茂み）','クイーンズランドの牧場'],home:['メルボルンの家','パースの郊外の家'],
+ flavor:['野生動物を守るため、外で暮らすねこは駆除の対象になっていると聞いた','夏は40度。日陰のコンクリートで、一日動かなかった']},
+{id:'eg',name:'エジプト',flag:'🇪🇬',pet:2,stray:12,indoor:.5,vet:.4,rescue:.5,cold:0,traffic:.7,kill:.1,adopt:.3,tnr:.1,food:'揚げたそら豆',
+ wild:['カイロの市場の路地','アレクサンドリアの港'],home:['カイロのアパート','ギザの家'],
+ flavor:['何千年も前から、この国でねこは神様だった','ピラミッドが見える屋上で、夕方の風を待った']},
+{id:'kr',name:'韓国',flag:'🇰🇷',pet:2.5,stray:2,indoor:.9,vet:.85,rescue:.5,cold:.6,traffic:.6,kill:.2,adopt:.4,tnr:.5,food:'焼き魚の残り',
+ wild:['ソウルの住宅街の路地','釜山の港'],home:['ソウルのマンション','大田の家'],
+ flavor:['冬の夜、駐車場の車の下で、ほかのねこと身を寄せ合った','「マウルコヤン（村のねこ）」として、町内の人が世話をしてくれた']},
+{id:'th',name:'タイ',flag:'🇹🇭',pet:3,stray:5,indoor:.4,vet:.5,rescue:.7,cold:0,traffic:.7,kill:.05,adopt:.4,tnr:.2,food:'ガパオの肉',
+ wild:['バンコクの寺院の境内','チェンマイの市場'],home:['バンコクのコンドミニアム','プーケットの家'],
+ flavor:['寺院のお坊さんが、毎朝ごはんを分けてくれた','雨季の雷に、仏像の後ろでふるえた'],rain:true,coatBias:{point:4}},
+{id:'vn',name:'ベトナム',flag:'🇻🇳',pet:2,stray:4,indoor:.4,vet:.4,rescue:.4,cold:.1,traffic:.8,kill:.1,adopt:.3,tnr:.1,food:'フォーの肉',
+ wild:['ホーチミンの路地','ハノイの市場'],home:['ハノイのアパート','ダナンの家'],
+ flavor:['バイクの波が途切れるのを待って、道を渡った','屋台のフォーの出汁のにおいが、朝の路地に流れていた'],rain:true},
+{id:'ph',name:'フィリピン',flag:'🇵🇭',pet:2,stray:6,indoor:.3,vet:.4,rescue:.4,cold:0,traffic:.7,kill:.1,adopt:.3,tnr:.1,food:'干し魚',
+ wild:['マニラの市場','セブ島の漁村'],home:['マニラのアパート','ダバオの家'],
+ flavor:['台風の夜、トタン屋根の下で一晩耐えた','漁から帰った船のまわりで、魚のおこぼれをもらった'],rain:true},
+{id:'gr',name:'ギリシャ',flag:'🇬🇷',pet:1,stray:3,indoor:.4,vet:.7,rescue:.8,cold:.2,traffic:.4,kill:.05,adopt:.5,tnr:.5,food:'グリルした魚',
+ wild:['サントリーニ島の白い階段','アテネの遺跡の丘'],home:['アテネのアパート','クレタ島の家'],
+ flavor:['観光客が毎日写真を撮って、ごはんをくれた。冬になると誰もいなくなった','エーゲ海の風は、夏でも夕方は涼しかった']},
+{id:'za',name:'南アフリカ',flag:'🇿🇦',pet:2.5,stray:2,indoor:.4,vet:.6,rescue:.5,cold:.2,traffic:.5,kill:.2,adopt:.5,tnr:.3,food:'ソーセージのかけら',
+ wild:['ヨハネスブルグの空き地','ケープタウンの港'],home:['ケープタウンの家','プレトリアの家'],
+ flavor:['庭にヒヒが来た日は、一日じゅう家から出なかった','週末はバーベキューの煙のにおいがした']},
+{id:'ng',name:'ナイジェリア',flag:'🇳🇬',pet:1,stray:5,indoor:.3,vet:.3,rescue:.3,cold:0,traffic:.7,kill:.1,adopt:.3,tnr:.05,food:'干し魚',
+ wild:['ラゴスの市場','アブジャの住宅街'],home:['ラゴスの家','イバダンの家'],
+ flavor:['乾季の砂ぼこりで、毛がいつも茶色くなった','市場のおばさんが、魚のあらをくれた']},
+{id:'ir',name:'イラン',flag:'🇮🇷',pet:1,stray:6,indoor:.6,vet:.5,rescue:.5,cold:.4,traffic:.7,kill:.1,adopt:.3,tnr:.1,food:'ごはんとヨーグルト',
+ wild:['テヘランの住宅街の路地','イスファハンのバザール'],home:['テヘランのアパート','シーラーズの家'],
+ flavor:['ペルシャ猫のふるさと。長い毛の子は特に大事にされた','バザールの絨毯の上で昼寝して、怒られた'],coatBias:{shiro:2,gray:2}},
+{id:'ma',name:'モロッコ',flag:'🇲🇦',pet:.5,stray:4,indoor:.4,vet:.4,rescue:.5,cold:.1,traffic:.6,kill:.1,adopt:.3,tnr:.1,food:'タジンの肉のかけら',
+ wild:['マラケシュの旧市街の路地','フェズの皮なめし工房のそば'],home:['カサブランカのアパート','ラバトの家'],
+ flavor:['迷路のような路地で、観光客の足もとをすり抜けた','ミントティーの湯気の中で、店主の膝の上に座った']},
+{id:'ke',name:'ケニア',flag:'🇰🇪',pet:.5,stray:3,indoor:.3,vet:.3,rescue:.3,cold:0,traffic:.6,kill:.1,adopt:.3,tnr:.05,food:'ウガリと魚',
+ wild:['ナイロビの市場','モンバサの港'],home:['ナイロビの家','キスムの家'],
+ flavor:['乾季の午後、トタン屋根の影だけが涼しかった','港の漁師が、小さな魚を投げてくれた']},
+{id:'nl',name:'オランダ',flag:'🇳🇱',pet:3,stray:.3,indoor:.5,vet:.95,rescue:.8,cold:.4,traffic:.5,kill:.02,adopt:.85,tnr:.6,food:'ニシンの切れ端',
+ wild:['アムステルダムの運河沿いのボート','田舎の農場'],home:['アムステルダムのアパート','ユトレヒトの家'],
+ flavor:['運河に浮かぶ「猫のボート」という保護施設があると聞いた','自転車の波の中、道を渡るのはいつも緊張した']},
+{id:'ro',name:'ルーマニア',flag:'🇷🇴',pet:4,stray:1.5,indoor:.4,vet:.6,rescue:.5,cold:.6,traffic:.4,kill:.15,adopt:.5,tnr:.3,food:'とうもろこしの粥',
+ wild:['ブカレストの団地の裏','トランシルヴァニアの村'],home:['ブカレストのアパート','クルジュの家'],
+ flavor:['村のおばあさんが、毎朝ミルクを置いてくれた','冬のカルパチア山脈の風は、骨までしみた']},
+{id:'il',name:'イスラエル',flag:'🇮🇱',pet:.5,stray:2,indoor:.5,vet:.8,rescue:.7,cold:.1,traffic:.6,kill:.05,adopt:.5,tnr:.6,food:'フムス（ひよこ豆）',
+ wild:['テルアビブの中庭','エルサレムの旧市街の路地'],home:['テルアビブのアパート','ハイファの家'],
+ flavor:['テルアビブは街ねこだらけ。ゴミ箱のそばが縄張りだった','安息日の夕方、街がしんと静かになった']},
+{id:'my',name:'マレーシア',flag:'🇲🇾',pet:1.5,stray:3,indoor:.5,vet:.6,rescue:.6,cold:0,traffic:.6,kill:.1,adopt:.4,tnr:.2,food:'干し小魚',
+ wild:['クアラルンプールの屋台街','ペナンの路地'],home:['クアラルンプールのコンドミニアム','クチン（猫の街）の家'],
+ flavor:['クチンは「猫」という名前の街。猫の像が街じゅうにあった','ナシレマッの屋台の下で、干し小魚を待った'],rain:true},
+{id:'pk',name:'パキスタン',flag:'🇵🇰',pet:1,stray:5,indoor:.5,vet:.3,rescue:.3,cold:.2,traffic:.8,kill:.1,adopt:.3,tnr:.05,food:'ロティのかけら',
+ wild:['カラチの市場','ラホールの旧市街'],home:['カラチのアパート','イスラマバードの家'],
+ flavor:['夏は45度。日が沈むまで、どこにも動けなかった','肉屋の前で、ほかのねこたちと順番を待った']},
+{id:'se',name:'スウェーデン',flag:'🇸🇪',pet:1.4,stray:.1,indoor:.5,vet:.95,rescue:.8,cold:.9,traffic:.4,kill:.02,adopt:.85,tnr:.5,food:'サーモンのくんせい',
+ wild:['ストックホルムの倉庫','北部の森のそばの農場'],home:['ストックホルムのアパート','ダーラナの赤い木の家'],
+ flavor:['冬は午後3時に日が沈んだ。白夜の夏は、一晩じゅう外で遊べた','夏至祭の日、庭にイチゴのにおいがあふれた']},
+{id:'cl',name:'チリ',flag:'🇨🇱',pet:2,stray:2,indoor:.4,vet:.6,rescue:.5,cold:.2,traffic:.5,kill:.1,adopt:.5,tnr:.3,food:'エンパナーダの中身',
+ wild:['サンティアゴの公園','バルパライソの坂の町'],home:['サンティアゴのアパート','バルパライソの色とりどりの家'],
+ flavor:['地震の夜、家じゅうが揺れて棚の下に隠れた','坂だらけの町。屋根から屋根へ飛び移って暮らした']},
+{id:'co',name:'コロンビア',flag:'🇨🇴',pet:2,stray:3,indoor:.4,vet:.5,rescue:.4,cold:.1,traffic:.6,kill:.1,adopt:.4,tnr:.2,food:'とうもろこしのパン',
+ wild:['ボゴタの市場','カルタヘナの旧市街'],home:['メデジンのアパート','ボゴタの家'],
+ flavor:['コーヒー農園の朝は、霧とコーヒーのにおいだった','カリブ海の風が、旧市街の路地を通り抜けた']},
+{id:'pe',name:'ペルー',flag:'🇵🇪',pet:1.5,stray:2,indoor:.4,vet:.5,rescue:.5,cold:.2,traffic:.6,kill:.1,adopt:.4,tnr:.2,food:'セビーチェの魚',
+ wild:['リマのケネディ公園','クスコの石畳'],home:['リマのアパート','アレキパの家'],
+ flavor:['ケネディ公園には何十匹ものねこが住んでいて、市民が世話をしていた','標高3,400mのクスコでは、息が少し苦しかった']},
+{id:'tw',name:'台湾',flag:'🇹🇼',pet:1.3,stray:.5,indoor:.8,vet:.85,rescue:.7,cold:.1,traffic:.7,kill:.05,adopt:.6,tnr:.6,food:'魯肉飯の肉',
+ wild:['猴硐（ホウトン）の猫村','台北の夜市の裏'],home:['台北のマンション','台南の家'],
+ flavor:['猫村には観光客が毎日来て、写真とおやつをくれた','夜市の屋台の下は、一晩じゅうおいしいにおいがした']}
+];
+
+const TOTAL_M = COUNTRIES.reduce((a,c)=>a+c.pet+c.stray,0);
+const COATS = [
+ {id:'kiji',name:'キジトラ',w:26,img:'kiji_back'},
+ {id:'kuro',name:'黒ねこ',w:15,img:'kuro'},
+ {id:'shiro',name:'白ねこ',w:8,img:'shiro'},
+ {id:'chatora',name:'茶トラ',w:15,img:'chatora_walk',sleep:'chatora_sleep',maleBias:true},
+ {id:'mike',name:'三毛',w:10,img:'mike',femaleOnly:true},
+ {id:'hachiware',name:'ハチワレ',w:14,img:'hachiware'},
+ {id:'gray',name:'グレー',w:8,img:'gray_sleep',sleepy:true},
+ {id:'point',name:'ポイント',w:4,img:'point'}
+];
+const SEASONS=[{n:'春',w:45},{n:'夏',w:25},{n:'秋',w:22},{n:'冬',w:8}];
+
+function rnd(){return Math.random()}
+function chance(p){return rnd()<p}
+function pick(a){return a[Math.floor(rnd()*a.length)]}
+function ri(a,b){return a+Math.floor(rnd()*(b-a+1))}
+function weighted(items,wf){let t=0;for(const it of items)t+=wf(it);let r=rnd()*t;for(const it of items){r-=wf(it);if(r<=0)return it}return items[items.length-1]}
+function clamp(v){return Math.max(0,Math.min(100,Math.round(v)))}
+function fmtMan(m){ const man=m*100; if(man>=10000) return (man/10000).toFixed(1).replace(/\.0$/,'')+'億匹'; if(man>=100) return Math.round(man)+'万匹'; if(man>=1) return man.toFixed(1).replace(/\.0$/,'')+'万匹'; return Math.max(1,Math.round(man*10000))+'匹'}
+
+/* ========== 誕生 ========== */
+function coatW(c,k,sex){ let w=k.w*((c.coatBias&&c.coatBias[k.id])||1); if(k.femaleOnly) w*= sex==='♀'?1:0.03; if(k.maleBias) w*= sex==='♂'?1:0.3; return w; }
+function birth(){
+  const c=weighted(COUNTRIES,k=>k.stray+k.pet*0.35);
+  const strayBorn=chance(c.stray/(c.stray+c.pet*0.35));
+  const sex=chance(.5)?'♂':'♀';
+  const coat=weighted(COATS,k=>coatW(c,k,sex));
+  const season=weighted(SEASONS,x=>x.w).n;
+  const litter=ri(1,6), order=ri(1,litter);
+  const s={
+    c, env: strayBorn?'stray':'pet', indoor: strayBorn?false:chance(c.indoor), tnr:false, fed:false, neutered:false, charm:0,
+    sex, coat, season, seasonIdx:SEASONS.findIndex(x=>x.n===season), litter, order,
+    place: strayBorn?pick(c.wild):pick(c.home), born: strayBorn?'街':'家',
+    t:0, turnNo:0, alive:true, cause:'', deathAge:'', w:0.1, acted:false,
+    st:{hp: strayBorn?55:80, food: strayBorn?55:90, joy:60, bond: strayBorn?20:65},
+    k:{sun:0,pets:0,meals:0,purr:0,kittens:0,homes:0,humans:0,fights:0,sibDead:0,box:0,hunt:0,naps:0},
+    used:{}, usedFlavor:{}, usedSeasonal:{}, usedRare:{}, joySum:0, joyN:0, name:'', turns:[], scene:'street', sibAnnounced:false, lostOnce:false
+  };
+  if(!strayBorn) s.k.homes=1;
+  const envShare = strayBorn? c.stray/(c.stray+c.pet) : c.pet/(c.stray+c.pet);
+  let tw=0,me=0; for(const k of COATS){ const w=coatW(c,k,sex); tw+=w; if(k.id===coat.id) me=w; }
+  s.same=(c.pet+c.stray)*envShare*(me/tw)*0.5; s.sameP=s.same/TOTAL_M*100;
+  s.scene=sceneFor(s);
+  return s;
+}
+function sceneFor(s){ if(s.env==='shelter') return 'shelter'; if(s.env==='pet') return s.indoor?'home':'yard'; return /牧場|農場|農家|畑|村|島|森|牧|漁村|ブッシュ/.test(s.place)?'field':'street'; }
+function ageY(s){ return Math.floor(s.t/12); }
+function seasonAt(s,t){ return SEASONS[(s.seasonIdx+Math.floor((t==null?s.t:t)/3))%4].n; }
+function ageText(s){ if(s.t<12) return `生後${s.t}か月`; return `${ageY(s)}さい`; }
+function deathAgeText(s){ if(s.t<12) return `生後${Math.max(1,s.t)}か月`; return `${ageY(s)}さい`; }
+function humanAge(s){ const y=ageY(s); if(s.t<12) return Math.round(s.t*1.25); if(y===1) return 15; if(y===2) return 24; return 24+(y-2)*4; }
+function dstat(s,k,v){ s.st[k]=clamp(s.st[k]+v); }
+function die(s,t,line){ s.alive=false; if(t){ if(line) t.lines.push(line); t.tag='death'; } s.deathAge=deathAgeText(s); }
+function becomePet(s,home){ s.env='pet'; s.indoor=chance(Math.max(s.c.indoor,home?0.7:0)); s.place=pick(s.c.home); s.k.homes++; s.k.humans+=ri(1,3); dstat(s,'food',30); dstat(s,'bond',20); s.scene=sceneFor(s); }
+function becomeStray(s){ s.env='stray'; s.indoor=false; s.place=pick(s.c.wild); s.scene=sceneFor(s); }
+function becomeShelter(s){ s.env='shelter'; s.place=s.c.name+'の動物保護施設'; s.scene='shelter'; }
+
+/* 結果を複数パターンから選ぶ小道具：[{w,t|t:[...],fx:{hp:..},k:{box:1},run:(s,t)=>text}] */
+function out(list){ return (s,t)=>{ const o=weighted(list,x=>x.w||1); if(o.fx) for(const k in o.fx) dstat(s,k,o.fx[k]); if(o.k) for(const k in o.k) s.k[k]=(s.k[k]||0)+o.k[k]; if(o.wt) s.w=Math.max(0.1,Math.round((s.w+o.wt)*10)/10); if(o.run){ const r=o.run(s,t); if(r) return r; } return o.t? pick([].concat(o.t)) : ''; }; }
+
+/* ========== ターン ========== */
+function startTurn(s){
+  const t={lines:[],choice:null,tag:'',head:'',before:{...s.st}};
+  s.turnNo++; s.acted=false;
+  if(s.t<12) monthTurn(s,t); else seasonTurn(s,t);
+  return t;
+}
+function resolveChoice(s,t,idx){
+  const res=t.choice.options[idx].apply(s,t);
+  if(res) t.lines.push(res);
+  t.choice=null;
+  if(!s.alive){ t.tag='death'; if(!s.deathAge) s.deathAge=deathAgeText(s); return t; }
+  afterEvents(s,t);
+  return t;
+}
+function monthTurn(s,t){
+  const c=s.c, m=s.t;
+  t.head = m===0?'誕生':`生後${m}か月（${seasonAt(s)}）`;
+  if(m===0){
+    t.tag='birth';
+    if(s.env==='stray'){ t.lines.push(`${s.place}。母ねこは街で生きてきたねこで、人間に近づくことを子どもたちに教えなかった。`); t.lines.push(pick(['目はまだ開いていない。母ねこのおなかのあたたかさだけが、世界のすべてだった。','目はまだ開いていない。雨の音と、母ねこの心臓の音を聞いていた。'])); }
+    else { t.lines.push(`${s.place}。母ねこは家で飼われているねこだった。`); t.lines.push(pick([`${s.litter}匹きょうだいの${s.order}番目。人間が「小さい」と言いながら、そっとのぞきこんだ。`,`${s.litter}匹きょうだいの${s.order}番目。人間が毛布を1枚ふやしてくれた。`])); }
+  } else {
+    const ms=MONTHS[m]; const pool = s.env==='stray'?ms.stray:(s.env==='pet'?ms.pet:ms.shelter||ms.pet);
+    t.lines.push(pick(pool));
+    if(m===3 && s.env==='stray' && !s.sibAnnounced){ s.sibAnnounced=true; const sib=s.litter-1; if(sib>0){ const dead=Math.round(sib*0.75); s.k.sibDead=dead; t.lines.push(dead>0?`きょうだい${sib}匹のうち${dead}匹は、いつのまにかいなくなっていた。`:`きょうだいは${sib}匹。まだ、みんないる。`); } }
+    if(m===3 && s.env==='pet' && s.litter>1 && chance(.6)){ s.place=pick(c.home); s.k.homes++; t.lines.push(pick([`${s.place}へ、もらわれていった。はじめての車。はじめてのキャリーバッグ。`,`${s.place}へ、もらわれていった。きょうだいのにおいが、1週間は毛に残っていた。`])); }
+    if(m===6 && s.env==='pet' && chance(c.vet*0.8)){ s.neutered=true; t.lines.push(pick(['不妊・去勢の手術を受けた。数日はエリザベスカラーがうっとうしかった。','不妊・去勢の手術を受けた。帰ってきた日は、一日じゅう家族をにらんでいた。'])); }
+    if(m===8 && s.env==='stray' && chance(.4)){ const sea=seasonAt(s); t.lines.push(`はじめての${sea}。`+(sea==='冬'?'寒さが、こんなに痛いとは知らなかった。':sea==='夏'?'アスファルトが、足の裏を焼いた。':sea==='春'?'風に、花のにおいがまじった。':'夜が、少しずつ長くなった。')); }
+  }
+  if(s.env==='stray' && m>=1 && m<=8){
+    const rp=c.rescue*0.045*(0.6+s.st.bond/100);
+    if(chance(rp)){ if(chance(.85)){ becomePet(s); t.tag='good';
+        t.lines.push(pick(['段ボールに入れられて鳴いていたところを、通りがかった人に拾われた。','ごはんをくれていた人が、冬が来る前に家に連れて帰ってくれた。','弱っているところを保護団体の人に見つけられ、新しい家族のもとへ行った。','学校帰りの子どもが、毎日通って、最後は親を連れてきた。'])); t.lines.push(`${s.place}。はじめての屋根の下、はじめての毛布。`); }
+      else { becomeShelter(s); t.lines.push('人に捕まえられて、保護施設のケージに入った。'); } }
+  }
+  const sv=statEvent(s); if(sv) t.lines.push(sv);
+  const ch = m>=1 ? pickChoice(s,0.4) : null;
+  if(ch){ t.choice=ch; return; }
+  afterEvents(s,t);
+}
+function seasonTurn(s,t){
+  const c=s.c; const sea=seasonAt(s); const y=ageY(s);
+  t.head=`${y}さいの${sea}`;
+  if(s.env==='stray'){
+    if(!s.tnr && chance(c.tnr*0.03)){ s.tnr=true; s.neutered=true; t.lines.push('捕獲器に入ってしまい、病院で手術を受けた。耳の先を少しだけ切られて、同じ場所に戻された。これで子どもは生まれない。'); }
+    const rp=(c.rescue*0.0125+(s.fed?0.015:0))*(0.6+s.st.bond/100);
+    if(chance(rp)){ becomePet(s); t.tag='good';
+      t.lines.push(pick(['毎日ごはんをくれていた人が、ついに家に入れてくれた。','ケガをしているところを保護された。治ったあと、そのまま家の子になった。','雪の日、玄関の前で鳴いていたら、ドアが開いた。','台風の夜、開いていた窓から入った。そのまま、出なかった。'])); t.lines.push(`${s.place}で、暮らしはじめた。`); }
+    else if(chance(0.005)){ becomeShelter(s); t.lines.push('苦情が出て、捕まえられた。保護施設のケージの中。'); }
+  } else if(s.env==='pet'){
+    const ab=(0.004+(1-c.rescue)*0.012+(y>=12?0.006:0))/4;
+    if(chance(ab)){ becomeStray(s); dstat(s,'joy',-25); dstat(s,'bond',-20); t.tag='death';
+      t.lines.push(pick(['引っ越しの日、家族は帰ってこなかった。','飼い主が亡くなった。親戚は誰も引き取らなかった。','知らない場所でドアが開き、そのまま車は走り去った。'])); t.lines.push(`${s.place}で、生きていくしかなくなった。`); }
+    else if(!s.indoor && chance(0.003)){ becomeStray(s); s.lostOnce=true; t.lines.push('遠くまで行きすぎて、帰り道がわからなくなった。'); dstat(s,'joy',-15); }
+  } else if(s.env==='shelter'){ shelterSeason(s,t); if(!s.alive) return; }
+  if(s.sex==='♀' && !s.neutered && y>=1 && y<=8 && s.alive && (sea==='春'||sea==='秋')){
+    const p = (s.env==='stray'?0.8:(1-c.vet*0.8))/2;
+    if(chance(p)){ const n=ri(2,5); const dead=s.env==='stray'?Math.round(n*0.75):Math.round(n*0.1); s.k.kittens+=n;
+      t.lines.push(pick([`${n}匹の子どもを産んだ。`,`${n}匹の子どもを産んだ。全員、少しずつ模様がちがった。`])+(dead>0?`そのうち${dead}匹は、半年を生きられなかった。`:'みんな元気に育った。')); }
+  }
+  const rare=rareEvent(s); if(rare) t.lines.push(rare);
+  const sv=statEvent(s); if(sv) t.lines.push(sv);
+  const ch=pickChoice(s,0.55);
+  if(ch){ t.choice=ch; return; }
+  flavor(s,t);
+  afterEvents(s,t);
+}
+function afterEvents(s,t){
+  if(!s.alive) return;
+  const step = s.t<12?1:3;
+  drift(s,step);
+  mortality(s,t,step/12);
+  if(s.alive){ s.t+=step; if(ageY(s)>=25){ s.cause='老衰'; die(s,t,`${ageY(s)}さい。眠るように、長い一生を終えた。`); } }
+}
+function shelterSeason(s,t){
+  const c=s.c; const r=rnd();
+  s.k.meals+=ri(85,92); s.k.pets+=ri(3,25); s.k.sun+=ri(0,8);
+  const adopt=1-Math.pow(1-Math.min(.95,c.adopt+s.charm),0.25), kill=1-Math.pow(1-c.kill,0.25);
+  if(r<adopt){ becomePet(s,true); dstat(s,'joy',25); s.charm=0; t.tag='good';
+    t.lines.push(pick(['譲渡会で、ひとりの人がケージの前から動かなくなった。','写真を見た家族が、わざわざ遠くから迎えに来た。','「この子は人慣れしています」の札を見た人が、面会を申し込んだ。'])); t.lines.push(`${s.place}で、新しい暮らしがはじまった。`); }
+  else if(r<adopt+kill){ s.cause='保護施設で、新しい家族が見つからないまま'; die(s,t,'新しい家族は、最後まで見つからなかった。'); }
+  else if(r<adopt+kill+0.013){ s.cause='収容中の病気'; die(s,t,'ケージの中で体調を崩し、そのまま回復しなかった。'); }
+  else { t.lines.push(pick(['ケージの中で、一日が長かった。','となりのケージの子が、もらわれていった。','ボランティアの人が、毎日少しだけ遊んでくれた。','面会に来た子どもが、ガラスごしに手を振った。','掃除の時間だけ、ケージの外を歩けた。'])); dstat(s,'joy',-6); dstat(s,'bond',4); }
+}
+function drift(s,step){
+  const c=s.c, y=ageY(s), f=step/3;
+  if(s.t<12){ s.w=Math.min(s.env==='pet'?4.0:3.2, s.w+(s.env==='pet'?0.34:0.26)); }
+  else { const target = s.env==='pet'?(s.indoor?4.6:4.1):(s.st.food>45?3.4:2.6); if(y>=13) s.w-=0.05; s.w+= (target-s.w)*0.15; }
+  s.w=Math.max(0.1,Math.round(s.w*10)/10);
+  if(s.env==='stray'){
+    dstat(s,'food',(ri(-12,4)+(s.fed?14:0)+c.rescue*6)*f); dstat(s,'hp',(ri(-7,2)+(s.tnr?2:0)+(s.st.food<20?-8:0))*f); dstat(s,'joy',ri(-6,6)*f); dstat(s,'bond',(ri(-4,2)+(s.fed?4:0))*f);
+    s.k.sun+=Math.round(ri(10,30)*f); s.k.meals+=Math.round(ri(50,100)*f); s.k.humans+=Math.round(ri(0,3)*f); s.k.pets+=Math.round(ri(0,2)*c.rescue*f);
+    if(s.sex==='♂'&&!s.neutered&&y>=1) s.k.fights+=Math.round(ri(0,2)*f);
+  } else if(s.env==='pet'){
+    dstat(s,'food',ri(3,10)*f); dstat(s,'hp',(ri(-3,3)+(y>=12?-3:0)+(c.vet-0.5)*3)*f); dstat(s,'joy',(ri(-3,6)+(s.indoor?0:2))*f); dstat(s,'bond',ri(-2,4)*f);
+    s.k.sun+=Math.round(ri(25,55)*f); s.k.meals+=Math.round(ri(175,183)*f); s.k.pets+=Math.round(ri(50,375)*f); s.k.humans+=Math.round(ri(0,4)*f); s.k.purr+=Math.round(ri(20,90)*f);
+    if(!s.indoor){ s.k.humans+=Math.round(ri(1,3)*f); if(s.sex==='♂'&&!s.neutered) s.k.fights+=Math.round(ri(0,1)*f); }
+  } else { dstat(s,'joy',-4*f); dstat(s,'food',4*f); }
+  s.joySum+=s.st.joy; s.joyN++;
+}
+function mortality(s,t,frac){
+  const c=s.c; let q=0; const y=ageY(s);
+  if(s.t<12){
+    if(s.env==='stray') q = (s.t<6 ? 0.082*(1+c.cold*0.3)*(1-c.rescue*0.15) : 0.027)*12;
+    else if(s.env==='pet') q = (s.t<2 ? 0.035 : 0.003)*12;
+    else return;
+    if(s.st.hp<20) q*=1.4;
+  } else if(s.env==='stray'){ q=0.28+c.cold*0.06+c.traffic*0.04-c.rescue*0.06-(s.tnr?0.04:0)-(s.fed?0.03:0); if(y>=8) q+=0.12; if(s.st.hp<25) q+=0.1; if(s.st.food<15) q+=0.05; q=Math.max(0.12,q); }
+  else if(s.env==='pet'){
+    let base = y<=6?0.008 : y<=9?0.018 : y<=12?0.045 : y<=14?0.09 : y<=16?0.17 : y<=18?0.28 : y<=20?0.42 : 0.6;
+    base*= 1+(1-c.vet)*0.8; if(!s.indoor && y<=12) base+=c.traffic*0.04; if(s.st.hp<15) base+=0.03; q=base;
+  } else return;
+  if(chance(q*frac)){
+    if(s.mercy && s.t<12 && !s.mercyUsed){
+      s.mercyUsed=true; const cause=deathCause(s);
+      t.lines.push(pick([`${cause}で、冷たくなりかけていた。`,`${cause}。もう、鳴く力も残っていなかった。`]));
+      if(s.env==='pet'){ dstat(s,'hp',30); t.lines.push(pick(['家族が夜中の救急病院に駆け込んだ。点滴と保温で、朝までに息を吹き返した。','家族が異変に気づいて、病院へ。3日の入院で、なんとか命をつないだ。'])); }
+      else { becomePet(s); dstat(s,'hp',30); s.k.homes=Math.max(1,s.k.homes); t.lines.push(pick(['見回りに来た保護団体のボランティアが見つけた。点滴と保温で、朝までに息を吹き返した。','通りがかった人が保護団体に連絡した。3日の治療で、なんとか命をつないだ。'])); t.lines.push(`そのまま里親が見つかり、${s.place}で暮らすことになった。`); }
+      t.tag='good'; return;
+    }
+    s.cause=deathCause(s);
+    const line = s.t<12 ? `${s.cause}で、短い一生を終えた。`
+      : s.env==='stray' ? pick([`${s.cause}で、命を落とした。`,`${s.cause}。それが最後だった。`,`ある${pick(['朝','夜','雨の日'])}、${s.cause}で動けなくなった。`])
+      : (y>=15? `${s.cause}。家族が見守る中、静かに息を引き取った。` : `${s.cause}で、家族より先に旅立った。`);
+    die(s,t,line);
+  }
+}
+function deathCause(s){
+  const c=s.c, y=ageY(s);
+  if(s.t<12){
+    if(s.env==='stray') return weighted([['寒さと飢え',1+c.cold*2],['猫風邪（ウイルス性の感染症）',1.2],['カラスの襲撃',.6],['交通事故',c.traffic],['母ねことはぐれたこと',.8]],x=>x[1])[0];
+    return pick(['生まれつきの病気','感染症']);
+  }
+  if(s.env==='stray'){
+    const list=[['交通事故',c.traffic*1.2],['猫エイズや白血病などの感染症',1],['ケンカの傷からの感染',s.sex==='♂'&&!s.neutered?1:.3],['真冬の寒さ',c.cold*1.2],['毒のあるものを食べてしまったこと',.3],['犬',.4],['腎臓の病気',y>=6?.8:.1],['飢え',s.st.food<20?1.5:.3]];
+    if(c.cull) list.push(['野生動物保護のための駆除',1.2]); if(c.id==='ua') list.push(['戦火',.5]);
+    return weighted(list,x=>x[1])[0];
+  }
+  if(y<10){ const l=[['誤飲',1],['心臓の病気',.8],['がん',.6],['感染症',.6]]; if(!s.indoor) l.push(['交通事故',c.traffic*2]); return weighted(l,x=>x[1])[0]; }
+  const l=[['慢性腎臓病',2],['がん',1],['心臓の病気',.7],['甲状腺の病気',.5]]; if(y>=16) l.push(['老衰',1.5+(y-16)*0.5]);
+  return weighted(l,x=>x[1])[0];
+}
+
+/* ========== いつでもできる行動（1ターンに1回） ========== */
+const ACTIONS={
+ pet:[
+  {id:'beg',label:'ごはんをねだる',run:s=>{ if(s.st.bond>=50) return out([{w:7,t:['おやつをもらえた。袋の音だけで、しっぽが立った。','「しょうがないなあ」と言われながら、ちゅ〜るをもらった。','ごはんの時間が、少し早まった。'],fx:{food:8,joy:5},k:{meals:1}},{w:3,t:['「さっき食べたでしょ」と言われた。聞こえないふりをした。','冷蔵庫の前で鳴いたが、人間は動かなかった。'],fx:{joy:-2}}])(s); return out([{w:5,t:['鳴いてみたが、人間は気づかなかった。','足にすりついたら、少しだけごはんが増えた。'],fx:{food:3,bond:2}},{w:5,t:'台所で鳴いていたら、家族が笑って、なでた。',fx:{bond:5,joy:3},k:{pets:2}}])(s); }},
+  {id:'pet',label:'なでてもらう',run:out([{w:6,t:['頭を人間の手にこすりつけた。10分なでられた。','あごの下をなでられて、目が細くなった。','お腹を見せた。なでられた。3秒で噛んだ。'],fx:{bond:6,joy:5},k:{pets:10}},{w:2,t:'人間は仕事中だった。かわりに膝に乗った。仕事は止まった。',fx:{bond:4,joy:4},k:{pets:5}},{w:2,t:'なでられすぎて、逆にうっとうしくなった。しっぽで、やめろと伝えた。',fx:{joy:-1},k:{pets:4}}])},
+  {id:'sun',label:'ひなたぼっこ',run:out([{w:6,t:['いちばん日の当たる場所で、丸くなった。','窓辺で、日が動くのを追いかけながら寝た。','背中があたたまって、毛のにおいが太陽のにおいになった。'],fx:{joy:5,hp:2},k:{sun:3}},{w:2,t:'雲が出てきた。しかたなく、こたつの上に移った。',fx:{joy:2},k:{sun:1}},{w:2,t:'日向で寝ていたら、家族がとなりで一緒に寝た。',fx:{joy:5,bond:4},k:{sun:3}}])},
+  {id:'zoom',label:'走り回る',run:out([{w:5,t:['理由もなく、廊下を全力で3往復した。','カーテンの裏からカーテンの裏へ、意味のないダッシュ。'],fx:{joy:6,hp:1}},{w:3,t:'勢いあまって、花瓶を倒した。家族が走ってきた。',fx:{joy:4,bond:-3}},{w:2,t:'走ったあと、急に止まって毛づくろいをした。何もなかったことにした。',fx:{joy:4}}])},
+  {id:'purr',label:'ゴロゴロいう',run:out([{w:7,t:['人間のとなりで、喉を鳴らした。人間の顔がゆるんだ。','ふみふみしながらゴロゴロ。人間の服に穴があいた。'],fx:{bond:5,joy:4},k:{purr:15}},{w:3,t:'ゴロゴロしていたら、人間が録音していた。',fx:{bond:3,joy:3},k:{purr:10}}])},
+  {id:'nap',label:'ねる',run:out([{w:6,t:['段ボールの中で、3時間寝た。','洗濯かごの中で、丸くなった。','飼い主のベッドのど真ん中で、大の字になった。'],fx:{hp:3,joy:2},k:{naps:1}},{w:4,t:'寝言で「にゃ」と言った。家族がそれを3回再生した。',fx:{hp:3,joy:3,bond:2},k:{naps:1}}])}
+ ],
+ stray:[
+  {id:'hunt',label:'ごはんをさがす',run:s=>out([{w:4,t:['ゴミ捨て場で、魚の骨をみつけた。','ねずみを捕まえた。ひさしぶりのごちそう。'],fx:{food:12},k:{hunt:1,meals:1}},{w:3,t:['屋台の下で、落ちたものを食べた。','残飯の袋を破った。おなかは少しだけ満たされた。'],fx:{food:7},k:{meals:1}},{w:2,t:'何も見つからなかった。水だけ飲んだ。',fx:{food:-2,joy:-2}},{w:1,t:'ゴミをあさっていたら、店の人にほうきで追われた。',fx:{joy:-4,hp:-2}}])(s)},
+  {id:'approach',label:'人間に近づく',run:s=>{ const c=s.c; return out([{w:4,t:['足にすりついた。人間はしゃがんで、あごをなでた。','ニャーと言ったら、人間が立ち止まった。'],fx:{bond:6,joy:3},k:{pets:2,humans:1}},{w:2,t:'人間は、手に持っていたパンのかけらをくれた。',fx:{bond:4,food:5},k:{humans:1}},{w:2,t:'人間は、気づかずに通り過ぎた。',fx:{joy:-1}},{w:1,t:'「しっ！」と追い払われた。',fx:{bond:-3,joy:-3}},{w:c.rescue*0.6,run:(s)=>{ becomePet(s); return `その人は、次の日も、その次の日も来た。1週間後、${s.place}に連れていかれた。`; }}])(s); }},
+  {id:'sun',label:'ひなたぼっこ',run:out([{w:6,t:['塀の上で、日向ぼっこ。','車のボンネットの上で、あたたまった。','お寺の石段で、観光客に写真を撮られながら寝た。'],fx:{joy:5,hp:2},k:{sun:3}},{w:2,t:'日向の場所を、別のねこに取られた。2番目の場所で妥協した。',fx:{joy:1},k:{sun:1}}])},
+  {id:'nap',label:'ねる',run:out([{w:6,t:['神社の縁の下で、昼まで寝た。','段ボールの家で、丸くなった。'],fx:{hp:3,joy:2},k:{naps:1}},{w:2,t:'寝ていたら、工事の音で起こされた。',fx:{hp:1,joy:-2}},{w:2,t:'屋根の上で寝た。星がよく見えた。',fx:{hp:2,joy:4},k:{naps:1}}])},
+  {id:'patrol',label:'なわばりを見回る',run:s=>out([{w:5,t:['路地を一周した。においをつけ直した。','屋根づたいに、町のはしまで歩いた。'],fx:{joy:4}},{w:2,t:'知らないねこがいた。にらみ合って、相手が去った。',fx:{joy:5}},{w:s.sex==='♂'&&!s.neutered?2:0.5,t:'知らないオスとケンカになった。耳に傷。',fx:{hp:-8,joy:-2},k:{fights:1}},{w:1,t:'新しいごはん場所を見つけた。',fx:{food:6,joy:3}}])(s)},
+  {id:'call',label:'鳴く',run:out([{w:4,t:['夜、大きな声で鳴いた。どこかの窓が開いて、閉まった。','鳴いたら、遠くで別のねこが返事をした。'],fx:{joy:2}},{w:3,t:'鳴いていたら、2階の窓から、ごはんが降ってきた。',fx:{food:8,bond:4},k:{humans:1}},{w:2,t:'鳴きすぎて、怒鳴られた。',fx:{joy:-3,bond:-2}}])}
+ ],
+ shelter:[
+  {id:'appeal',label:'アピールする',run:out([{w:5,t:['ケージの前を通る人に、前足を出した。','ゴロゴロと喉を鳴らしてみた。'],fx:{bond:3},run:s=>{ s.charm=Math.min(.4,s.charm+.1); }},{w:3,t:'目が合った人が、写真を撮っていった。',fx:{joy:2},run:s=>{ s.charm=Math.min(.4,s.charm+.05); }}])},
+  {id:'nap',label:'ねる',run:out([{w:8,t:['タオルの上で、丸くなった。','ケージのすみで、一日寝た。'],fx:{hp:3},k:{naps:1}}])},
+  {id:'call',label:'鳴く',run:out([{w:5,t:'鳴いたら、となりのケージも鳴きはじめた。',fx:{joy:1}},{w:5,t:'鳴いていたら、ボランティアの人が来て、少し遊んでくれた。',fx:{bond:4,joy:4},k:{pets:3}}])}
+ ]
+};
+function doAction(s,id){
+  if(s.acted||!s.alive) return null;
+  const a=(ACTIONS[s.env]||[]).find(x=>x.id===id); if(!a) return null;
+  s.acted=true;
+  const r=a.run(s);
+  return r||'……';
+}
+
+/* ========== ステータスで起きる出来事／珍しい出来事 ========== */
+const STAT_EVENTS=[
+ {p:.5,cond:s=>s.env==='stray'&&s.st.food<25,t:['おなかが減りすぎて、ゴミ袋を破った。人間に怒鳴られた。','空腹で、道ばたの草を食べた。すぐ吐いた。'],fx:{food:6,bond:-2}},
+ {p:.5,cond:s=>s.env==='pet'&&s.st.food<25,t:['ごはんの2時間前から、台所で鳴き続けた。','お皿の前で、無言で座り続けた。家族が負けた。'],fx:{food:8}},
+ {p:.6,cond:s=>s.env==='pet'&&s.st.hp<30,t:['元気がないのに家族が気づいて、病院へ。点滴を受けた。','ごはんを残すのを見て、家族がすぐ病院に連れていった。'],fx:{hp:12}},
+ {p:.5,cond:s=>s.env==='stray'&&s.st.hp<30,t:['まる一日、段ボールの中から動かなかった。','体が重くて、縄張りの見回りを休んだ。'],fx:{hp:4}},
+ {p:.5,cond:s=>s.env==='pet'&&s.st.joy<30,t:['ストレスで、お腹の毛をむしった。家族が心配して、新しいおもちゃを買ってきた。','つまらなくて、壁紙をはがした。'],fx:{joy:8}},
+ {p:.3,cond:s=>s.env==='pet'&&s.st.bond>=85,t:['家族が旅行の写真より、ねこの写真のほうを多く撮っていた。','家族の誰かが帰省するとき、連れていかれた。知らない家でも、膝の上は同じだった。','家族の会話の半分が、ねこの話だった。'],fx:{joy:5}},
+ {p:.3,cond:s=>s.env==='stray'&&s.st.bond>=65,t:['近所の人が、名前をつけて呼ぶようになった。','散歩の人が、毎朝あいさつしていくようになった。'],fx:{bond:4,joy:3}},
+ {p:.4,cond:s=>s.env==='pet'&&s.w>=5.2,t:['獣医さんに「ダイエット」と言われた。ごはんが減った。','段ボールに入れなくなった。箱のせいにした。'],fx:{food:-8,joy:-4},wt:-0.3},
+ {p:.4,cond:s=>s.env==='stray'&&s.w<2.5,t:['あばらが浮いてきた。','風が吹くと、体がゆれた。'],fx:{hp:-3}},
+ {p:.3,cond:s=>s.env==='stray'&&s.k.fights>=10,t:['耳の傷が増えて、路地では一目置かれるようになった。','若いねこが、道をゆずるようになった。'],fx:{joy:4}},
+ {p:.3,cond:s=>s.env==='pet'&&s.st.joy>=85,t:['毎日が、だいたい最高だった。','家族が「この子、ずっとゴロゴロ言ってる」と言った。'],fx:{bond:3},k:{purr:20}},
+ {p:.3,cond:s=>s.env==='pet'&&s.k.box>=3,t:['家族が、わざわざ空き箱をもらってくるようになった。'],fx:{joy:5},k:{box:1}}
+];
+function statEvent(s){
+  const el=STAT_EVENTS.filter(e=>e.cond(s)&&chance(e.p)); if(!el.length) return null;
+  const e=pick(el); if(e.fx) for(const k in e.fx) dstat(s,k,e.fx[k]); if(e.k) for(const k in e.k) s.k[k]+=e.k[k]; if(e.wt) s.w=Math.max(0.1,Math.round((s.w+e.wt)*10)/10);
+  return pick([].concat(e.t));
+}
+const RARE=[
+ {id:'tv',cond:s=>s.env==='stray',t:'テレビ局が、街のねこの取材に来た。カメラの前で、あくびをした。',fx:{joy:5,bond:5}},
+ {id:'quake',cond:s=>true,t:'大きな地震があった。棚の下で、一晩じゅう動けなかった。',fx:{joy:-8}},
+ {id:'blackout',cond:s=>s.env==='pet',t:'停電の夜。ろうそくの明かりの中で、家族と一緒に寝た。',fx:{bond:6}},
+ {id:'move',cond:s=>s.env==='pet',t:'引っ越した。新しい家は、においが全部ちがった。慣れるのに3週間かかった。',fx:{joy:-5},run:s=>{ s.place=pick(s.c.home); }},
+ {id:'poster',cond:s=>s.env==='stray'&&s.lostOnce,t:'電柱に、自分の写真の貼り紙があった。「さがしています」。読めなかった。',fx:{joy:-3}},
+ {id:'festival',cond:s=>s.env==='stray',t:'お祭りの夜。屋台の下は、一晩じゅういいにおいだった。',fx:{food:10,joy:6}},
+ {id:'snowday',cond:s=>s.env==='pet',t:'大雪で家族が全員家にいた。一日じゅう、誰かの膝の上にいた。',fx:{bond:8,joy:6}},
+ {id:'wedding',cond:s=>s.env==='pet'&&ageY(s)>=3,t:'家族の結婚式の写真に、抱っこされて写った。',fx:{joy:5,bond:5}},
+ {id:'baby_born',cond:s=>s.env==='stray'&&s.sex==='♂',t:'路地に、自分とそっくりな模様の子ねこがいた。',fx:{joy:4}},
+ {id:'hospital',cond:s=>s.env==='pet'&&ageY(s)>=5,t:'飼い主が入院した。1週間、知らない人がごはんをくれに来た。帰ってきた日は、玄関から離れなかった。',fx:{bond:10}}
+];
+function rareEvent(s){
+  if(!chance(.06)) return null;
+  const el=RARE.filter(e=>!s.usedRare[e.id]&&e.cond(s)); if(!el.length) return null;
+  const e=pick(el); s.usedRare[e.id]=true; if(e.fx) for(const k in e.fx) dstat(s,k,e.fx[k]); if(e.run) e.run(s);
+  return e.t;
+}
+
+/* ========== 子猫の月ごとの出来事 ========== */
+const MONTHS={
+ 1:{stray:['目が開いた。世界はまだぼんやりしている。母ねこのにおいだけが、はっきりしていた。','耳が立った。雨の音と、遠くの車の音を覚えた。','目が開いた。最初に見たのは、きょうだいの背中だった。'],pet:['目が開いた。世界はまだぼんやりしている。人間の大きな手が、そっと背中をなでた。','耳が立った。冷蔵庫の音と、人間の声を覚えた。','目が開いた。家族が「開いた！」と言って、全員で見に来た。'],shelter:['目が開いた。ケージの白い天井が見えた。']},
+ 2:{stray:['よちよち歩けるようになった。きょうだいと転がって遊んだ。','母ねこが運んできた小さな魚を、はじめてかじった。','はじめて外の空気をかいだ。土と、排気ガスと、花のにおい。'],pet:['よちよち歩けるようになった。家族が動画を撮りはじめた。','離乳。はじめての固いごはんを、前足でつついた。','はじめてトイレを自分で使った。家族が拍手した。'],shelter:['よちよち歩けるようになった。ボランティアの人が、ミルクをくれた。']},
+ 3:{stray:['母ねこについて、はじめて外の世界を歩いた。地面は冷たくて、広かった。','カラスの影に、母ねこが毛を逆立てた。','母ねこが、ねずみの捕まえ方を見せてくれた。'],pet:['ワクチンを打った。注射は一瞬だった。帰りにおやつをもらった。','はじめてのトイレ。砂を掘るのが、なぜか楽しかった。','家族の靴下を、自分のものにした。'],shelter:['ワクチンを打った。ケージの外の世界は、まだ知らない。']},
+ 4:{stray:['乳歯が抜けはじめた。石でも段ボールでも、なんでもかじった。','ねずみをはじめて見た。追いかけたら、逃げられた。','人間の足音を聞き分けられるようになった。'],pet:['乳歯が抜けはじめた。家族の指と充電ケーブルを、なんでもかじった。','カーテンを登って、てっぺんで鳴いた。怒られた。','抜けた乳歯を、家族が小さな袋に入れて取っておいた。'],shelter:['乳歯が抜けはじめた。ケージの金網をかじった。']},
+ 5:{stray:['ジャンプが得意になった。塀の上から、はじめて町を見下ろした。','雨の日、母ねこの背中の下で、雨音を聞いていた。','はじめて、ほかの大人のねこに威嚇された。'],pet:['ジャンプが得意になった。キャットタワーのてっぺんが、自分の場所になった。','お腹を出して寝ていたら、写真を撮られた。','冷蔵庫の上に登った。降ろされた。また登った。'],shelter:['ジャンプが得意になった。ケージの中では、あまり跳べなかった。']},
+ 6:{stray:['体はもう、大人と同じくらい。母ねこが、少しずつ離れていった。','はじめてひとりで夜を過ごした。星が、思ったより多かった。','自分のにおいを、はじめて電柱につけた。'],pet:['体はもう、大人と同じくらい。でも寝るときは、まだ人間の首もとにもぐりこんだ。','宅配の段ボールに、はじめて入った。出てこなかった。','はじめてのお留守番。帰ってきた家族に、全力で文句を言った。'],shelter:['体はもう、大人と同じくらい。譲渡会のチラシに、写真が載った。']},
+ 7:{stray:['縄張りの見回りがはじまった。室外機の上、神社の軒下、魚屋の裏。','ほかのねこと、はじめてにらみ合った。先に目をそらしたほうが負けだった。','雨上がり、水たまりに映った自分を見た。'],pet:['はじめて、人間の膝の上で寝た。人間は、トイレに行くのをあきらめた。','夜中の運動会が、日課になった。','はじめて窓の外の鳥に、カカカと鳴いた。'],shelter:['となりのケージの子と、金網ごしに前足でじゃれた。']},
+ 8:{stray:['ごはんをくれる人と、くれない人の顔を覚えた。','軽トラの荷台で昼寝して、知らない町まで運ばれそうになった。','雷の夜、縁の下でふるえた。'],pet:['飼い主が仕事から帰ると、玄関まで迎えに行くようになった。','冷蔵庫が開く音で、どこにいても飛んで帰った。','家族の布団に入る技を、覚えた。'],shelter:['ボランティアの人が、名前をつけて呼ぶようになった。']},
+ 9:{stray:['ほかのねこと、はじめて本気でケンカした。耳に小さな傷が残った。','公園のベンチの下が、お気に入りの場所になった。','魚屋の前に、毎朝座るようになった。'],pet:['おもちゃのねずみを、毎晩ベッドに運んでくるようになった。','飼い主が泣いていた夜、となりに座った。理由はわからなかった。','飼い主の電話の声に、毎回返事をするようになった。'],shelter:['面会に来た家族が、ずっと見ていった。でも、連れていかれなかった。']},
+ 10:{stray:['おとなの毛に生え変わった。体が、少し重くなった。','魚屋のおじさんが、はじめて名前のようなもので呼んだ。','縄張りに、小さなねこが迷いこんできた。追い払わなかった。'],pet:['おとなの毛に生え変わった。ブラッシングのあと、床が毛だらけになった。','洗濯したての布団の上で、全力で寝た。','高いところから家族を見下ろすのが、日課になった。'],shelter:['おとなの毛に生え変わった。「子猫のほうがもらわれやすい」と、誰かが言っていた。']},
+ 11:{stray:['もうすぐ1歳。生きているきょうだいは、もう近くにいなかった。','もうすぐ1歳。縄張りの地図は、頭の中に全部入った。','もうすぐ1歳。冬を1回、越えた。'],pet:['もうすぐ1歳。家じゅうの日向の場所と、その時間を全部覚えた。','もうすぐ1歳。家族の誰が一番甘いかも、わかっていた。','もうすぐ1歳。自分の名前に、たまに返事をするようになった。'],shelter:['もうすぐ1歳。ケージの中で、はじめての誕生日が近づいていた。']}
+};
+
+/* ========== 選択イベント（結果は毎回ちがう） ========== */
+const CHOICES=[
+ // 子猫（月）
+ {id:'kmilk',kit:true,cond:s=>s.t>=1&&s.t<=2&&s.litter>=3,text:'母ねこのおっぱいの順番。きょうだいが先に並んでいる。',options:[
+   {label:'押しのける',apply:out([{w:6,t:'いちばんいい場所を取った。きょうだいが鳴いた。',fx:{food:8},wt:.1},{w:3,t:'押しのけたら、押し返された。結局3番目。',fx:{food:4}},{w:1,t:'母ねこに、前足でそっと戻された。',fx:{food:3,joy:2}}])},
+   {label:'待つ',apply:out([{w:6,t:'順番を待った。母ねこが、頭をなめてくれた。',fx:{joy:4}},{w:4,t:'待っているあいだに寝てしまった。起きたら、もう終わっていた。',fx:{food:-3,joy:1}}])}]},
+ {id:'kplay',kit:true,cond:s=>s.t>=2&&s.t<=5&&s.litter>=2,text:'きょうだいが、しっぽにじゃれてきた。',options:[
+   {label:'反撃する',apply:out([{w:5,t:'転がりながら、夕方までプロレスをした。',fx:{joy:6,hp:2}},{w:3,t:'勢いあまって、きょうだいを泣かせた。母ねこににらまれた。',fx:{joy:3}},{w:2,t:'3匹に囲まれて、負けた。',fx:{joy:2,hp:1}}])},
+   {label:'寝たふり',apply:out([{w:6,t:'しっぽだけ、ぱたぱたと動いた。',fx:{joy:2}},{w:4,t:'寝たふりをしていたら、きょうだいも上で寝はじめた。重かった。',fx:{joy:4,hp:1}}])}]},
+ {id:'kname',kit:true,cond:s=>s.t>=1&&s.t<=3&&s.env==='pet',text:'家族が、何度も同じ音で呼んでいる。',options:[
+   {label:'返事をする',apply:out([{w:6,t:'「にゃ」と言ったら、家族が大喜びした。それが名前だった。',fx:{bond:8}},{w:4,t:'返事をしたら、家族が泣いた。人間はよく泣く。',fx:{bond:8,joy:2}}])},
+   {label:'無視する',apply:out([{w:6,t:'ねこだから。でも耳だけは、ちゃんと聞いていた。',fx:{joy:2}},{w:4,t:'無視していたら、おやつが出てきた。これは、覚えた。',fx:{food:4,joy:3}}])}]},
+ {id:'khand',kit:true,cond:s=>s.t>=3&&s.t<=7&&s.env==='stray',text:'人間が、しゃがんで手を差し出している。',options:[
+   {label:'にゃあと鳴いてみる',apply:out([{w:3,run:s=>{ becomePet(s); return `その人は、家まで連れて帰ってくれた。${s.place}が、自分の家になった。`; }},{w:5,t:'指のにおいをかいだ。少しだけ、なでられた。',fx:{bond:10},k:{humans:1,pets:2}},{w:2,t:'鳴いたら、人間がカリカリを置いて行った。',fx:{food:8,bond:6},k:{humans:1}}])},
+   {label:'母ねこのうしろに隠れる',apply:out([{w:6,t:'母ねこが低くうなった。人間は、あきらめて行ってしまった。'},{w:4,t:'人間は、遠くから写真だけ撮って帰った。',fx:{joy:1}}])}]},
+ {id:'kcurtain',kit:true,cond:s=>s.t>=3&&s.t<=7&&s.env==='pet',text:'カーテンが、風でゆれている。',options:[
+   {label:'登る',apply:out([{w:5,t:'てっぺんまで登った。降りられなくなって、鳴いた。',fx:{joy:8}},{w:3,t:'登ったら、カーテンレールごと落ちた。家族が走ってきた。',fx:{joy:5,bond:-2}},{w:2,t:'途中で爪が引っかかって、ぶら下がった。家族に笑われた。',fx:{joy:4}}])},
+   {label:'下で見る',apply:out([{w:6,t:'ゆれるたびに、前足だけ出した。',fx:{joy:3}},{w:4,t:'ゆれるカーテンを1時間見ていた。家族がとなりで一緒に見た。',fx:{joy:3,bond:3}}])}]},
+ {id:'kbox',kit:true,cond:s=>s.t>=4&&s.t<=9&&s.env==='pet',text:'宅配の箱が、空になった。',options:[
+   {label:'入る',apply:out([{w:6,t:'入った。箱は体より小さかったが、入った。',fx:{joy:8},k:{box:1}},{w:4,t:'入った。家族が上からのぞきこんだ。無視した。',fx:{joy:8},k:{box:1}}])},
+   {label:'……入る',apply:out([{w:6,t:'入った。家族がため息をついて、写真を撮った。',fx:{joy:8},k:{box:1}},{w:4,t:'入った。そのまま、夜まで出なかった。',fx:{joy:8,hp:2},k:{box:1}}])}]},
+ // 街のねこ
+ {id:'child',cond:s=>s.env==='stray'&&ageY(s)<=2,text:'人間の子どもが、こっちに手をのばしてきた。',options:[
+   {label:'近づいてみる',apply:out([{w:2.5,run:s=>{ becomePet(s); return `その子は、家まで連れて帰ってくれた。${s.place}が、自分の家になった。`; }},{w:5,t:'はじめて、人間に頭をなでられた。あたたかかった。',fx:{bond:12,joy:6},k:{pets:3,humans:1}},{w:2,t:'子どもは、ポケットのお菓子をくれた。食べられなかったが、気持ちはもらった。',fx:{bond:8},k:{humans:1}},{w:1,t:'しっぽを引っぱられた。子どもは、ねこの扱いを知らなかった。',fx:{joy:-4,bond:-3},k:{humans:1}}])},
+   {label:'物陰にかくれる',apply:out([{w:6,t:'じっと息をひそめた。子どもは、あきらめて行ってしまった。',fx:{joy:-2}},{w:4,t:'隠れていたら、子どもは地面にお菓子を置いて行った。あとで食べた。',fx:{food:4}}])}]},
+ {id:'granny',once:true,cond:s=>s.env==='stray'&&s.c.rescue>=.3&&!s.fed,text:'毎日同じ時間に、おばあさんがごはんを置いていく。',options:[
+   {label:'毎日通う',apply:out([{w:6,t:'おばあさんは、名前をつけて呼ぶようになった。',fx:{food:25,bond:15},k:{humans:1},run:s=>{ s.fed=true; }},{w:4,t:'おばあさんは、ごはんの横に小さな水の皿も置くようになった。',fx:{food:25,bond:12},k:{humans:1},run:s=>{ s.fed=true; }}])},
+   {label:'気ままに暮らす',apply:out([{w:6,t:'自分の力で生きていく。それがねこというものだ。',fx:{joy:5}},{w:4,t:'たまに通った。おばあさんは、それでも待っていた。',fx:{food:8,joy:3}}])}]},
+ {id:'engine',cond:s=>s.env==='stray'&&s.c.cold>=.3&&seasonAt(s)==='冬',text:'止まっている車のボンネットが、まだあたたかい。',options:[
+   {label:'もぐりこむ',apply:out([{w:.6,run:s=>{ s.cause='車のエンジンルームの事故'; die(s,null,''); return '朝、エンジンがかかった。それが最後だった。'; }},{w:7,t:'エンジンのぬくもりで、一晩生きのびた。',fx:{hp:8}},{w:2.4,t:'朝、人間がボンネットをたたいてから車に乗った。この町には、知っている人がいた。',fx:{hp:8,bond:4}}])},
+   {label:'段ボールの中で耐える',apply:out([{w:6,t:'朝まで震えていた。でも、朝は来た。',fx:{hp:-6}},{w:4,t:'段ボールに、もう1匹入ってきた。2匹なら、少しあたたかかった。',fx:{hp:-2,joy:3}}])}]},
+ {id:'boss',cond:s=>s.env==='stray'&&s.sex==='♂'&&ageY(s)>=2&&!s.neutered,text:'縄張りに、見たことのない大きなオスねこが入ってきた。',options:[
+   {label:'戦う',apply:out([{w:5,t:'激しい夜だった。相手は二度と来なかった。',fx:{joy:12},k:{fights:3}},{w:4,t:'耳が裂け、傷は長く治らなかった。縄張りの半分を失った。',fx:{hp:-18},k:{fights:3}},{w:1,t:'にらみ合いだけで、相手が去った。戦わずに勝った。',fx:{joy:8},k:{fights:1}}])},
+   {label:'ゆずる',apply:out([{w:6,t:'黙って別の路地に移った。負けるより、生きることを選んだ。',fx:{joy:-8}},{w:4,t:'ゆずった路地の隣に、もっといい場所があった。',fx:{joy:2,food:4}}])}]},
+ {id:'trap',once:true,cond:s=>s.env==='stray'&&s.c.rescue>=.4&&!s.tnr&&ageY(s)>=1,text:'見慣れないカゴの中に、いいにおいのごはんがある。',options:[
+   {label:'入る',apply:out([{w:7,t:'ガチャン、と扉が閉まった。病院で手術を受け、耳の先を切られて同じ場所に戻された。',run:s=>{ s.tnr=true; s.neutered=true; }},{w:3,run:s=>{ becomeShelter(s); return 'ガチャン、と扉が閉まった。そのまま保護施設のケージへ。'; }}])},
+   {label:'入らない',apply:out([{w:6,t:'においだけ嗅いで、離れた。',fx:{food:-5}},{w:4,t:'入らなかった。となりのねこが入った。次の日、耳の先が欠けて戻ってきた。',fx:{joy:-2}}])}]},
+ {id:'fish',cond:s=>s.env==='stray',text:'魚屋の前。店主がこっちを見ている。',options:[
+   {label:'座って待つ',apply:out([{w:6,t:'店主が、小さな魚を投げてくれた。',fx:{food:15,bond:5},k:{humans:1}},{w:3,t:'店主は忙しそうだった。閉店のとき、あらをひとつかみくれた。',fx:{food:10,bond:3},k:{humans:1}},{w:1,t:'店主ではなく、客のおばさんがイワシを一匹くれた。',fx:{food:12,bond:4},k:{humans:1}}])},
+   {label:'店の裏をあさる',apply:out([{w:5,t:'あらが山ほどあった。ひさしぶりに、おなかがいっぱいになった。',fx:{food:10}},{w:4,t:'ほうきで追い払われた。',fx:{joy:-4}},{w:1,t:'店の裏には、先客が3匹いた。おこぼれの、おこぼれ。',fx:{food:4}}])}]},
+ {id:'rain',cond:s=>s.env==='stray'&&seasonAt(s)!=='冬',text:'雨。',options:[
+   {label:'室外機の下',apply:out([{w:6,t:'風は温かかった。うるさかったが、濡れなかった。',fx:{hp:2}},{w:4,t:'室外機の下は、ほかのねこで満員だった。軒下で濡れた。',fx:{hp:-2}}])},
+   {label:'お寺の縁の下',apply:out([{w:6,t:'線香のにおいがした。ほかのねこも、2匹いた。',fx:{joy:5}},{w:4,t:'お坊さんが、縁の下をのぞいて、ごはんを置いていった。',fx:{food:8,bond:4},k:{humans:1}}])}]},
+ {id:'buddy',once:true,cond:s=>s.env==='stray'&&ageY(s)>=2,text:'いつも一緒にいた仲間のねこが、動かなくなってきた。',options:[
+   {label:'そばにいる',apply:out([{w:7,t:'一晩じゅう、体を寄せていた。朝、冷たくなっていた。',fx:{joy:-6}},{w:3,t:'一晩じゅう、体を寄せていた。朝、人間が来て、仲間を箱に入れて連れていった。',fx:{joy:-5,bond:2}}])},
+   {label:'離れる',apply:out([{w:7,t:'それが、街のねこの流儀だった。',fx:{joy:-3}},{w:3,t:'離れた。でも、3日間はその場所に戻った。',fx:{joy:-4}}])}]},
+ {id:'conbini',cond:s=>s.env==='stray',text:'コンビニの前で、人がしゃがんでこっちを見ている。',options:[
+   {label:'近づく',apply:out([{w:1,run:s=>{ becomePet(s); return `その人は、次の日も来た。1週間後、${s.place}に連れていかれた。`; }},{w:5,t:'からあげのかけらをもらった。あごの下をなでられた。',fx:{bond:8,food:6},k:{pets:2,humans:1}},{w:3,t:'写真を撮られた。何もくれなかった。',fx:{bond:2},k:{humans:1}},{w:1,t:'酔っぱらいだった。遠くから見るだけにした。',fx:{joy:-2}}])},
+   {label:'通り過ぎる',apply:out([{w:6,t:'人間は、しばらく見送っていた。'},{w:4,t:'人間は、地面にカリカリを少し置いて帰った。あとで食べた。',fx:{food:5}}])}]},
+ {id:'truck',cond:s=>s.env==='stray'&&seasonAt(s)==='秋',text:'軽トラの荷台に、あたたかそうな毛布がある。',options:[
+   {label:'乗る',apply:out([{w:3,run:s=>{ s.place=pick(s.c.wild); s.scene=sceneFor(s); dstat(s,'joy',-8); return `気づいたら、知らない町だった。${s.place}で、一からやり直した。`; }},{w:6,t:'朝まで、ぐっすり眠れた。',fx:{hp:4}},{w:1,t:'運転手に見つかった。でも、降ろされずに、魚をもらった。',fx:{food:8,bond:5},k:{humans:1}}])},
+   {label:'乗らない',apply:out([{w:7,t:'毛布のにおいだけ、かいだ。'},{w:3,t:'乗らなかった。軽トラは、次の日も同じ場所にいた。',fx:{joy:1}}])}]},
+ {id:'feedq',cond:s=>s.env==='stray'&&s.fed,text:'ごはんの場所に、ほかのねこが先に来ている。',options:[
+   {label:'順番を待つ',apply:out([{w:6,t:'残りを食べた。少なかったが、あった。',fx:{food:6}},{w:4,t:'待っていたら、おばあさんがもう一皿出してきた。',fx:{food:12,bond:4}}])},
+   {label:'割り込む',apply:out([{w:6,t:'先に食べた。相手はシャーッと言っただけだった。',fx:{food:12},k:{fights:1}},{w:4,t:'ひっかかれた。',fx:{hp:-6},k:{fights:1}}])}]},
+ {id:'cafe',once:true,cond:s=>s.env==='stray'&&(s.c.id==='jp'||s.c.id==='kr'||s.c.id==='tw'),text:'ガラスの向こうで、ねこたちが人間の膝に乗っている。猫カフェ、と書いてある。',options:[
+   {label:'しばらく見ている',apply:out([{w:7,t:'ガラスの向こうは、あたたかそうだった。',fx:{joy:-3}},{w:3,t:'中のねこと、ガラスごしに目が合った。向こうが先にそらした。',fx:{joy:1}}])},
+   {label:'興味なし',apply:out([{w:7,t:'自分には、空がある。',fx:{joy:2}},{w:3,t:'店員が外に出てきて、少しだけおやつをくれた。',fx:{food:5,bond:3}}])}]},
+ {id:'tourist',cond:s=>s.env==='stray'&&['gr','tr','jp','tw','ma','it','th'].includes(s.c.id),text:'観光客がカメラを向けてきた。',options:[
+   {label:'ポーズをとる',apply:out([{w:6,t:'何枚も撮られた。おやつをもらった。たぶん、どこかの国のSNSに載った。',fx:{food:8,bond:5},k:{humans:3,pets:2}},{w:4,t:'撮られているあいだに、別の観光客もやってきた。ちょっとした行列ができた。',fx:{food:10,bond:6,joy:4},k:{humans:5}}])},
+   {label:'逃げる',apply:out([{w:7,t:'後ろ姿だけ、撮られた。'},{w:3,t:'逃げた先に、別の観光客がいた。結局、撮られた。',fx:{bond:2}}])}]},
+ {id:'heat',cond:s=>s.env==='stray'&&seasonAt(s)==='夏',text:'アスファルトが、足の裏を焼くほど熱い。',options:[
+   {label:'日陰で動かない',apply:out([{w:6,t:'夕方まで、一歩も動かなかった。',fx:{hp:2,food:-4}},{w:4,t:'日陰が動いた。日陰について、少しずつ移動した。',fx:{hp:1,food:-3}}])},
+   {label:'水を探す',apply:out([{w:5,t:'公園の水飲み場の下に、水たまりがあった。',fx:{hp:5}},{w:4,t:'どこにもなかった。',fx:{hp:-4}},{w:1,t:'打ち水をしているおばさんがいた。ホースの水を、少し向けてくれた。',fx:{hp:4,bond:3},k:{humans:1}}])}]},
+ {id:'snow',cond:s=>s.env==='stray'&&seasonAt(s)==='冬'&&s.c.cold>=.5,text:'雪が降りはじめた。',options:[
+   {label:'車の下',apply:out([{w:6,t:'風だけはしのげた。',fx:{hp:-3}},{w:4,t:'車が動いた。次の車の下に移った。',fx:{hp:-4,joy:-2}}])},
+   {label:'ほかのねこと身を寄せる',apply:out([{w:6,t:'知らないねこと3匹で丸くなった。朝まで、誰も動かなかった。',fx:{hp:4,joy:4}},{w:4,t:'寄せ合った相手が、先に温まって出ていった。',fx:{hp:1}}])}]},
+ {id:'kitfound',cond:s=>s.env==='stray'&&s.sex==='♀'&&ageY(s)>=2,text:'段ボールの中で、知らない子ねこが鳴いている。',options:[
+   {label:'そばで寝る',apply:out([{w:6,t:'自分の子ではなかったが、一緒に寝た。朝には、いなくなっていた。',fx:{joy:6}},{w:4,t:'一緒に寝た。朝、人間が来て、子ねこを連れていった。',fx:{joy:3}}])},
+   {label:'通り過ぎる',apply:out([{w:7,t:'声は、しばらく聞こえていた。'},{w:3,t:'通り過ぎた。夜、また同じ声がした。戻った。',fx:{joy:2}}])}]},
+ {id:'temple',cond:s=>s.env==='stray'&&!s.fed&&['jp','th','tw','kr','my','id'].includes(s.c.id),text:'お寺の境内。お坊さんがこっちを見て、手招きしている。',options:[
+   {label:'境内に住みつく',apply:out([{w:7,t:'毎朝、お経のあとにごはんが出た。',fx:{food:15,bond:10},run:s=>{ s.fed=true; }},{w:3,t:'お坊さんは、縁の下に古い座布団を置いてくれた。',fx:{food:10,bond:8,hp:4},run:s=>{ s.fed=true; }}])},
+   {label:'通り過ぎる',apply:out([{w:7,t:'住むには、静かすぎた。',fx:{joy:2}},{w:3,t:'通り過ぎた。でも、雨の日はそこに戻るようになった。',fx:{food:3}}])}]},
+ // 家ねこ
+ {id:'window',cond:s=>s.env==='pet'&&s.indoor&&ageY(s)>=1&&ageY(s)<=8,text:'開いた窓の外で、鳥が鳴いている。',options:[
+   {label:'飛び出す',apply:out([{w:5.5,t:'夕方、おなかをすかせて自分で帰ってきた。家族は泣きながら怒った。',fx:{joy:10}},{w:2,run:s=>{ becomeStray(s); s.lostOnce=true; dstat(s,'joy',-20); return `帰り道がわからなくなった。${s.place}で、生きていくことになった。`; }},{w:2.5,t:'3日後、張り紙を見た人が見つけてくれた。',fx:{joy:3,bond:5}}])},
+   {label:'窓辺で見るだけにする',apply:out([{w:6,t:'鳥は飛んでいった。あくびをして、また眠った。',fx:{joy:3}},{w:4,t:'カカカと鳴いた。鳥は無視した。',fx:{joy:3}}])}]},
+ {id:'carry',cond:s=>s.env==='pet'&&s.c.vet>=.5,text:'キャリーバッグが出てきた。病院のにおいがする。',options:[
+   {label:'ベッドの下に隠れる',apply:out([{w:6,t:'30分の攻防の末、結局連れていかれた。',fx:{hp:-4}},{w:4,t:'隠れきった。病院は、翌週に延期された。',fx:{hp:-6,joy:3}}])},
+   {label:'おとなしく入る',apply:out([{w:6,t:'注射は一瞬だった。帰りにおやつをもらった。',fx:{hp:8,bond:5}},{w:4,t:'病院の待合室で、犬と目が合った。無視した。健康だった。',fx:{hp:6,bond:4}}])}]},
+ {id:'baby',once:true,cond:s=>s.env==='pet'&&ageY(s)>=2&&ageY(s)<=10,text:'家に、人間の赤ちゃんがやってきた。',options:[
+   {label:'威嚇する',apply:out([{w:6,t:'しばらく、別の部屋で過ごすことが増えた。',fx:{bond:-10}},{w:4,t:'威嚇した。赤ちゃんは泣いた。こっちも落ち込んだ。',fx:{bond:-8,joy:-4}}])},
+   {label:'そっと見守る',apply:out([{w:6,t:'赤ちゃんが泣くと、となりで丸くなった。家族はそれを何枚も写真に撮った。',fx:{bond:12,joy:6},k:{humans:1}},{w:4,t:'赤ちゃんの最初の言葉は、自分の名前だった。',fx:{bond:15,joy:8},k:{humans:1}}])}]},
+ {id:'kidney',once:true,cond:s=>s.env==='pet'&&ageY(s)>=11,text:'水を飲む回数が、増えてきた。',options:[
+   {label:'いつもどおりふるまう',apply:(s,t)=>{ if(chance(s.c.vet)){ dstat(s,'hp',6); return pick(['家族が気づいて、病院へ。腎臓の数値が悪く、療法食がはじまった。','家族が水の減りに気づいた。病院で、早めに見つかった。']); } dstat(s,'hp',-10); return pick(['誰も気づかなかった。少しずつ、やせていった。','気づいたときには、だいぶやせていた。']); }},
+   {label:'トイレでアピールする',apply:out([{w:7,t:'家族はすぐ病院に連れていった。早めに見つかって、薬と療法食で落ち着いた。',fx:{hp:8}},{w:3,t:'家族は「最近よく鳴くね」と言っただけだった。1か月後、病院へ。',fx:{hp:3}}])}]},
+ {id:'dog',cond:s=>s.env==='pet'&&!s.indoor,text:'隣の家の犬が、こっちを見て吠えている。',options:[
+   {label:'塀の上から見下ろす',apply:out([{w:6,t:'犬は吠え疲れて寝た。勝った。',fx:{joy:6}},{w:4,t:'犬の飼い主が出てきて、犬を叱った。もっと勝った。',fx:{joy:8}}])},
+   {label:'逃げ帰る',apply:out([{w:7,t:'今日の散歩は、ここまで。'},{w:3,t:'逃げ帰ったら、家族に「どうしたの」と笑われた。',fx:{bond:2}}])}]},
+ {id:'okaeri',cond:s=>s.env==='pet',text:'玄関の鍵の音。飼い主が帰ってきた。',options:[
+   {label:'玄関まで迎えに行く',apply:out([{w:6,t:'靴も脱がないうちに、なでられた。',fx:{bond:8},k:{pets:5}},{w:3,t:'迎えに行ったら、買い物袋から魚のにおいがした。',fx:{bond:6,food:4},k:{pets:3}},{w:1,t:'迎えに行ったら、知らない人も一緒だった。しばらく、物陰から観察した。',fx:{bond:3},k:{humans:1}}])},
+   {label:'寝たふりをする',apply:out([{w:6,t:'でも、しっぽだけは正直に動いた。',fx:{joy:3}},{w:4,t:'寝たふりをしていたら、本当に寝た。',fx:{hp:2,joy:2}}])}]},
+ {id:'box',cond:s=>s.env==='pet'&&ageY(s)>=1,text:'高いねこ用ベッドと、それが入っていた段ボール箱。',options:[
+   {label:'箱に入る',apply:out([{w:6,t:'家族は、ため息をついて写真を撮った。',fx:{joy:10},k:{box:1}},{w:4,t:'箱に入った。家族は箱を捨てられなくなった。',fx:{joy:10},k:{box:1}}])},
+   {label:'ベッドで寝る',apply:out([{w:6,t:'3日使った。4日目に、やっぱり箱に移った。',fx:{joy:5},k:{box:1}},{w:4,t:'意外と気に入った。でも箱も、とっておいてもらった。',fx:{joy:7,hp:2}}])}]},
+ {id:'toilet',cond:s=>s.env==='pet',text:'飼い主がトイレに入った。',options:[
+   {label:'ついていく',apply:out([{w:6,t:'ドアの前で待った。出てきたら、なんでもない顔をした。',fx:{bond:5}},{w:4,t:'ドアが少し開いていた。中に入って、足もとに座った。飼い主は困っていた。',fx:{bond:6,joy:3}}])},
+   {label:'待つ',apply:out([{w:6,t:'ドアのすきまから、手だけ入れた。'},{w:4,t:'待っているあいだに、トイレの前で寝た。出てきた飼い主がまたいだ。',fx:{joy:2}}])}]},
+ {id:'night',cond:s=>s.env==='pet'&&ageY(s)<=9,text:'夜中の3時。目が冴えた。',options:[
+   {label:'運動会',apply:out([{w:6,t:'家じゅうを走った。飼い主は枕をかぶった。',fx:{joy:8,bond:-2}},{w:4,t:'走っていたら、飼い主が起きてきて、一緒に遊んでくれた。翌日、飼い主は寝不足だった。',fx:{joy:10,bond:3}}])},
+   {label:'寝る',apply:out([{w:6,t:'飼い主の足の上で、朝まで寝た。飼い主は足をしびれさせたまま、動かなかった。',fx:{hp:3}},{w:4,t:'枕の横で寝た。朝、飼い主の顔の上にいた。',fx:{hp:3,bond:3}}])}]},
+ {id:'vacuum',cond:s=>s.env==='pet',text:'掃除機が、出てきた。',options:[
+   {label:'全力で逃げる',apply:out([{w:7,t:'押し入れの奥で、終わるのを待った。'},{w:3,t:'逃げた先の洗面台で寝た。掃除は、そこまで来なかった。',fx:{hp:1}}])},
+   {label:'上に乗ってみる',apply:out([{w:6,t:'家族がいちばん笑った日になった。動画は親戚じゅうに送られた。',fx:{joy:10,bond:6}},{w:4,t:'乗った瞬間に動き出して、飛び降りた。二度と乗らない。',fx:{joy:3}}])}]},
+ {id:'keyboard',cond:s=>s.env==='pet',text:'飼い主が、パソコンに向かっている。',options:[
+   {label:'キーボードの上に座る',apply:out([{w:6,t:'仕事は中断された。なでられた。画面には「ssssssss」と打たれていた。',fx:{bond:6},k:{pets:3}},{w:4,t:'座った。飼い主はそのまま、ねこの背中の上で打ち続けた。',fx:{bond:4,joy:4}}])},
+   {label:'画面の前を横切る',apply:out([{w:6,t:'3往復した。4往復目で抱っこされた。',fx:{joy:4}},{w:4,t:'横切ったら、画面の中の点が動いた。追いかけた。',fx:{joy:6}}])}]},
+ {id:'churu',cond:s=>s.env==='pet',text:'台所で、おやつの袋の音がした。',options:[
+   {label:'全力で走る',apply:out([{w:6,t:'ふだんは呼んでも来ないのに、この音だけは0.5秒で着いた。',fx:{food:10,joy:8}},{w:4,t:'走ったら、袋はポテトチップスだった。しばらく台所でにらんだ。',fx:{joy:-2}}])},
+   {label:'聞こえないふり',apply:out([{w:6,t:'……できなかった。気づいたら台所にいた。',fx:{food:6}},{w:4,t:'聞こえないふりに成功した。家族が、わざわざ持ってきた。勝ち。',fx:{food:8,joy:6}}])}]},
+ {id:'nail',cond:s=>s.env==='pet',text:'爪切りが、出てきた。',options:[
+   {label:'暴れる',apply:out([{w:6,t:'3本切ったところで、延期になった。',fx:{hp:-2}},{w:4,t:'暴れたら、洗濯ネットに入れられた。全部切られた。',fx:{hp:2,joy:-4}}])},
+   {label:'おとなしくする',apply:out([{w:6,t:'終わったあと、たくさんほめられた。',fx:{hp:3},k:{pets:4}},{w:4,t:'おとなしくしていたら、途中で寝た。',fx:{hp:3,joy:2}}])}]},
+ {id:'newcat',once:true,cond:s=>s.env==='pet'&&ageY(s)>=2&&ageY(s)<=10,text:'家に、新しい子ねこがやってきた。',options:[
+   {label:'シャーッと言う',apply:out([{w:6,t:'1週間、別の部屋。でも1か月後には、同じ箱で寝ていた。',fx:{joy:-5}},{w:4,t:'シャーッと言った。子ねこは、気にせず背中に乗ってきた。',fx:{joy:-2}}])},
+   {label:'様子を見る',apply:out([{w:6,t:'子ねこは、勝手に後ろをついてくるようになった。しかたなく、毛づくろいをしてやった。',fx:{joy:8}},{w:4,t:'子ねこが、自分のごはんを食べた。初日から、上下関係を教えた。',fx:{joy:4}}])}]},
+ {id:'bath',cond:s=>s.env==='pet'&&ageY(s)<=12,text:'お風呂場から、呼ばれた。',options:[
+   {label:'逃げる',apply:out([{w:7,t:'ベッドの下で、2時間耐えた。'},{w:3,t:'逃げたが、捕まった。濡れた。',fx:{joy:-5,hp:2}}])},
+   {label:'あきらめる',apply:out([{w:6,t:'終わったあと、3時間機嫌が悪かった。でも毛はふわふわになった。',fx:{hp:3,joy:-4}},{w:4,t:'あきらめたら、意外と短かった。ドライヤーのほうが、長かった。',fx:{hp:3,joy:-2}}])}]},
+ {id:'cup',cond:s=>s.env==='pet',text:'テーブルのはしに、水の入ったコップ。',options:[
+   {label:'落とす',apply:out([{w:6,t:'ゆっくり、前足で。落ちた。人間が走ってきた。',fx:{joy:6,bond:-4}},{w:4,t:'落とした。人間は、カメラを構えていた。わかっていたらしい。',fx:{joy:6}}])},
+   {label:'がまんする',apply:out([{w:6,t:'前足は出した。でも、止めた。えらい。',fx:{joy:2}},{w:4,t:'がまんした。人間が、ごほうびをくれた。意味はよくわからなかった。',fx:{food:4,joy:3}}])}]},
+ {id:'lap',cond:s=>s.env==='pet',text:'飼い主がソファに座った。膝が空いている。',options:[
+   {label:'乗る',apply:out([{w:6,t:'ゴロゴロと喉を鳴らした。飼い主は、1時間動かなかった。',fx:{bond:10},k:{purr:30,pets:10}},{w:4,t:'乗った。飼い主はトイレに行きたいのを我慢していた。',fx:{bond:8,joy:4},k:{purr:20,pets:6}}])},
+   {label:'となりに座る',apply:out([{w:6,t:'背中だけ、くっつけた。',fx:{bond:4}},{w:4,t:'となりに座っていたら、飼い主が肩に手を置いた。そのまま二人で寝た。',fx:{bond:6,joy:4}}])}]},
+ {id:'phone',cond:s=>s.env==='pet',text:'飼い主が電話をしている。',options:[
+   {label:'鳴きつづける',apply:out([{w:6,t:'電話の相手に「ねこ飼ってるの？」と聞かれていた。',fx:{bond:2}},{w:4,t:'鳴いていたら、スピーカーにされて、電話の相手にあいさつさせられた。',fx:{bond:3,joy:2}}])},
+   {label:'邪魔しない',apply:out([{w:6,t:'足もとで、電話が終わるのを待った。'},{w:4,t:'待っていたら、電話が長くて寝た。',fx:{hp:1}}])}]},
+ {id:'laundry',cond:s=>s.env==='pet',text:'干したての洗濯物が、たたまれて置いてある。',options:[
+   {label:'上で寝る',apply:out([{w:6,t:'白い服が、毛だらけになった。',fx:{joy:8}},{w:4,t:'一番上のタオルが、自分専用になった。',fx:{joy:8,bond:2}}])},
+   {label:'やめておく',apply:out([{w:6,t:'においだけ、かいだ。太陽のにおいがした。'},{w:4,t:'やめておいた。かわりに、洗濯かごに入った。',fx:{joy:5}}])}]},
+ {id:'mirror',cond:s=>s.env==='pet'&&ageY(s)<=3,text:'鏡の中に、知らないねこがいる。',options:[
+   {label:'威嚇する',apply:out([{w:6,t:'相手も威嚇してきた。引き分けだった。',fx:{joy:3}},{w:4,t:'威嚇したら、鏡の裏に回りこんだ。誰もいなかった。',fx:{joy:2}}])},
+   {label:'無視する',apply:out([{w:6,t:'向こうも無視した。気の合わない相手だった。'},{w:4,t:'無視した。でも、ときどき横目で見た。',fx:{joy:1}}])}]},
+ {id:'stairs',cond:s=>s.env==='pet'&&ageY(s)>=13,text:'2階の寝室。階段が、前より高く見える。',options:[
+   {label:'のぼる',apply:out([{w:6,t:'時間はかかったが、いつもの場所で寝た。',fx:{hp:-2,joy:4}},{w:4,t:'途中で休んだ。家族が、踊り場にクッションを置いてくれた。',fx:{joy:4,bond:4}}])},
+   {label:'下で待つ',apply:out([{w:6,t:'家族が気づいて、抱っこして運んでくれた。',fx:{bond:8}},{w:4,t:'家族が、1階にベッドを移してくれた。',fx:{bond:8,hp:2}}])}]},
+ {id:'bird',cond:s=>s.env==='pet'&&!s.indoor,text:'庭で、鳥を捕まえた。',options:[
+   {label:'玄関に置いておく',apply:out([{w:6,t:'プレゼントのつもりだった。家族は悲鳴をあげた。',fx:{bond:2}},{w:4,t:'玄関に置いた。鳥は、生きていた。家族が逃がした。',fx:{joy:-2}}])},
+   {label:'自分で食べる',apply:out([{w:6,t:'野生を、少し思い出した。',fx:{food:8}},{w:4,t:'食べなかった。しばらく見ていて、飽きた。',fx:{joy:2}}])}]},
+ {id:'sunspot',cond:s=>s.env==='pet',text:'いちばん日の当たる場所に、ほかの誰か（犬、子ども、洗濯かご）がいる。',options:[
+   {label:'じっと見る',apply:out([{w:6,t:'3分後、場所は空いた。ねこの目は、強い。',fx:{joy:5}},{w:4,t:'見ていたら、相手も見返してきた。にらみ合いは、15分続いた。',fx:{joy:3}}])},
+   {label:'あきらめて2番目の場所へ',apply:out([{w:6,t:'2番目も、わるくなかった。',fx:{joy:2}},{w:4,t:'2番目の場所に行ったら、1番目が空いた。戻った。',fx:{joy:4}}])}]},
+ {id:'cold_pet',cond:s=>s.env==='pet'&&seasonAt(s)==='冬',text:'夜。飼い主の布団が、少し開いている。',options:[
+   {label:'もぐりこむ',apply:out([{w:6,t:'足もとから入って、朝には枕の横にいた。',fx:{bond:8,hp:3},k:{purr:20}},{w:4,t:'もぐりこんだ。飼い主が寝返りをうてなくなった。',fx:{bond:6,hp:3}}])},
+   {label:'自分のベッドで寝る',apply:out([{w:6,t:'朝、布団の上に乗って起こした。',fx:{hp:2}},{w:4,t:'自分のベッドで寝ていたら、飼い主が毛布をかけに来た。',fx:{hp:3,bond:4}}])}]},
+ {id:'hungry_cry',cond:s=>s.env==='pet'&&s.st.food<35,text:'おなかが減った。家族は、まだ起きてこない。',options:[
+   {label:'顔の上に乗る',apply:out([{w:6,t:'5時半。家族は起きた。ごはんは出た。',fx:{food:12,bond:-2}},{w:4,t:'顔の上に乗ったら、抱きしめられて二度寝された。',fx:{food:-2,bond:4}}])},
+   {label:'枕元で見つめる',apply:out([{w:6,t:'気配で起きた。ごはんは、少し遅れて出た。',fx:{food:8}},{w:4,t:'見つめていたら、目が合った。家族は「怖い」と言って起きた。',fx:{food:10}}])}]},
+ {id:'sick_stray',cond:s=>s.env==='stray'&&s.st.hp<35,text:'体が重い。動きたくない。',options:[
+   {label:'人間の見えるところで寝る',apply:out([{w:3,run:s=>{ becomePet(s); return '通りがかった人が、弱っているのに気づいた。病院のあと、そのまま家の子になった。'; }},{w:4,t:'誰かが、水とごはんを置いていった。',fx:{food:10,hp:4,bond:4},k:{humans:1}},{w:3,t:'人間は、見ただけで通り過ぎた。',fx:{joy:-3}}])},
+   {label:'縁の下で休む',apply:out([{w:6,t:'3日、動かなかった。4日目に、少し歩けた。',fx:{hp:6}},{w:4,t:'縁の下で休んだ。治るのは、遅かった。',fx:{hp:3}}])}]},
+ {id:'bored_pet',cond:s=>s.env==='pet'&&s.st.joy<35,text:'つまらない。家族は忙しそうだ。',options:[
+   {label:'いたずらをする',apply:out([{w:6,t:'トイレットペーパーを、廊下のはしまで引っぱった。家族は笑った。',fx:{joy:10,bond:2}},{w:4,t:'観葉植物の土を掘った。家族は笑わなかった。',fx:{joy:6,bond:-4}}])},
+   {label:'家族の前に座って見る',apply:out([{w:6,t:'5分後、家族が手を止めて、おもちゃを出してきた。',fx:{joy:10,bond:5}},{w:4,t:'見ていたら、家族が「ごめんね」と言ってなでた。',fx:{joy:6,bond:5},k:{pets:5}}])}]},
+ // 保護施設
+ {id:'fair',cond:s=>s.env==='shelter',text:'譲渡会の日。ケージの前に、人が立ち止まった。',options:[
+   {label:'ゴロゴロ言ってみる',apply:out([{w:6,t:'その人は、しゃがんで長いあいだ見ていた。',run:s=>{ s.charm=Math.max(s.charm,.3); }},{w:4,t:'その人は、スタッフに何か聞いて、申込書を持っていった。',run:s=>{ s.charm=Math.max(s.charm,.45); }}])},
+   {label:'奥で丸まる',apply:out([{w:6,t:'人は、となりのケージへ移っていった。',run:s=>{ s.charm=-0.1; }},{w:4,t:'奥で丸まっていたら、「おとなしい子ですね」と言われた。わるくなかった。',run:s=>{ s.charm=Math.max(s.charm,.1); }}])}]},
+ {id:'volun',cond:s=>s.env==='shelter',text:'ボランティアの人が、ケージを開けて膝をたたいた。',options:[
+   {label:'乗る',apply:out([{w:6,t:'「この子、膝乗りです」と、カードに書き足された。',fx:{bond:10},k:{pets:10},run:s=>{ s.charm=Math.max(s.charm,.2); }},{w:4,t:'乗ったら、動画を撮られた。それが施設のSNSに載った。',fx:{bond:8},run:s=>{ s.charm=Math.max(s.charm,.3); }}])},
+   {label:'手のにおいだけかぐ',apply:out([{w:6,t:'それだけでも、ほめられた。',fx:{bond:3}},{w:4,t:'手のにおいをかいだら、おやつのにおいだった。食べた。',fx:{bond:3,food:4}}])}]}
+];
+function pickChoice(s,p){
+  if(!chance(p)) return null;
+  const el=CHOICES.filter(c=>{ if(!c.cond(s)) return false; if(s.t<12 && !c.kit) return false; if(s.t>=12 && c.kit) return false; const u=s.used[c.id]; if(!u) return true; if(c.once) return false; return s.turnNo-u>=8; });
+  if(!el.length) return null;
+  const ch=pick(el); s.used[ch.id]=s.turnNo; return ch;
+}
+/* ========== ふつうの出来事（季節・あるある） ========== */
+const SEASONAL={
+ pet:{春:['窓から桜の花びらが入ってきて、追いかけた。','換毛期。家じゅうが毛だらけになった。コロコロが毎日動いた。','網戸ごしの春の風に、鼻をひくひくさせた。','新しい家族（ランドセル）が玄関に置かれた。上に乗った。'],
+      夏:['フローリングの上で、とろけるように伸びて寝た。','エアコンの風の真下が、特等席になった。','セミが窓にとまった。1時間、張りついて見ていた。','スイカを、不思議そうに見ていた。','風鈴の音のたびに、耳だけ動いた。'],
+      秋:['毛布の上で、香箱座り。','日向の場所が、毎日少しずつ動いた。追いかけた。','サンマを焼く日、台所から一歩も離れなかった。','ハロウィンの飾りを、ひとつずつ落とした。'],
+      冬:['こたつの中から、一日出てこなかった。','ストーブの前を占領して、お腹が熱くなるまで動かなかった。','飼い主の布団に入り、朝には飼い主を端に追いやっていた。','ヒーターに近づきすぎて、毛がちょっと焦げくさくなった。','クリスマスツリーに登った。ツリーは倒れた。']},
+ stray:{春:['発情期の夜、路地じゅうが騒がしかった。','桜の木の下で昼寝した。花びらが、背中に積もった。','つばめが戻ってきた。見上げるだけにした。','新しく越してきた家の人が、こっちを見て笑った。'],
+      夏:['アスファルトが熱くて、日陰から日陰へ渡り歩いた。','お寺の縁の下が、いちばん涼しかった。','夕立のあと、水たまりの水を飲んだ。','花火の音に、一晩じゅう縁の下にいた。'],
+      秋:['イチョウの葉の上で寝た。かさかさして、あたたかかった。','人間がサンマを焼くにおいが、路地まで流れてきた。','夜が長くなった。星を見る時間が増えた。','台風の日、看板の裏で一晩耐えた。'],
+      冬:['室外機の上は、あたたかかった。','雪の中で丸くなった。朝、背中に雪が積もっていた。','ごはんをくれる人が、来ない日が増えた。','年末、人間がいなくなった町は静かだった。']},
+ shelter:{春:['窓から、桜の花びらが1枚飛んできた。'],夏:['扇風機の風が、ケージまで届いた。'],秋:['ボランティアの人が、落ち葉を1枚くれた。遊んだ。'],冬:['毛布が2枚になった。']}
+};
+const ARUARU={
+ pet:['飼い主が呼んでも来ないのに、袋の音には0.5秒で来た。','お腹を見せて誘っておいて、触ったら噛んだ。','トイレのあと、意味もなく全力で走った。','鳴いていないのに、口だけ開けた。飼い主は「サイレントニャー」と言った。','ベッドのど真ん中で寝て、飼い主を端に追いやった。','飼い主が読んでいる本の上に、座った。','紙袋に入って、かさかさ鳴らした。','飼い主のパソコンの前に座った。仕事は止まった。','毛づくろいの途中で、片足を上げたまま止まった。','なでられて、ゴロゴロと喉を鳴らした。','飼い主の肩の上で、ふみふみした。','水はお皿よりコップから飲みたい。コップは3回倒れた。','飼い主が帰ってきたとき、知らないふりをした。でも5分後に膝にいた。','留守番の日、玄関のマットの上で待ちつづけた。','寝言で、小さく「にゃ」と言った。','ソファの爪とぎが、完成した。','洗面台の中で、丸くなって寝た。','飼い主の足音と、他人の足音を聞き分けた。','高いところから、落とせるものを探した。','飼い主のあくびがうつった。','窓の外の鳥に、カカカと鳴いた。','空の段ボールと高いベッド。段ボールを選んだ。','ドアを開けてほしいと鳴いた。開けたら入らなかった。','飼い主が自撮りすると、必ず画面に入った。','飼い主の靴下を、ベッドまで運んだ。','新聞を読む飼い主の、新聞の上に座った。','真夜中、理由もなく廊下を走った。','お腹を出して寝て、起きたら家族全員に見られていた。','ごはんの皿の、へりだけ残した。'],
+ stray:['公園のベンチの下で、昼寝した。','ゴミ捨て場で、魚の骨をみつけた。ごちそうだった。','知らない人間に、石を投げられた。','ねずみを捕まえた。ひさしぶりのごちそう。','工事が始まって、寝床がなくなった。','夜、屋根の上から町を見ていた。','トラックの下で、暑さをやり過ごした。','ほかのねこと、日向の場所を取り合った。','バイクに追いかけられて、塀を越えた。','自転車のカゴの中で寝ていたら、持ち主が帰ってきた。','神社の賽銭箱の前で、お参りする人を見ていた。','鳥の群れを見上げて、口だけカカカと鳴らした。','電柱のにおいをかいで、知らないねこが通ったのを知った。','塀の上を歩いていたら、下の犬が狂ったように吠えた。','通学路の子どもたちに、名前をつけられていた。3つあった。','軒下で雨宿りしていたら、知らないねこも来た。一緒に雨を見た。','猫缶の空き缶を、なめた。','夕方、家の明かりを、外から見た。'],
+ yard:['庭でバッタを捕まえて、玄関に置いておいた。','夜ふけに帰ったら、ごはんが取ってあった。','隣町まで遠征して、帰りが遅くなった。','雨に濡れて帰って、タオルで拭かれた。','となりの家でも、ごはんをもらっていた。名前が2つあった。','庭の木に登って、降りられなくなった。家族が脚立を出した。'],
+ senior:['高いところに登るのが、少しおっくうになった。','一日の大半を、日の当たる場所で眠って過ごした。','若いねこが来たけれど、相手にしなかった。','毛づくろいが、前ほどていねいにできなくなった。','ごはんを、前より少し残すようになった。','飼い主が、前より長くなでてくれるようになった。','寝ている時間が、起きている時間より長くなった。','昔なら飛び乗れた棚を、見上げるだけにした。']
+};
+function flavor(s,t){
+  const c=s.c, y=ageY(s), sea=seasonAt(s);
+  if(chance(.25)){ const left=c.flavor.filter(f=>!s.usedFlavor[f]); if(left.length){ const f=pick(left); s.usedFlavor[f]=true; t.lines.push(f+'。'); return; } }
+  if(y>=12 && chance(.45)){ t.lines.push(pick(ARUARU.senior)); return; }
+  const key=s.env==='pet'?'pet':s.env==='shelter'?'shelter':'stray';
+  if(chance(.45)){ const pool=SEASONAL[key][sea].filter(f=>!s.usedSeasonal[f]); if(pool.length){ const f=pick(pool); s.usedSeasonal[f]=true; t.lines.push(f); if(chance(.3)&&s.env==='pet') t.lines.push(`${c.food}が、いちばんの好物になった。`); return; } }
+  if(s.env==='pet'){ t.lines.push(pick(s.indoor?ARUARU.pet:ARUARU.pet.concat(ARUARU.yard))); }
+  else if(s.env==='stray'){ t.lines.push(pick(ARUARU.stray)); }
+}
+/* ========== エンディングとリザルト ========== */
+function summary(s){
+  const who = s.name? `${s.name}（${s.coat.name}${s.sex}）` : `${s.coat.name}の${s.sex==='♂'?'オス':'メス'}`;
+  const avg = s.joyN? s.joySum/s.joyN : 50;
+  const joyLine = s.joyN<3?'短い一生だった。':avg>=70?'しあわせな一生だった。':avg>=50?'わるくない一生だった。':avg>=35?'きびしい一生だった。':'つらい一生だった。';
+  return {who,joyLine,avg};
+}
+function titleFor(s){
+  const y=ageY(s), k=s.k;
+  if(s.t<12) return '小さな命';
+  const c=[];
+  if(y>=20) c.push(['長老',10]); else if(y>=16) c.push(['大往生',8]);
+  if(k.kittens>=15) c.push(['大家族のかあさん',7]);
+  if(k.homes>=3) c.push(['旅するねこ',6]);
+  if(k.box>=7) c.push(['箱の住人',6]);
+  if(s.st.bond>=95&&s.k.pets>=10000&&s.env==='pet') c.push(['人たらし',7]);
+  if(k.fights>=20&&s.env==='stray') c.push(['路地の王',7]);
+  if(k.sun>=3200) c.push(['日向の達人',5]);
+  if(k.purr>=4500) c.push(['ゴロゴロ名人',5]);
+  if(s.tnr&&s.env==='stray') c.push(['さくら耳',5]);
+  if(s.fed&&s.env==='stray') c.push(['おばあさんのねこ',5]);
+  if(s.env==='stray'&&y>=8) c.push(['街の生き字引',8]);
+  if(s.born==='街'&&s.env==='pet') c.push(['拾われた子',6]);
+  if(s.born==='家'&&s.env==='stray') c.push(['帰れなかった子',6]);
+  if(s.w>=5.2) c.push(['ぽっちゃり',4]);
+  if(k.hunt>=10) c.push(['ハンター',4]);
+  if(!c.length) return s.env==='pet'?'ふつうの家ねこ':'ふつうの街ねこ';
+  c.sort((a,b)=>b[1]-a[1]); return c[0][0];
+}
+function endingText(s){
+  const {joyLine,avg}=summary(s); const y=ageY(s); const c=s.c; const P=[];
+  if(s.t<12){
+    if(s.env==='pet') P.push(pick(['家族は、小さな箱に花を入れて、庭に埋めた。','家族は、一晩じゅう箱のそばにいた。','家族は、使わなかった首輪を、引き出しの奥にしまった。']));
+    else if(s.env==='shelter') P.push('名前は、ケージの札に書かれた仮の名前のままだった。');
+    else P.push(pick(['母ねこは、しばらくその場所に戻ってきていた。','誰にも気づかれなかった。雨が、すべてを流した。','きょうだいのうち、生き残ったのはあと1匹だった。']));
+    P.push('世界では、1年にこういう子ねこが何千万匹も生まれて、半分以上が最初の冬を越せない。');
+  } else if(s.env==='shelter'){
+    P.push('名前は、ケージの札に書かれた仮の名前のままだった。'); P.push('ボランティアの人が、最後の日に、少し長くなでてくれた。');
+  } else if(s.env==='stray'){
+    if(s.fed) P.push(pick(['おばあさんは、次の日もごはんを置いた。3日たって、片づけた。','おばあさんは、いつもの場所に小さな花を置いた。']));
+    else if(s.st.bond>=60) P.push(pick(['近所の人が、しばらく「最近見ないね」と言い合っていた。','通学路の子どもたちが、名前で呼んで、しばらく探していた。']));
+    else P.push(pick(['誰にも気づかれなかった。','路地は、次の日も同じように人が通った。']));
+    if(s.k.kittens>0) P.push(`路地には、同じ模様の子どもたちが${Math.round(s.k.kittens*0.25)||1}匹、走っている。`);
+    if(s.tnr) P.push('さくらの形に切られた耳は、ボランティアの台帳に、名前と一緒に残っている。');
+    if(y>=8) P.push(`街のねこで${y}年は、長い。長老だった。`);
+  } else {
+    if(y>=15) P.push(pick(['最後の夜、家族は交代でそばにいた。朝、いちばん日の当たる場所で、動かなくなっていた。','家族は、病院の先生に「よく頑張りましたね」と言われて、はじめて泣いた。','最後の数日、ごはんは食べなかったが、なでられると喉は鳴った。']));
+    else P.push(pick(['家族は、しばらくキャリーバッグを見るたびに泣いた。','家族は、写真を1枚、台所に貼った。','ごはんの皿は、1か月、片づけられなかった。']));
+    if(s.st.bond>=80) P.push(pick(['家族のスマホには、写真が4,000枚残っている。','家族は今でも、帰宅すると玄関を見る。']));
+    if(s.born==='街') P.push('街で生まれて、家で死んだ。それは、とても珍しいことだった。');
+    if(s.k.homes>=3) P.push(`暮らした家は${s.k.homes}軒。どの家にも、自分のにおいが少し残っている。`);
+    if(s.k.box>=3) P.push('空き箱は、まだ捨てられていない。');
+  }
+  P.push(joyLine);
+  return P;
+}
+function shareText(s,url){
+  const {who,joyLine}=summary(s); const c=s.c;
+  const when = s.t<12? s.deathAge : `${s.deathAge}の${seasonAt(s)}`;
+  const l1=`${c.flag} ${c.name}、${s.place}に生まれた${who}。称号「${titleFor(s)}」`;
+  const l2=`${when}、${s.cause}${/まま$/.test(s.cause)?'':'で'}旅立った。${joyLine}`;
+  const l3=`日向ぼっこ ${s.k.sun}回 ／ なでられた ${s.k.pets}回 ／ 子ども ${s.k.kittens}匹`;
+  return `${l1}\n${l2}\n${l3}\n\nあなたはどこに生まれる？ #6億分の1のねこ${url?'\n'+url:''}`;
+}
+if(typeof module!=='undefined') module.exports={COUNTRIES,COATS,birth,startTurn,resolveChoice,shareText,TOTAL_M,ageY,summary,doAction,ACTIONS,titleFor,endingText};
+</script>
+
+<script id="art">
+/* ========== 絵（添付のドット絵9匹を切り出したもの） ========== */
+const CAT_IMG = {"kuro": {"w": 17, "h": 21, "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAAVCAYAAACg/AXsAAACtklEQVR42nWUy25jRRCGvzrdx3c7iWY5O0Qydhw7F6zMhQAb4AHYj0AIacSOBe8Amh0LVrDgCZDYgxDbyUzGGWVmQCDxAmxIfIl9TlexOPaJg53adXfVV9V/VTfMbK/Ts06za6ywnTs7ttfeX3kGEAEc9u7b7UaVtXqdbvuta87d1r6tr2/w40fvc7h7fyXIA1RKVb55ewdKJT7+6Te2t3asUatzMR6yttbghw92cbEjWHpzJc3WmwjGYDwAU+rVKghUS2Wm0wm/nP2NjKekSbISIgAnx8/sy0dfMNIEiwwQzAwRwURQNUrmOPrwXb5+/JWshGy+0bKN9TWYBS6aLeyl05RnZ0+XIFH7TtdubayDCrEIoh7s/5k0E7Dg6TR3l8SNvHOYGpEL/Pzde0zDAITsKmokyYRfvz8Cy2JLxeKysCGkGIZIBOk/qM0TKc47TBSX/EuwlCiKMNVlYffaB1YoxJgZzjnSNMV7z+d7Tb49eZU5zXUyGI4uOfujLwAHnZ4VSsVM2G5r30qlIouaqqSIOkDy/fOLEa//fCEA25tdq9UqJEmSzcmL189lNB6jC6XOAVmH4PxiwOG9Xn7uXIQIqGoGAYi9I4SAqmK2cAUMM6VaKXN60s8hk+kEVSV27gqCgfc+D1a1a02Ooog49rS3OrbYpSSEK4jzDhHJITcNXa1W4bNPH1kxjlE17j64R+7Z3Ny2Rq1+DWA2fwJ6DXQ+HNCo1jAznp4eS16JiJsFZc6Wz0sWqJK/Eoo+BuDhJw+v3g5Aa6tjtUo5L390eUm1nK0vJxMi7yg4nydI05T+y+eSfwXzli1eJQ3pTGAlSQMFl4k+GI8ZjMaEBeF93rLJhHKxeKXHbGSiKMJQQgiEELCg/P7XS1n6CuZ20OmZajYrx/0nHN19h+FoSOxjTl/15aY/9j9p1zjRVeoJwwAAAABJRU5ErkJggg=="}, "shiro": {"w": 19, "h": 19, "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAC9ElEQVR42n2Uy2vcVRTHP+c302SSJtJSkkaIXblx4U5F8mgmM5NMHrVKaUBRig/oUnEjuFaw/0QVuhBXblJbNMU2EB8LEdwJbiwmtHFmktp53Hnd++3iN5l0zOOsDvdwvnzP93zPhU5cyM7r3UtviCNiZfmC0hPnj6x3Yy49r2atJF8pajGTP9CQm8moXb6vVq2giZcnjgRMArxwbpRkZFSuf8Xq6nUWl9/TM0ODtHyLaq3B2q1v2L5xg5ErbzEwkOJYsK1/d8B7yhXHkPVz+/bXGIYALIGaFcLjOubanB4ePB7MB0N4qDswI7K4aIAIkDxJIjJCaDB2duR4zRZm8/KuqFArKNSLCvWivNvPgysouAeSK6ruqjr/6tShukW56Zxurn6JIRQZEgQZZjGvzqyY9SHECT1m9MyZQ0lF42dPYYl+EATrY+KTNQIDGAYYv//T5JUPVwkCzDAixkeGDwer1F0sdWSYb0HqJAk1CQqxqCf6iIZOgRGzNaPwqHw4WL0pvKVAbRImfvlsErN2Z0x4cUz8+sV0LEPweOvjr/sP9z06M6ul3MK+hhMvTarlSvL1okK9cHABe0upFpWZznQbX8vl5Ru7atce6vLyRUUAP//2k81lL7G9+aBjCLrMenIz3lye5drn1wSQSqUgtImiJKOnh4n2GhKJiLHnxrvNXQCBQucN+ODjj/ju1k2cc9rcLoA8KPDn31uxaQGeP/csCsIMpKdsZDGi9rYZWqyvfUtufomB/j5IpJB33YnITqXVrO0e1MgVFFxRwZV63xslpSdn1HZF+cqWljOxjhFAlEiCIky9rGIrQFx4ygOCT6++E1vKjFqzYw2AdvA0/9tCKAaQeLS5hXWAFTzVnV2QAQF8k3LVgTy5/Nvc3fjRegyXnpyRKxfka9sKjZIuL12Ub+xKtaIa5R39sf5DZ8ySXl9c0vsrK0pPZXpu1Ho/yayMQMu3+f7OHRayeQYH+tktV1nfuMdcOothBIx7G3ft/xfwBFlNyHWFjB4aAAAAAElFTkSuQmCC"}, "mike": {"w": 24, "h": 19, "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAATCAYAAACKsM07AAAD5klEQVR42p2UW2xUVRSGv3XOmekMtAxBC2IbaqptuTXDpe3QEiiaYooI8qCggBQ0GggaEvUNAvHygJoQE40JBqJcfVGjJD5AULwBKhQF0YBGRIotbWmh0umczpy9lw+9yKUYy0r2w95r7///V/61FwDr1q7XsniFTptaqQwQ8bFxnTZ54Nz/inhpmXbu2a5/bH5Sy0srrgGaNGGqrlv+iJ5/fYMmJs8cNIkHcFssiv97A9lBPjsfa2O5U651k2K8c7SN4oJRrC4pggDSQXLQ4h0ATQd4OdlsOfQNEhG2P17AkofGUpiXS3cmwzP765GsLMR1bo0g8NO0dnzBw9Nj9BCmiM59kXWzRuJYCBzDqk8PkE7fQgVl46fotuV3A4IqqAgaHYKjQkFJjMAaRB3EdSnKy2dC8cRB+eAUjR6GDdKIVZxQmILi2ylcuRkw5MxZy4711bgimMAAEI1GB2fyudZO1MvFk4AxK15m0vSFHP8+QBEcdygVT3/AiWP7WLHwCZxQCNcRaqZVacSxNHX41P/8o1wPWhlPaKAWvzuF50aiFK58C1HFuhEy3V2I6yAW1GZwxeB6IXZ8+B5WhcXzF/HqglxsoJxs8HktHNGDP3zbT1JWmtC8O4Zj1eF0QyMCUDOzRvfu3Y3gAhbkelGCqOHLzRvJN2dxw1nYIINvw/z252Ve+ryZYyfrBWBWeaXGhg8l4oZoar/c00X7v9ovc2qXopgBwMGqpaOxlXynAdf10CCD4whDQgFe2COeH+u/mwkybF16F0smDiUwAf2NXT37Xi6c/Qt7FbCq9uqHnDtHUfDU24yIgSMeGSeL5z5ppyttmF2SQ2nxOE35SVVcvCFhZlWOIjciXCM3nbyknmtu2hFqLCIe595dwwsfN9P3etOCkew52syuY3/zxqMlFN2TTSg6gqrn9/xbwYzEdLVX61fpWX2VWEUcBxVDXt1G1JH+6ky6mywM1RNGY22aX05d4v4NB/jp1AnpJ3C9cO/c6P1HovRlRQQrDmAREcSLsPujXaAur9QOQwX2nW5hTLZyssny7Pu/cvjowRvNXFW3TE13p6rfribVrCbVqjZ1Ua3foWuW1alJtvTuL6r129Qkz6v57k09s2mRTiwZr/NnVmuirOrmPz0xJaEmeUGtf0kXzp2nQbJJbapFTVejzqupVdN5UW2qRa3fqrarRY3fribVqObKOS2Pl+tNx3VfhDwXi+Aan7YrSUQUrOHBBxaTDADH9Pgi0uNBkGLJ4tWcaWjhyPEjMhDBDYdVUyo17Hns/foz5t5XS3cmRcm48WzZtlVmVMxQARRFEAITcKj+sPzXLPoHgvLN0t+wUF4AAAAASUVORK5CYII="}, "chatora_walk": {"w": 26, "h": 22, "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAWCAYAAADeiIy1AAAEj0lEQVR42rWWWWyVRRTHf2fm+77bewttb6WFtlLCIl20tSlQiMYYQ9wgQN3QuL0QjRITYzQ+8ugWjeFBJEFjFHdjUAmITUzEBY0btoC0kRhkaaSl0L397v1mjg9XiwR90KSTzMvkzPmf//mfOWcAOPb4cu26f6kyjSs49ECrVl+xkDk+z7eTiba99pNMC5D6hPG+U6CW/uHc9DGaVZNhom+SH7omWP3BzzJdQEbUkl1QhWgynRJhdn4/yODhUyyqdP/Lwb67W/SddY0XFNL2VZfpjvZLp87NikrPzLoS5l1Vz451l/6nynt7dYMu3bCRtXdfw8vX1U3dfX1ts65/aDVtS+ae08jOzGICYfjX37mqrZQPadQhSdNQljCr3HK0L6E8LWBCjvWNsGZHz5SOYhwyGRMfKeaeB9uoLi3SM6N52tfUYieUIFN+Dqhh8z755nSztqyqxeVyNM6PyWQsKpaLFpWTOjLIrLoK4uExKnqF3y5Zpj52TKpFrCCpIob6+7AlCStvmkfiHWPdvRA43ODwOY0ABnMw+OtZhn8Z5uKls8E78AkminDxGBJlMOliVBOqLq8iyhhKSjzzWrMw2MOcthHC7DhYgzWGdFWW/PHTZBelOfFom04B3fBelxw4OMJFzZUYFPGeiqYa8iMxQZTC6QSTAwN4C95aRAwVjTUEQYTL/YIxDjEFicQagtIUmUVVSBhhdLKQur+oVZRavBUMAR6PWINgQEBEwEOUsajLIaKAQ1UQq3j1BRBRvCoSWNSAJJay1mp6N1Wo+QuopjbC5MErlC+uRlFU8xTPTgMem7IEqQyCwxpwecNgz2nOdJ7kbPfvjJwaQlUxxtC66TCgOCytm47gk7ECo/faWzSeyKMGjBcosuA9YUkRIkUokK7K/hk1lNRVMHFygNLFpYiE4MFrgveeIAgJowzhikew4rHBQ/icK2gUO4PYFENdJwppCyyIASt4KTgHObcDQ9HcmZw5cJqkf4zc8CjJWB4cJLmYH/c8DzZF/0ef0/XFK+RHkwKjtDiiYk8yHiFG8D5P6oqNxN9tBzeG/u0Ze+8wCiIR2eYq+rtOUllfSVy7lKD+WsSE4B2qMbPXXc3Rpx5m4db9Irvb63Vl+3zUgkVwPiG8ciNqA0QiEGX8x/exuQECjVFvmBwYpbg8TYJHE4iW3IrOqEKiFEKEGoNXOP7coyx49ptCPvbc3KDXvfAymhtCvEMNvL3xMcIgZDz23LnlaUxgMBrgfQ79aisTC9uZ6HiJ0gVlEBjwBhekYc4S9m97A3HKlW8dPG8SBNWVRaA5JJpJ92tb6N7byV27uwVg2/VN+vmTTzD36pX40GCM5avXu5lhNmOCmJqeYZatrUdNjMvWkKqoAWdY/ur38FZ4/jw62udokBBxo3z9aScbOg5NRXLfJwfkxZXNyqwealuaQIQgTLF+54Epmw/COdq4bB4XN7cgZXNZ8fQzdNzR8s9d+N21TbrrlpZ/7dxnjxzU7Te1aMe9bfrmjQ0X2J3q3Kcf3d6qrnevut7P9Mv1TdP6/+Dj25p0V3vDP4L8ARtT5ue6RV4nAAAAAElFTkSuQmCC"}, "hachiware": {"w": 17, "h": 20, "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAAUCAYAAABroNZJAAADL0lEQVR42nWUTWhcVRTHf/feNzO0lKYxn51Ik5RSGuJMMm8S++Eilmilgl8bFQludOdGQYs73QguFHWlIuhCS/yAgqirulBciIuiTSlpqo1fSdo0adTGyWTevHf/Lt4YKzM9cFfn8jvn/M+fA40oDYUKh0PRIopDIxovjrfMAViA8ZHbNbi7g+5b2ijdVv7f53JxTEN78vS072B4f6ElKAAol0s8v2cnLpPjqdPfUj9Q1GC+m/nFFfKdbbx8ZJQgl+Oh6S9u3slb775t2L6NenUTb2Ggt4MkEYO7e/BJTC2OqFc2ePrZZ1pCDEA4HKq7s43ABYBHEgaH9x45h1OCs5b5pWXOzc6YpnEKB4rKd7VjrAMlKdlavE+wzgAJxhi895ibSGtz2SzWWfAxIDyQzWY49en7eK90XiXIWAZu7SEslJtQ1hoLQCLLR6+E/Hp5mY9PTeOc5eTJ97g4P8cnr5UxJHjvcS3asbXNGtnAsS0XYOMIl8kgYqwJ2NHRhXGOZGMRaw3WWvb29TZDbCYgl81grWHqxUv88N1prATWYJN1zs6cZeqFawiDSRJmL/3eWpjRoRE9evy4fHVVajy/uaqkuiK/cVVRZUn3HZ1U6QY9Zs/PabwQ6o1XX5cFcJmAn5ZWEQ5JyNBYMwjDLxfmWVhZ48bdTj3yGJ3tu/jwg+lU/DMzZ0xUq/Hb3AWMGgBjQKmR4nqd/t5uatXqFkSkGkmNDQLku7vo378Pb8FiwGvLj3uHh4jjmH39fYSFMUX1SF7/5bcgSRylxmp0klaD2HsefuBxrAvwEklcAxmMAWchGwQppFwsa1fbTrAZwDcKGKwxpE0J+RhrDAN9ecqFMgP5LqK4zuVrqykkiiKshJLUmcJg5PHeY21APY4wzuICBxKJPELkctv58ee5VO/D4UHNfv2ZfHVZvrKgE088KV/9Q766qriyqM/feVNJ5aqSv6/owbuOaXS4pLAw1mzd+4/dq7iyovrGsu6emFSysSJfWdJLz51Qff2K/PqCkutLmjg0oYPhYTWdgn/jjtIhYeDLb77injsnyTjL5bU/mTn/PZNHjrJ2/S/OzTWfgn8ACQqJWc4GUFEAAAAASUVORK5CYII="}, "point": {"w": 17, "h": 21, "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAAVCAYAAACg/AXsAAADPElEQVR42pWUbWiVZRjHf9f9PM85ubnmJs7e6INhVGMljEV7aed40FxtGqiEfQkr+mIQ9L0+ZIJBRB/ETyGBIUNwNZTKacvNdnLNFwQjqHCWtWHsnL24c47Pnpf76sPRabhNuj/eLz/+1/X/3xf8j7W+NaUL7ZulHrU3t+oLqYz6vq+NDet0Z1eGVGvmLpC7FGRzWzNoxMudnQwOniBpfJ5+rpF337M6kB2Qeyp5MbNBwxtzqCqf79iKawuotdQ/U0/fsUNs29ylez7YrYsq+XjvR1oXz/JV9jzN9U/SOz7GTokwJNh38k/WrEjQ/cV+CtMz/D02rgsq6enpRUVpfHwtQeDzxq7XcNQBtRzMTnL4/ARWoLK2hiAIF1YyfG5YPNfVk70HMF4CqwoigGVkdxMShxBZrHHxPG/xnogIJlGJYjHGoFo2RWwIAohBwxsEQbB0LjamN6ifG9W53O86NzGqc/krGuQva5gb1dLEb5pqS+s9czJTmOWn0yPkruVQYmwccu3qGFcuXyXz0usMDpVtdgE2pdZrwvU41n9C7oTcl1zGsy3rwHEozZaoqKpg1cMPYNSw5qGVDN8qPd3Srp3tTeSmrzN04WeyI2cEYEtHlx4++CkiBtV4vk8AqoDGLFv9hACYupoqoiigpqqCZMKbVxGGEaoRqEVw4I40GCOIuGzp2FQO23SxhKgwnpvCOOWL6Za0ftm9D8GgxEBcdkQdlBgRQUTITxbKUAtECo+sriWKLL7vq9UYiSOsWlT1pnywNpovR4Eg9MuQ7wZOycC5SzjA840NtLWkeOuVLg4d6AYs12cKiHFQlJnJKRAHEYO1EQ2PPXr7A27dvp38dAHiiAdXVmNE2PHmqwDcX70ctREiwopVdWS/7kOjANdNkpuduw3Z9c7bcvrCL3gJh6an1uJJOeW33DCOg4gLkc9nR75FksuxccT4PxP/HQVDZ3+UvjOXKJZCwjAsH4lh4GgfH77/CdgASVYzVfTRoHjTdr17nmSHf5D+sxc58v0Ihek8x3uO8usff1FXW8nePfuJihOUCj4WMJ5LR0tTOT+Lz9OMGlEcARUhCENcz+Ob/uN0pDcCcCo7KAD/AtLtfmi5pbVoAAAAAElFTkSuQmCC"}, "gray_sleep": {"w": 28, "h": 15, "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAPCAYAAAD3T6+hAAAD9UlEQVR42rWTTWxUVRTHf+fe92baaWkLFAo0GoghGowpUyudorZBDCiRuDIuCCqJiVGJmkKIQJWWUGMwkZXGHZiILEQXqItqxKIFShkQUg2CX0FAw0egX/P15r17XAwMGIgmJp7NzV2c+8v/d88R/mOlkin1fR/nHIhgLHw7OCD/1ufdeGlrSqnxLfvT+2/ZuHhhhxbCIp61PLigCXUOEcGKwVpLXFSNV8HI+DhDx4bkH4Gtza26Z/VK3jk2TKwirl8P7P1bw8KWNl3U1owLi/QfGQYH1lpUFYwQuogHUs2IGPx4BYl4TPsP3Zy4DKypqsKPGV5pbqI6UcOV0VGdPqWOyDnGMlmWtbcSFUKemz2LvsEjGCslGKCqiAjGGACiYkBHW5IwcjqQPiC3BEZRhKpHcPEPgmKRhfPnUT95En4sRjYXEDnH3cE46qbjGa8MuQa88YRS+iXtLWBUB4YOyk1Aa4WRiYBd58dREWbNqCefLyBiAMV4llOT6pgUFEqDchWgquVkzrmyZmMMzkF7azNhpDp4ZFAADMDi9od1USrJzl9/ISJCBUQMiUQCgKpEJSKCM4b0aJaOVJJsLihrDIKA9etfYlrDVDyvlCGTzTORyVEV86mtjJeTG4CZk6twzpU1XXtI1AGKFcFYg0gplWcMl0au4BsPX6D37Tfxq6t5/uUXWbJ8GZlcniAIcJFjLJOHmL3+h6l7UzrvrrklGFwFllSt7erEi1VQLEZs27KVCDDWYoHfz/zJW73rmdLYiEYFMB7iIsJigCBYawnDkKAYkM8FLEi26tB3h8TEfUtYDLHW4hkhZgSrsGZjJ9azEIZ4ErH2tU5e7dlAPpvFsx7T6uuZ2ng7XLOiCmJZ0NZC15YucCV9o+MTzGxooOnOOQBIS9N9+lBqPg31tYiNs333HpxC+uhB4m4CxfJZ3z56untxkSOd3svlc6epv20ORDlQH0RREQRFcYgKTh0b1nTz4+mzzG2cwZS6Gj7dexCTPn5YDg3/RCxRw+p1L3As/SXDR/uJuzEeX76Cixcu8djS+zk82Ef6wCf0rNvE9yfPQpQHiaGiOA1Z8cSz9L6+lY92fgwCzoUcP/kz2UyO2ppqxBgqKysp78eqp5/RUyd+o/+LD7CxSlQjlKikQWLgcmzs7GXzts0YzeFMLW9s7Gb4xAnOXRhh3zefYylgMEQ4Hl36FEs6kvi+Tz4o0vfVAXbs+vD6Hm5/f4cAPLJ8pYoIRA4b80uDHEVM5AvU11Wz4slVoHD+8hUymTx1tbVghd3vvsc9zUkmsmP8cPIMY/kx/HgFIoZcPsdEocDsO2aL8D9Vd9cmTSQq8K1hZDxLz5YeAfgL3GjJFKIBiLgAAAAASUVORK5CYII="}, "kiji_back": {"w": 14, "h": 22, "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAWCAYAAADwza0nAAAC10lEQVR42m2SzW/UVRSGn3Pv/XW+jJBWEYESnBqCEIx00o9ADDG0fOlCN6wJ0ahdmPjfkBhCglHjyo1uYGETihIUsGiolpigY234SGvamTIzv3vPcVHSZOi8u5vznvu8594DT3XuWM3ooY8mR+zs5NimmgP4+MSonTn6Gp+cOtJlmDpZs3fHqwyUsk0XBoBKgKKDd8Z2s9Jq2fatJVbWOhzd9zLiAxXa9CTmyUCNxmqL/Tv6GakOUOrL8A4wYyX63sSAsNRoY27dkBWLBIGHqx1wnpQ2jy9TJ2o2MVzFGYCuhzBDNKIuoCmB81z55W/OX74hG1GLLiNoAgTB4R04AfEB04TzHotKQZ6JGs3Ik3H9bp12TCjgvSNpwokRI5QKGTHF7sYHjScUyiUOH9xFCI6Yd1BbJwfxmCgxT1yY/r278euZO1L2wd4br5IQbt97TFRDVdk72M+WcoErs3W+/XmuK+zG4YOJmu3aUiGZYUmJpqgZi0tNLl37VXp+B0B/0XPglW344LA8YQKqxt0/6702cZ04dXzUJt8YJKrjcaPNXwtLGCBO6GhiuZFz8fufpAcx4UPgxm91OiY4s6dFx56B52k2H24mfjgxZqdHd+MAhwMxYoyE4DEDMyMLGV9e/YNL07c2qCF4EAFViLkyM7+AJSMmRTAEo62OPueJndzOHR+jlAVC9YUKHk/ShLnEkX078ZrAC+I9MU+gxne37mM4Jg9s596/K4T5Bw0ODr2EiOOHO4uoGe2oBBFyUbYWixx6dRtt8Zw9NsKZw3soF1sEdR7vParGm6/vBBz/rbYQImutRLlU4Jvr87z4XIW9QxUWHzWYrS8TPrv8o/SJ2alDg/gsYKYEZ1T6MubqyzSftDlZG6LsYGFpjZv3H/HVzG3ZeKVPT4+bmhG8p9lOvD28A+cCirHayLk69w+NCJ9P35SulXtW7781bHk0koAl5Ytrs13e/wEeU00I7+0JjQAAAABJRU5ErkJggg=="}, "chatora_sleep": {"w": 20, "h": 16, "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAQCAYAAAAWGF8bAAADdklEQVR42n2UbUiddRjGf///85znHI/pcdODunRJk8pc5eYLzi1yFvSyoKJW24e+mFT0IsKioG9BNdtiGDEYwT7EIoiF+xCFUbHWmyuorDDmkok7Oj16zpzzvD7P83/uPhirge3+dt8X18UF98WluMacfbFLNC5+4KMtG23ZLFz0cGyLtqM/qbU4ax7P9HeIZ4qU19eQS+Uo3xAjtrESXJ/U+HnyWpNPLmNphzuOXC2s/7v4qbMy2d8qJTdUU9ZQB3YIrQTl+uAX0I7Nuhvj2GJR39pAVVMVY30tsqbgwsnjMnWoD7u++h9E42ULSNjC8zaylLiEaAdlCcoyYATjGsobqvix7za5SjBITkp6eBBnfRm+67M8n+ZScgknHKY0WkP8pk6Sv6ewt+7G2v4c8Yf6sJ0QphBQsT7CLZ2NjL98lwDYAJOv7UFXlOJnitRu3gSxCiLN9+Ge+RbyARZpGh7twYk34+gwRinUzTsp+3MY79woQeBTqnKrTxnrbZFbH3+FzPQxwtFKwnX1GBUh1N6LYHBH30fbGjEFUtMz1D4xCCiU1oBNEFzGOzFAAc3M6VnsUOQ6xNdYbjfhpixGOYRanyLARomH0/kMaIUEhtoOg9IWYgwSBICLIozz8Lt4wwNYvosu5LNY8RjRbTECHUF8DxHQKkApjVgWnR09zC9mV0NmfJaTi4CAklW3aEp79vHLVBYdLQ+TODlEdvwrtNaEOvtQlr3qQGB2doE3DrxFbTzKhwNPk0pMEauJo5RCoVAKBDCBzTkVRTe9c1rl0ktcnJxlZXyUO7c9SMuWnRSDCBTy1NWu454dLXx+8FWWcwUqGxqvZE5EEPHxiy7pkcNczhdWgU93t4j7w34JMnNiMhfEZJPiZ2ckyC+KySXl6N4e+fXt58Vk02Jyc+Jn58TLXJAgl5Qgn5TEwfvlm/7uf2Oz6/iY+ti35JFjTyK2jTJwfnwCcYt8PfQ6e3q3E+nehwrynPpomLnpBM072mnq6mLm8LN4GcOpv1a4Igjw2Imf1f69D0h9SZSxxQIHPvkMsSMoL4+spEh/8ALGM1TP5+ho20RJ++34EyOEQyHe+36awS//UP9bDgBv7mqXjOuR8w2NFTZ3b6kGy0LyHrHrSxn5LsFEEgaGjrBhc5u6ZtusNS/du1UkCHBsTdE3HPritzW5fwM0wZYZS6F3qAAAAABJRU5ErkJggg=="}};
+const ART = { title:'', scene_street:'', scene_home:'', scene_shelter:'', scene_yard:'', scene_field:'' }; // 背景は差し替え可
+const IMG={};
+function img(src){ if(!src) return null; if(IMG[src]) return IMG[src].complete&&IMG[src].naturalWidth?IMG[src]:null; const im=new Image(); im.src=src; IMG[src]=im; im.onload=()=>{ if(window.__redraw) window.__redraw(); }; return null; }
+function px(ctx,x,y,w,h,col){ ctx.fillStyle=col; ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h)); }
+function seeded(n){ let x=n*9301+49297; return ()=>{ x=(x*9301+49297)%233280; return x/233280; }; }
+// 背景は 1ドット=4px で描く（ねこのドットと同じ粗さ）
+function drawBackground(ctx,scene,season,c,W,H){
+  const over=img(ART['scene_'+scene]); if(over){ ctx.drawImage(over,0,0,W,H); return; }
+  const D=4, R=seeded(scene.length*31+season.length*7+W); const winter=season==='冬';
+  const g=(x,y,w,h,col)=>px(ctx,x*D,y*D,w*D,h*D,col);
+  const cw=Math.ceil(W/D), chh=Math.ceil(H/D), ground=chh-7;
+  if(scene==='street'){
+    const grad=ctx.createLinearGradient(0,0,0,H); grad.addColorStop(0,'#1a1c3d'); grad.addColorStop(1,'#34305e'); ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
+    for(let i=0;i<26;i++){ const x=Math.floor(R()*cw), y=Math.floor(R()*(ground-14)); g(x,y,1,1,'#f1e9d8'); if(R()<.3){ g(x-1,y,1,1,'#8b86b0'); g(x+1,y,1,1,'#8b86b0'); g(x,y-1,1,1,'#8b86b0'); g(x,y+1,1,1,'#8b86b0'); } }
+    g(cw-14,3,5,5,'#f6e7a8'); g(cw-13,2,3,1,'#f6e7a8'); g(cw-13,8,3,1,'#f6e7a8'); g(cw-15,4,1,3,'#f6e7a8'); g(cw-9,4,1,3,'#f6e7a8');
+    let x=0; while(x<cw){ const w=5+Math.floor(R()*9), h=8+Math.floor(R()*16); g(x,ground-h,w,h,'#201e3c'); for(let wy=ground-h+2; wy<ground-2; wy+=3) for(let wx=x+1; wx<x+w-1; wx+=3) if(R()<.45) g(wx,wy,1,1,R()<.6?'#f2b35c':'#9fcbea'); x+=w+1; }
+    g(0,ground,cw,chh-ground,'#3d3858'); g(0,ground,cw,1,'#534d74');
+    g(8,ground-18,1,18,'#6a6485'); g(6,ground-19,5,1,'#6a6485'); g(7,ground-18,3,2,'#ffe9a6');
+    ctx.fillStyle='rgba(255,230,160,.07)'; ctx.beginPath(); ctx.moveTo(8*D+6,(ground-16)*D); ctx.lineTo(0,ground*D); ctx.lineTo(26*D,ground*D); ctx.fill();
+    g(cw-12,ground-7,9,7,'#4a5a4a'); g(cw-13,ground-8,11,1,'#5d705d'); g(cw-10,ground-5,2,1,'#2e3a2e');
+  } else if(scene==='home'){
+    g(0,0,cw,chh,'#e7cfa9'); g(0,ground,cw,chh-ground,'#a06a48'); for(let x=0;x<cw;x+=8) g(x,ground,1,chh-ground,'#86563a'); g(0,ground,cw,1,'#b8805a');
+    g(cw-30,4,22,16,'#6b5646'); g(cw-29,5,20,14,winter?'#d6e6f2':'#9fd3f0'); g(cw-20,5,1,14,'#6b5646'); g(cw-29,11,20,1,'#6b5646');
+    if(!winter){ g(cw-27,7,4,2,'#ffffff'); g(cw-14,13,4,2,'#ffffff'); } else { for(let i=0;i<12;i++) g(cw-29+Math.floor(R()*20),5+Math.floor(R()*14),1,1,'#ffffff'); }
+    g(3,ground-10,18,10,'#cf6a62'); g(2,ground-11,20,2,'#e38a80'); g(3,ground-2,18,2,'#9a3f3a'); g(5,ground-8,14,4,'#e38a80');
+    g(26,ground-6,10,6,'#7fb8e8'); g(28,ground-3,6,2,'#315b7a');
+    g(cw-9,ground-9,5,9,'#6b8f5a'); g(cw-10,ground-11,7,3,'#86b070'); g(cw-8,ground-2,3,2,'#b06a48');
+  } else if(scene==='shelter'){
+    g(0,0,cw,chh,'#a9b1b6'); g(0,ground,cw,chh-ground,'#747c80'); for(let x=3;x<cw;x+=6) g(x,0,1,chh-7,'#4e565a'); g(0,18,cw,1,'#4e565a');
+    g(10,ground-5,14,5,'#d6cfb5'); g(cw-16,ground-3,8,3,'#e2e5e9'); g(cw-15,ground-4,6,1,'#9fcbea');
+  } else if(scene==='yard'){
+    g(0,0,cw,chh,winter?'#d3dde6':'#9fd6f2'); if(!winter){ g(cw-12,3,6,6,'#fff2a8'); for(let i=0;i<3;i++){ const x=4+i*22+Math.floor(R()*6), y=5+Math.floor(R()*6); g(x,y,9,3,'#ffffff'); g(x+2,y-1,5,1,'#ffffff'); } }
+    g(0,ground-2,cw,chh-ground+2,winter?'#eef2f5':'#78b864'); g(0,ground-12,cw,10,'#c7a070'); for(let x=0;x<cw;x+=4) g(x,ground-13,2,12,'#b08858');
+    g(5,ground-26,8,16,'#5f8a4e'); g(8,ground-12,2,10,'#7a5a3a'); g(3,ground-22,12,8,'#6f9a5c');
+    if(!winter) for(let i=0;i<10;i++) g(Math.floor(R()*cw),ground-1+Math.floor(R()*6),1,1,pick(['#ffffff','#f2b35c','#ec93a6']));
+  } else {
+    g(0,0,cw,chh,winter?'#d8dfe8':'#aedcf6'); g(0,ground-6,cw,chh-ground+6,winter?'#eef1f4':'#8ac46c'); for(let x=0;x<cw;x+=5) g(x,ground-6,1,chh-ground+6,winter?'#ccd3d9':'#6aa14f');
+    g(cw-22,ground-16,16,10,'#b0603f'); g(cw-24,ground-19,20,3,'#80402a'); g(cw-16,ground-11,4,5,'#4a2a1a'); g(cw-9,3,6,6,'#fff2a8');
+    g(4,ground-20,10,14,'#5f8a4e'); g(8,ground-6,2,4,'#7a5a3a');
+  }
+  if(winter && scene!=='home' && scene!=='shelter'){ for(let i=0;i<24;i++) g(Math.floor(R()*cw),Math.floor(R()*chh),1,1,'#ffffff'); }
+  if(c&&c.rain&&season==='夏'&&(scene==='street'||scene==='field')){ ctx.fillStyle='rgba(200,220,255,.45)'; for(let i=0;i<30;i++) ctx.fillRect(R()*W,R()*H,1,8); }
+}
+function drawCat(ctx,coat,pose,x,y,sc,f){
+  const key=(pose==='sleep'||pose==='star')&&coat.sleep?coat.sleep:coat.img; const d=CAT_IMG[key]; const im=img(d.src); if(!im) return {w:d.w*sc,h:d.h*sc};
+  ctx.imageSmoothingEnabled=false;
+  const bob=f&&f.breath?1:0;
+  if(pose==='star'){ ctx.globalAlpha=.7; }
+  ctx.drawImage(im,0,0,d.w,d.h,Math.round(x),Math.round(y+bob*sc),d.w*sc,d.h*sc-bob*sc);
+  ctx.globalAlpha=1;
+  if(pose==='star'){ const hx=x+d.w*sc/2, hy=y-3*sc; px(ctx,hx-2*sc,hy,4*sc,sc,'#ffe08a'); px(ctx,hx-3*sc,hy+sc,sc,sc,'#ffe08a'); px(ctx,hx+2*sc,hy+sc,sc,sc,'#ffe08a'); }
+  return {w:d.w*sc,h:d.h*sc};
+}
+function renderScene(canvas,s,pose,f){
+  const ctx=canvas.getContext('2d'); const W=canvas.width,H=canvas.height; ctx.imageSmoothingEnabled=false; ctx.clearRect(0,0,W,H);
+  const season=seasonAt(s);
+  drawBackground(ctx,s.scene,season,s.c,W,H);
+  const kitten=s.t<12; const sc=kitten?3:4; const d=CAT_IMG[(pose==='sleep'||pose==='star')&&s.coat.sleep?s.coat.sleep:s.coat.img];
+  const ground=(Math.ceil(H/4)-7)*4; const x=W/2-d.w*sc/2, y=ground+6-d.h*sc;
+  drawCat(ctx,s.coat,pose,x,y,sc,f);
+}
+function renderTitle(canvas){
+  const ctx=canvas.getContext('2d'); ctx.imageSmoothingEnabled=false; const tim=img(ART.title); if(tim){ ctx.drawImage(tim,0,0,320,180); return; }
+  drawBackground(ctx,'street','秋',null,320,180);
+  const ground=(Math.ceil(180/4)-7)*4;
+  const place=(coat,x,sc,f)=>{ const d=CAT_IMG[coat.img]; drawCat(ctx,coat,'sit',x,ground+6-d.h*sc,sc,f); };
+  place(COATS[1],32,3,null); place(COATS[0],118,4,null); place(COATS[4],210,3,null);
+}
+</script>
+
+<script id="ui">
+/* 公開サイト用の設定：リンクが空のボタンは表示されない */
+const SITE={
+  xText:'', // 共有文の末尾に足す（例：@アカウント）
+  gifts:[{label:'ちゅ〜るを贈る 120円',url:''},{label:'お花を贈る 240円',url:''},{label:'お星さまを贈る 480円',url:''}],
+  donate:{label:'保護活動に寄付する',url:''},
+  form:{label:'',url:''},
+  report:{label:'寄付の実績',url:'kifu.html'},
+  donateNote:'おくりものの半分と、寄付の全額（決済手数料など7.2%を除いたぶん）は、猫の保護団体に届けます。実績は毎月、寄付のページに。'
+};
+const $=id=>document.getElementById(id);
+let S=null, T=null, curBlock=null, speed=0, autoTimer=null, animTimer=null, breath=0, skipping=false, stage='';
+const logEl=$('log');
+const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function show(id,on){ $(id).hidden=!on; }
+function setStats(){ for(const k of ['hp','joy','food','bond']){ $('v'+k).textContent=S.st[k]; $('b'+k).style.width=S.st[k]+'%'; }
+  $('ageTxt').textContent=`${ageText(S)}（人間なら${humanAge(S)}歳）`; $('wTxt').textContent=`${S.w.toFixed(1)}kg`; }
+function capText(){ const env=S.env==='pet'?(S.indoor?'家ねこ':'外に出る家ねこ'):S.env==='shelter'?'保護施設':'街のねこ'; return `${S.c.flag} ${S.c.name} ・ ${env}${S.tnr?' ・ さくら耳':''}`; }
+function redraw(){ if(!S) return; renderScene($('scene'),S,S.alive?'sit':'star',{breath}); $('cap').textContent=capText(); }
+window.__redraw=()=>{ if(S&&!$('game').hidden) redraw(); if(!$('title').hidden) renderTitle($('titleCanvas')); };
+function startAnim(){ if(animTimer||reduced) return; animTimer=setInterval(()=>{ if(!S||$('game').hidden||document.hidden) return; breath=breath?0:1; redraw(); },900); }
+function esc(s){ return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+function deltaText(t){ if(!t.before||!S) return ''; const names={hp:'けんこう',food:'おなか',joy:'ごきげん',bond:'ひと'}; const parts=[]; for(const k in names){ const d=S.st[k]-t.before[k]; if(Math.abs(d)>=5) parts.push(`${names[k]}${d>0?'+':''}${d}`); } return parts.join('　'); }
+function addBlock(t){
+  const d=document.createElement('div'); d.className='year cur'+(t.tag?' '+t.tag:'');
+  d.innerHTML=`<div class="age">${esc(t.head||'')}</div>`+t.lines.map(l=>`<p>${esc(l)}</p>`).join('');
+  if(curBlock) curBlock.classList.remove('cur');
+  logEl.prepend(d); curBlock=d; return d;
+}
+function appendLine(block,text,cls){ const p=document.createElement('p'); if(cls) p.className=cls; p.textContent=text; const d=block.querySelector('.delta'); if(d) block.insertBefore(p,d); else block.appendChild(p); }
+function renderChoice(block,t){
+  const box=document.createElement('div'); box.className='choice';
+  const q=document.createElement('p'); q.className='q'; q.textContent=t.choice.text; box.appendChild(q);
+  t.choice.options.forEach((o,i)=>{ const b=document.createElement('button'); b.textContent='▶ '+o.label; b.onclick=()=>choose(i); box.appendChild(b); });
+  block.appendChild(box);
+  $('btnNext').disabled=true; toTop();
+}
+function choose(i){
+  if(!T||!T.choice) return; clearTimeout(autoTimer);
+  const block=curBlock; const cb=block.querySelector('.choice');
+  const picked=T.choice.options[i].label; const nBefore=T.lines.length;
+  cb.querySelectorAll('button').forEach(b=>b.remove());
+  const p=document.createElement('p'); p.className='picked'; p.textContent='▶ '+picked; cb.appendChild(p);
+  resolveChoice(S,T,i);
+  T.lines.slice(nBefore).forEach(l=>appendLine(block,l));
+  block.className='year cur'+(T.tag?' '+T.tag:'');
+  closeTurn(block);
+}
+function closeTurn(block){
+  const dt=deltaText(T); if(dt){ const d=document.createElement('div'); d.className='delta'; d.textContent=dt; block.appendChild(d); }
+  S.turns.push(T.head); T=null; setStats(); redraw(); renderChips();
+  $('btnNext').disabled=false;
+  if(!S.alive){ endGame(); return; }
+  if(!skipping) toTop();
+  scheduleAuto();
+}
+function toTop(){ window.scrollTo({top:0,behavior:skipping||reduced?'auto':'smooth'}); }
+function nextTurn(){
+  if(!S||!S.alive||T) return; clearTimeout(autoTimer);
+  T=startTurn(S);
+  const block=addBlock(T);
+  if(T.choice){ renderChoice(block,T); return; }
+  closeTurn(block);
+}
+function scheduleAuto(){
+  clearTimeout(autoTimer);
+  if(!speed||!S||!S.alive||T) return;
+  if(speed==='skip'){ runSkip(); return; }
+  autoTimer=setTimeout(nextTurn, Math.round((S.t<12?900:1100)/speed));
+}
+function runSkip(){
+  skipping=true; let n=0;
+  while(S&&S.alive&&!T&&n<400){ nextTurn(); n++; }
+  skipping=false; toTop();
+  if(S&&(!S.alive||T)) { /* 選択肢か最期で止まる */ }
+}
+function setSpeed(v){ speed=v==='skip'?'skip':Number(v); document.querySelectorAll('#speed button').forEach(b=>b.classList.toggle('on',String(b.dataset.sp)===String(v))); scheduleAuto(); }
+function renderChips(){
+  const box=$('chips'); box.innerHTML='';
+  if(!S||!S.alive) return;
+  const list=ACTIONS[S.env]||[];
+  list.forEach(a=>{ const b=document.createElement('button'); b.textContent=a.label; b.disabled=S.acted||!!(T&&T.choice); b.onclick=()=>{ const r=doAction(S,a.id); if(r==null) return; appendLine(curBlock, r, 'act'); setStats(); redraw(); renderChips(); }; box.appendChild(b); });
+}
+function startGame(){
+  S=birth(); T=null;
+  try{ if(!localStorage.getItem('neko_played')){ S.mercy=true; localStorage.setItem('neko_played','1'); } }catch(e){} curBlock=null; logEl.innerHTML=''; $('endArea').innerHTML=''; show('endArea',false);
+  show('title',false); show('game',true); show('actions',true);
+  setStats(); redraw(); startAnim(); renderChips();
+  const c=S.c;
+  const intro={head:'あなたは——',tag:'birth',lines:[
+    `${c.flag} ${c.name}に生まれた。`,
+    `${S.place}。${S.season}の生まれ。`,
+    `${S.coat.name}の${S.sex==='♂'?'オス':'メス'}。${S.litter}匹きょうだいの${S.order}番目。`,
+    `母は${S.born==='街'?'街で生きるねこ':'家で飼われているねこ'}。`,
+    `同じ生まれ（国・暮らし・毛色・性別）のねこは、世界に推定${fmtMan(S.same)}。6億匹のうちの${S.sameP<0.1?S.sameP.toFixed(2):S.sameP.toFixed(1)}%。`
+  ]};
+  addBlock(intro); S.turns.push('intro'); S.acted=true; renderChips();
+  toTop(); scheduleAuto();
+}
+function endGame(){
+  show('actions',false); clearTimeout(autoTimer);
+  const s=S, c=s.c;
+  const area=$('endArea'); area.innerHTML='';
+  const end=document.createElement('div'); end.className='card ending stack';
+  end.innerHTML=`<p class="eyebrow">エンディング</p>`+endingText(s).map(p=>`<p>${esc(p)}</p>`).join('')+`<div class="row"><button id="btnResult">リザルトを見る</button></div>`;
+  area.appendChild(end); show('endArea',true); toTop();
+  $('btnResult').onclick=()=>{ $('btnResult').remove(); showResult(area); };
+}
+function showResult(area){
+  const s=S, c=s.c; const {who,joyLine}=summary(s); const title=titleFor(s);
+  const card=document.createElement('div'); card.className='card epitaph stack';
+  card.innerHTML=`
+    <div class="row"><span class="flag">${c.flag}</span><div><p class="eyebrow">リザルト</p><p class="big" id="epName">${esc(who)}</p></div></div>
+    <p><span class="title-badge">称号：${esc(title)}</span></p>
+    <p>${esc(c.name)}、${esc(s.place)}に生まれ、<b>${esc(s.deathAge)}</b>で一生を終えた。人間でいえば${humanAge(s)}歳。</p>
+    <p class="muted">最期は、${esc(s.cause)}${/まま$/.test(s.cause)?'':'で'}。${s.env==='pet'?'家族のそばで。':s.env==='shelter'?'ケージの中で。':'誰にも知られずに。'}</p>
+    <p class="joyline">${esc(joyLine)}</p>
+    <div class="nums">
+      <div class="num"><b>${s.k.sun}</b><span>日向ぼっこ（回）</span></div>
+      <div class="num"><b>${s.k.pets}</b><span>なでられた（回）</span></div>
+      <div class="num"><b>${s.k.meals}</b><span>ごはん（食）</span></div>
+      <div class="num"><b>${s.k.purr}</b><span>ゴロゴロ（回）</span></div>
+      <div class="num"><b>${s.k.kittens}</b><span>子ども（匹）</span></div>
+      <div class="num"><b>${s.k.homes}</b><span>暮らした家</span></div>
+    </div>
+    <p class="rarity">同じ生まれのねこは、世界に推定${fmtMan(s.same)}。</p>
+    <div class="stack" style="gap:8px">
+      <label for="nameIn" class="small muted">このねこに名前をつける（共有文に入ります）</label>
+      <input type="text" id="nameIn" maxlength="12" placeholder="例：とらじろう">
+    </div>
+    <div class="stack" style="gap:8px">
+      <label for="shareOut" class="small muted">Xに貼る文</label>
+      <textarea id="shareOut" readonly></textarea>
+      <div class="row"><button id="btnCopy">文をコピー</button><a id="btnX" class="btn-x" target="_blank" rel="noopener" href="#">Xに投稿する</a><button class="ghost" id="btnAgain">もう一度生まれる</button></div>
+    </div>
+    <div class="stack extra" id="extra" style="gap:8px" hidden>
+      <p class="eyebrow">この子に、なにか贈る？</p>
+      <div class="row" id="giftRow"></div>
+      <p class="note" id="donateNote"></p>
+      <div class="row" id="linkRow"></div>
+    </div>`;
+  area.appendChild(card);
+  (function(){ const gr=$('giftRow'), lr=$('linkRow'); let any=false;
+    SITE.gifts.forEach(g=>{ if(!g.url) return; any=true; const a=document.createElement('a'); a.className='btn-gift'; a.target='_blank'; a.rel='noopener'; a.href=g.url; a.textContent=g.label; gr.appendChild(a); });
+    [SITE.donate,SITE.report,SITE.form].forEach(l=>{ if(!l.url) return; any=true; const a=document.createElement('a'); a.className='btn-link'; a.target='_blank'; a.rel='noopener'; a.href=l.url; a.textContent=l.label; lr.appendChild(a); });
+    if(any){ $('donateNote').textContent=SITE.donateNote; $('extra').hidden=false; }
+  })();
+  const refresh=()=>{ const txt=shareText(s,location.href.split('#')[0].split('?')[0])+(SITE.xText?'\n'+SITE.xText:''); $('shareOut').value=txt; $('epName').textContent=summary(s).who; $('btnX').href='https://x.com/intent/post?text='+encodeURIComponent(txt); };
+  refresh();
+  $('nameIn').addEventListener('input',e=>{ s.name=e.target.value.trim(); refresh(); });
+  $('btnCopy').onclick=()=>{ const ta=$('shareOut'); const done=()=>toast('コピーしました'); if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(ta.value).then(done).catch(()=>{ ta.select(); done(); }); } else { ta.select(); done(); } };
+  $('btnAgain').onclick=()=>{ show('game',false); show('title',true); renderTitle($('titleCanvas')); window.scrollTo({top:0}); };
+  card.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});
+}
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),1500); }
+$('btnBirth').onclick=startGame;
+$('btnNext').onclick=()=>{ nextTurn(); };
+document.querySelectorAll('#speed button').forEach(b=>b.onclick=()=>setSpeed(b.dataset.sp));
+renderTitle($('titleCanvas'));
+if(/[?&]gift=ok/.test(location.search)){ setTimeout(()=>toast('ありがとう。半分は、猫たちへ。'),600); try{ history.replaceState(null,'',location.pathname); }catch(e){} }
+if(/[?&]kifu=ok/.test(location.search)){ setTimeout(()=>toast('ありがとう。猫たちに届けます。'),600); try{ history.replaceState(null,'',location.pathname); }catch(e){} }
+</script>
+
+<footer style="max-width:560px;margin:0 auto;padding:24px 0 150px;font-size:.8rem;color:#aaa2c0;text-align:center;line-height:2">
+<a href="kifu.html" style="color:#aaa2c0">寄付について</a>　<a href="tokushoho.html" style="color:#aaa2c0">特定商取引法に基づく表記</a>　<a href="privacy.html" style="color:#aaa2c0">プライバシー</a><br>
+© 2026 髙木大資
+</footer>
+</body>
+</html>
