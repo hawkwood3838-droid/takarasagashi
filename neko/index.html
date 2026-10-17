@@ -120,6 +120,7 @@ summary{cursor:pointer;font-weight:700}
 .btn-x{background:#000;border-color:#000;color:#fff}
 .btn-gift{background:var(--panel2);border-color:var(--rose);color:var(--fg)}
 .btn-link{background:transparent;font-size:.9rem;padding:6px 12px}
+.soon{opacity:.45;pointer-events:none}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(160px + env(safe-area-inset-bottom,0px));background:var(--mint);color:#0b1a12;padding:8px 14px;border-radius:6px;font-weight:700;z-index:7}
 </style>
 
@@ -133,6 +134,7 @@ summary{cursor:pointer;font-weight:700}
       <p class="lead">あなたは今から、そのうちの1匹として生まれます。<br>どの国に、誰の子として生まれるかは選べません。</p>
       <div class="row"><button id="btnBirth">生まれる</button><span class="note">1歳までは1か月ごと、そのあとは季節ごとに進みます</span></div>
     </div>
+    <p class="note" id="titleNote"></p>
     <details><summary>このゲームの数字について</summary>
       <div class="small muted stack" style="gap:6px;margin-top:8px">
         <p>生まれる国は、各国の飼いねこ・野良ねこの推定頭数（40か国、合計およそ5億9千万匹）の比率で決まります。飼いねこの数は各国の公表推計を、野良ねこの数は世界推計（約4億8千万匹）を国ごとに割り振った概算を使っています。</p>
@@ -328,7 +330,7 @@ function birth(){
   const s={
     c, env: strayBorn?'stray':'pet', indoor: strayBorn?false:chance(c.indoor), tnr:false, fed:false, neutered:false, charm:0,
     sex, coat, season, seasonIdx:SEASONS.findIndex(x=>x.n===season), litter, order,
-    place: strayBorn?pick(c.wild):pick(c.home), born: strayBorn?'街':'家',
+    place: strayBorn?pick(c.wild):pick(c.home), born: strayBorn?'街':'家', birthPlace:'',
     t:0, turnNo:0, alive:true, cause:'', deathAge:'', w:0.1, acted:false,
     st:{hp: strayBorn?55:80, food: strayBorn?55:90, joy:60, bond: strayBorn?20:65},
     k:{sun:0,pets:0,meals:0,purr:0,kittens:0,homes:0,humans:0,fights:0,sibDead:0,box:0,hunt:0,naps:0},
@@ -337,7 +339,7 @@ function birth(){
   if(!strayBorn) s.k.homes=1;
   const envShare = strayBorn? c.stray/(c.stray+c.pet) : c.pet/(c.stray+c.pet);
   let tw=0,me=0; for(const k of COATS){ const w=coatW(c,k,sex); tw+=w; if(k.id===coat.id) me=w; }
-  s.same=(c.pet+c.stray)*envShare*(me/tw)*0.5; s.sameP=s.same/TOTAL_M*100;
+  s.same=(c.pet+c.stray)*envShare*(me/tw)*0.5; s.sameP=s.same/TOTAL_M*100; s.birthPlace=s.place;
   s.scene=sceneFor(s);
   return s;
 }
@@ -841,7 +843,7 @@ function endingText(s){
 function shareText(s,url){
   const {who,joyLine}=summary(s); const c=s.c;
   const when = s.t<12? s.deathAge : `${s.deathAge}の${seasonAt(s)}`;
-  const l1=`${c.flag} ${c.name}、${s.place}に生まれた${who}。称号「${titleFor(s)}」`;
+  const l1=`${c.flag} ${c.name}、${s.birthPlace}に生まれた${who}。称号「${titleFor(s)}」`;
   const l2=`${when}、${s.cause}${/まま$/.test(s.cause)?'':'で'}旅立った。${joyLine}`;
   const l3=`日向ぼっこ ${s.k.sun}回 ／ なでられた ${s.k.pets}回 ／ 子ども ${s.k.kittens}匹`;
   return `${l1}\n${l2}\n${l3}\n\nあなたはどこに生まれる？ #6億分の1のねこ${url?'\n'+url:''}`;
@@ -930,7 +932,8 @@ const SITE={
   donate:{label:'保護活動に寄付する',url:''},
   form:{label:'',url:''},
   report:{label:'寄付の実績',url:'kifu.html'},
-  donateNote:'おくりものの半分と、寄付の全額（決済手数料など7.2%を除いたぶん）は、猫の保護団体に届けます。実績は毎月、寄付のページに。'
+  donateNote:'おくりものの半分は猫の保護団体へ。残りの半分は、作者のねこ（とらじろうとココ）のちゅ〜る代と、このゲームの維持費です。寄付は、決済手数料など7.2%を除いた全額を届けます。実績は毎月、寄付のページに。',
+  authorNote:'作者は宮崎のイベント屋で、プログラムは素人です。背景の絵はまだ仮。おかしなところは #6億分の1のねこ で教えてください。'
 };
 const $=id=>document.getElementById(id);
 let S=null, T=null, curBlock=null, speed=0, autoTimer=null, animTimer=null, breath=0, skipping=false, stage='';
@@ -1036,7 +1039,7 @@ function showResult(area){
   card.innerHTML=`
     <div class="row"><span class="flag">${c.flag}</span><div><p class="eyebrow">リザルト</p><p class="big" id="epName">${esc(who)}</p></div></div>
     <p><span class="title-badge">称号：${esc(title)}</span></p>
-    <p>${esc(c.name)}、${esc(s.place)}に生まれ、<b>${esc(s.deathAge)}</b>で一生を終えた。人間でいえば${humanAge(s)}歳。</p>
+    <p>${esc(c.name)}、${esc(s.birthPlace)}に生まれ、${s.place!==s.birthPlace?esc(s.place)+'で':''}<b>${esc(s.deathAge)}</b>の一生を終えた。人間でいえば${humanAge(s)}歳。</p>
     <p class="muted">最期は、${esc(s.cause)}${/まま$/.test(s.cause)?'':'で'}。${s.env==='pet'?'家族のそばで。':s.env==='shelter'?'ケージの中で。':'誰にも知られずに。'}</p>
     <p class="joyline">${esc(joyLine)}</p>
     <div class="nums">
@@ -1057,17 +1060,17 @@ function showResult(area){
       <textarea id="shareOut" readonly></textarea>
       <div class="row"><button id="btnCopy">文をコピー</button><a id="btnX" class="btn-x" target="_blank" rel="noopener" href="#">Xに投稿する</a><button class="ghost" id="btnAgain">もう一度生まれる</button></div>
     </div>
-    <div class="stack extra" id="extra" style="gap:8px" hidden>
+    <div class="stack extra" id="extra" style="gap:8px">
       <p class="eyebrow">この子に、なにか贈る？</p>
       <div class="row" id="giftRow"></div>
       <p class="note" id="donateNote"></p>
       <div class="row" id="linkRow"></div>
     </div>`;
   area.appendChild(card);
-  (function(){ const gr=$('giftRow'), lr=$('linkRow'); let any=false;
-    SITE.gifts.forEach(g=>{ if(!g.url) return; any=true; const a=document.createElement('a'); a.className='btn-gift'; a.target='_blank'; a.rel='noopener'; a.href=g.url; a.textContent=g.label; gr.appendChild(a); });
-    [SITE.donate,SITE.report,SITE.form].forEach(l=>{ if(!l.url) return; any=true; const a=document.createElement('a'); a.className='btn-link'; a.target='_blank'; a.rel='noopener'; a.href=l.url; a.textContent=l.label; lr.appendChild(a); });
-    if(any){ $('donateNote').textContent=SITE.donateNote; $('extra').hidden=false; }
+  (function(){ const gr=$('giftRow'), lr=$('linkRow');
+    SITE.gifts.forEach(g=>{ const a=document.createElement('a'); a.className='btn-gift'; a.textContent=g.label; if(g.url){ a.target='_blank'; a.rel='noopener'; a.href=g.url; } else { a.classList.add('soon'); a.textContent=g.label+'（準備中）'; } gr.appendChild(a); });
+    [SITE.donate,SITE.report,SITE.form].forEach(l=>{ if(!l.label) return; const a=document.createElement('a'); a.className='btn-link'; a.textContent=l.label; if(l.url){ a.target='_blank'; a.rel='noopener'; a.href=l.url; } else { a.classList.add('soon'); a.textContent=l.label+'（準備中）'; } lr.appendChild(a); });
+    $('donateNote').textContent=SITE.donateNote;
   })();
   const refresh=()=>{ const txt=shareText(s,location.href.split('#')[0].split('?')[0])+(SITE.xText?'\n'+SITE.xText:''); $('shareOut').value=txt; $('epName').textContent=summary(s).who; $('btnX').href='https://x.com/intent/post?text='+encodeURIComponent(txt); };
   refresh();
@@ -1081,6 +1084,7 @@ $('btnBirth').onclick=startGame;
 $('btnNext').onclick=()=>{ nextTurn(); };
 document.querySelectorAll('#speed button').forEach(b=>b.onclick=()=>setSpeed(b.dataset.sp));
 renderTitle($('titleCanvas'));
+(function(){ const n=$('titleNote'); const parts=[]; if(SITE.report.url) parts.push(`<a href="${SITE.report.url}" target="_blank" rel="noopener" style="color:var(--muted)">おくりもの・寄付について</a>`); if(SITE.authorNote) parts.push(SITE.authorNote); n.innerHTML=parts.join('<br>'); })();
 if(/[?&]gift=ok/.test(location.search)){ setTimeout(()=>toast('ありがとう。半分は、猫たちへ。'),600); try{ history.replaceState(null,'',location.pathname); }catch(e){} }
 if(/[?&]kifu=ok/.test(location.search)){ setTimeout(()=>toast('ありがとう。猫たちに届けます。'),600); try{ history.replaceState(null,'',location.pathname); }catch(e){} }
 </script>
