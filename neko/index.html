@@ -111,6 +111,7 @@ input:focus-visible,textarea:focus-visible{outline:3px solid var(--sky);outline-
 details{background:var(--panel);border-radius:8px;padding:10px 14px}
 summary{cursor:pointer;font-weight:700}
 .hero .lead{font-size:1.05rem}
+.ver{font-size:.8rem;color:var(--muted);letter-spacing:.1em;vertical-align:middle}
 .rarity{font-family:var(--display);color:var(--sky);font-size:.95rem}
 .note{font-size:.85rem;color:var(--muted)}
 .joyline{font-family:var(--display);color:var(--rose)}
@@ -129,7 +130,7 @@ summary{cursor:pointer;font-weight:700}
     <div class="scenebox"><canvas id="titleCanvas" width="320" height="180" aria-label="夜の路地にすわるねこたちのドット絵"></canvas></div>
     <div class="hero stack">
       <p class="eyebrow">ねこ人生シミュレーター</p>
-      <h1>6億分の1のねこ</h1>
+      <h1>6億分の1のねこ <span class="ver">ver 0.9</span></h1>
       <p class="lead">世界には、推定6億匹のねこがいます。<br>家で暮らすねこは、そのうちの半分より少し少ないくらい。<br>残りは、街や野山で生きています。</p>
       <p class="lead">あなたは今から、そのうちの1匹として生まれます。<br>どの国に、誰の子として生まれるかは選べません。</p>
       <div class="row"><button id="btnBirth">生まれる</button><span class="note">1歳までは1か月ごと、そのあとは季節ごとに進みます</span></div>
@@ -556,6 +557,7 @@ function statEvent(s){
 }
 const RARE=[
  {id:'tv',cond:s=>s.env==='stray',t:'テレビ局が、街のねこの取材に来た。カメラの前で、あくびをした。',fx:{joy:5,bond:5}},
+ {id:'tora',cond:s=>/宮崎/.test(s.birthPlace||s.place),t:'塀の上から、茶トラの大きなねこがこっちを見ていた。あとで聞いた話では、「とらじろう」という名前で、元は野良だったらしい。',fx:{joy:4}},
  {id:'quake',cond:s=>true,t:'大きな地震があった。棚の下で、一晩じゅう動けなかった。',fx:{joy:-8}},
  {id:'blackout',cond:s=>s.env==='pet',t:'停電の夜。ろうそくの明かりの中で、家族と一緒に寝た。',fx:{bond:6}},
  {id:'move',cond:s=>s.env==='pet',t:'引っ越した。新しい家は、においが全部ちがった。慣れるのに3週間かかった。',fx:{joy:-5},run:s=>{ s.place=pick(s.c.home); }},
@@ -567,6 +569,7 @@ const RARE=[
  {id:'hospital',cond:s=>s.env==='pet'&&ageY(s)>=5,t:'飼い主が入院した。1週間、知らない人がごはんをくれに来た。帰ってきた日は、玄関から離れなかった。',fx:{bond:10}}
 ];
 function rareEvent(s){
+  if(!s.usedRare.tora && /宮崎/.test(s.birthPlace||s.place) && s.t>=12 && chance(.18)){ const e=RARE.find(x=>x.id==='tora'); s.usedRare.tora=true; dstat(s,'joy',4); return e.t; }
   if(!chance(.06)) return null;
   const el=RARE.filter(e=>!s.usedRare[e.id]&&e.cond(s)); if(!el.length) return null;
   const e=pick(el); s.usedRare[e.id]=true; if(e.fx) for(const k in e.fx) dstat(s,k,e.fx[k]); if(e.run) e.run(s);
@@ -810,6 +813,14 @@ function titleFor(s){
   if(s.born==='家'&&s.env==='stray') c.push(['帰れなかった子',6]);
   if(s.w>=5.2) c.push(['ぽっちゃり',4]);
   if(k.hunt>=10) c.push(['ハンター',4]);
+  if(s.env==='pet'&&k.naps>=25) c.push(['寝すぎ',4]);
+  if(s.env==='pet'&&y>=3&&k.hunt===0&&k.fights===0&&s.indoor) c.push(['ニート',4]);
+  if(s.env==='pet'&&k.box>=4&&k.box<7) c.push(['段ボール評論家',4]);
+  if(s.env==='pet'&&s.st.food>=95&&s.w<4.2) c.push(['食べても太らない',3]);
+  if(s.env==='stray'&&k.humans>=120) c.push(['顔が広い',4]);
+  if(s.sex==='♂'&&!s.neutered&&y>=4&&k.fights<=2) c.push(['平和主義',4]);
+  if(s.env==='pet'&&s.st.bond<=40&&y>=3) c.push(['ツンデレ',5]);
+  if(s.k.pets>=15000) c.push(['なでられすぎ',4]);
   if(!c.length) return s.env==='pet'?'ふつうの家ねこ':'ふつうの街ねこ';
   c.sort((a,b)=>b[1]-a[1]); return c[0][0];
 }
@@ -933,7 +944,7 @@ const SITE={
   form:{label:'',url:''},
   report:{label:'寄付の実績',url:'kifu.html'},
   donateNote:'おくりものの半分は猫の保護団体へ。残りの半分は、作者のねこ（とらじろうとココ）のちゅ〜る代と、このゲームの維持費です。寄付は、決済手数料など7.2%を除いた全額を届けます。実績は毎月、寄付のページに。',
-  authorNote:'作者は宮崎のイベント屋で、プログラムは素人です。背景の絵はまだ仮。おかしなところは #6億分の1のねこ で教えてください。'
+  authorNote:'作者は、元野良ねこの飼い主です。3匹いたうち、2匹は感染症で亡くなって、いま1匹と暮らしています。プログラムは素人で、背景の絵はまだ仮。おかしなところは #6億分の1のねこ で教えてください。'
 };
 const $=id=>document.getElementById(id);
 let S=null, T=null, curBlock=null, speed=0, autoTimer=null, animTimer=null, breath=0, skipping=false, stage='';
