@@ -97,6 +97,8 @@ canvas{display:block;width:100%;max-width:100%;image-rendering:pixelated;image-r
 .card{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:18px 18px 20px}
 .card.epitaph{border-color:var(--amber);background:linear-gradient(180deg,#2c2748,#1f1c33)}
 .card.ending{border-color:var(--line);background:#1d1a30}
+.endcap{font-family:var(--display);letter-spacing:.06em;color:var(--amber)}
+button.small{font-size:.85rem;padding:6px 12px}
 .ending p+p{margin-top:8px}
 .epitaph .flag{font-size:2.4rem;line-height:1}
 .epitaph .big{font-family:var(--display);font-size:1.5rem;line-height:1.4}
@@ -1168,6 +1170,80 @@ function renderTitle(canvas){
 }
 </script>
 
+<script id="movie">
+/* ========== エンディングのムービー（12秒前後、スキップ可） ========== */
+let endRaf=null;
+function stopEnding(){ if(endRaf){ cancelAnimationFrame(endRaf); endRaf=null; } }
+function playEnding(canvas,capEl,s,onDone){
+  const ctx=canvas.getContext('2d'); const W=canvas.width,H=canvas.height; ctx.imageSmoothingEnabled=false;
+  const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const kitten=s.t<12, born=s.born, env=s.env, y=ageY(s), sea=seasonAt(s);
+  const adopted = born==='街' && env==='pet';
+  const scene = env==='shelter'?'shelter':env==='pet'?(s.indoor?'home':'yard'):sceneFor(s);
+  const prelude = adopted ? 2600 : 0;              // 拾われた子：路地→家
+  const walk = (env==='stray'&&!kitten) ? 2000 : 0; // 街のねこ：歩いてくる
+  const T0=prelude+walk;
+  const total=T0+9800;
+  const when = kitten? `生後${Math.max(1,s.t)}か月。` : `${y}さいの${sea}。`;
+  const cause = s.cause + (/まま$/.test(s.cause)?'':'で');
+  let last;
+  if(kitten) last = env==='pet'?'小さな命だった。家族は、その夜、眠れなかった。':env==='shelter'?'名前は、仮の名前のままだった。':'小さな命だった。母ねこは、しばらくその場所に戻ってきていた。';
+  else if(env==='pet') last = y>=15?'家族が見守る中、静かに息を引き取った。':'家族より先に、旅立った。';
+  else if(env==='shelter') last = '新しい家族は、最後まで見つからなかった。';
+  else last = s.fed?'次の日も、おばあさんはごはんを置いた。':s.st.bond>=60?'通学路の子どもたちが、しばらく探していた。':'誰にも気づかれなかった。';
+  const caps=[[T0+300,when],[T0+2600,cause.replace(/で$/,'で、')],[T0+5200,last],[T0+8000,'ここに、1匹のねこが生きた。']];
+  if(adopted){ caps.unshift([300,'街に生まれて、']); caps.splice(1,0,[prelude+200,'家で、生きた。']); }
+  const sc=kitten?3:4; const d=CAT_IMG[(s.coat.sleep)||s.coat.img]; const dsit=CAT_IMG[s.coat.img];
+  const ground=(Math.ceil(H/4)-7)*4;
+  const R=seeded(s.t*7+s.c.name.length);
+  const flakes=Array.from({length:40},()=>({x:R()*W,y:R()*H,v:.3+R()*.6}));
+  const weather = (sea==='冬'&&s.c.cold>=.4&&scene!=='home'&&scene!=='shelter')?'snow':(sea==='雨季'||(sea==='夏'&&s.c.rain))&&scene!=='home'&&scene!=='shelter'?'rain':'';
+  const start=performance.now(); let lastCap=-1;
+  function frame(now){
+    const t=Math.min(total, now-start);
+    ctx.clearRect(0,0,W,H);
+    // 背景（拾われた子は路地→家のクロスフェード）
+    if(adopted && t<prelude){ drawBackground(ctx,sceneFor({...s,env:'stray',place:s.birthPlace}),sea,s.c,W,H); if(t>prelude-900){ ctx.globalAlpha=(t-(prelude-900))/900; drawBackground(ctx,scene,sea,s.c,W,H); ctx.globalAlpha=1; } }
+    else drawBackground(ctx,scene,sea,s.c,W,H);
+    // 天気
+    if(weather){ ctx.fillStyle = weather==='snow'?'rgba(255,255,255,.9)':'rgba(200,220,255,.5)'; for(const f of flakes){ const fy=(f.y+t*f.v*0.08)%H; if(weather==='snow') ctx.fillRect(Math.round(f.x),Math.round(fy),2,2); else ctx.fillRect(Math.round(f.x),Math.round(fy),1,7); } }
+    // ねこ
+    const u=t-T0; // ムービー本編の時刻
+    let pose='sit', alpha=1, cx=W/2-dsit.w*sc/2;
+    if(t<T0){ // 前奏：歩いてくる／路地にいる
+      if(walk){ const p=Math.min(1,(t-prelude)/walk); cx = -dsit.w*sc + p*(W/2); }
+    } else {
+      if(u>=1500) pose='sleep';
+      if(u>=4000) alpha=Math.max(0.12, 1-(u-4000)/2500);
+      if(u>=7500) alpha=0;
+    }
+    const dd = pose==='sleep'? d : dsit; const cy = ground+6-dd.h*sc;
+    const bob = (t<T0 && walk && Math.floor(t/180)%2===0)? -sc : (pose==='sleep'&&Math.floor(t/900)%2===0? sc*0.5:0);
+    if(kitten){ // 母ねこ（同じ毛色・大きめ）をとなりに
+      const md=CAT_IMG[s.coat.img]; const mx=cx-md.w*4-6; const my=ground+6-md.h*4;
+      if(env!=='shelter'){ ctx.globalAlpha=1; drawCat(ctx,s.coat,'sit',Math.round(mx),Math.round(my),4,null); }
+    }
+    if(alpha>0){ ctx.globalAlpha=alpha; drawCat(ctx,s.coat,pose,Math.round(cx),Math.round(cy+bob),sc,null); ctx.globalAlpha=1; }
+    // 夜の帳
+    if(u>1500){ const a=Math.min(.55,(u-1500)/2500*.55) * (u>7500? Math.max(.45, 1-(u-7500)/2300*.55) : 1); ctx.fillStyle=`rgba(10,8,24,${a.toFixed(3)})`; ctx.fillRect(0,0,W,H);
+      // 星空
+      ctx.fillStyle='#f1e9d8'; for(let i=0;i<18;i++){ const sx=(i*53+17)%W, sy=(i*29+9)%70; if(Math.floor((t+i*130)/700)%3!==0) ctx.fillRect(sx,sy,2,2); } }
+    // 昇っていく星
+    if(u>=4000){ const p=Math.min(1,(u-4000)/3200); const sx=cx+dd.w*sc/2 + Math.sin(p*6)*6, sy=(cy+dd.h*sc/2) - p*(cy+dd.h*sc/2-16); const tw=Math.floor(t/250)%2===0; const col=tw?'#ffe08a':'#fff6c8';
+      px(ctx,sx-1,sy-3,2,6,col); px(ctx,sx-3,sy-1,6,2,col); if(tw){ px(ctx,sx-2,sy-2,4,4,col); } }
+    // 字幕
+    let ci=-1; for(let i=0;i<caps.length;i++) if(t>=caps[i][0]) ci=i;
+    if(ci!==lastCap){ lastCap=ci; capEl.textContent = ci>=0? caps[ci][1] : ' '; capEl.style.opacity=0; requestAnimationFrame(()=>{ capEl.style.transition='opacity .6s'; capEl.style.opacity=1; }); }
+    if(t<total){ endRaf=requestAnimationFrame(frame); } else { endRaf=null; onDone(); }
+  }
+  if(reduced){ // 動きを減らす設定：最後の絵と字幕だけ
+    drawBackground(ctx,scene,sea,s.c,W,H); ctx.fillStyle='rgba(10,8,24,.45)'; ctx.fillRect(0,0,W,H); px(ctx,W/2-1,13,2,6,'#ffe08a'); px(ctx,W/2-3,15,6,2,'#ffe08a');
+    capEl.textContent=`${when}${cause.replace(/で$/,'')}。${last}`; setTimeout(onDone,1200); return;
+  }
+  endRaf=requestAnimationFrame(frame);
+}
+</script>
+
 <script id="ui">
 /* 公開サイト用の設定：リンクが空のボタンは表示されない */
 const SITE={
@@ -1180,7 +1256,7 @@ const SITE={
   authorNote:'作者は、元野良ねこの飼い主です。3匹いたうち、2匹は感染症で亡くなって、いま1匹と暮らしています。プログラムは素人で、背景の絵はまだ仮。おかしなところは #6億分の1のねこ で教えてください。'
 };
 const $=id=>document.getElementById(id);
-let S=null, T=null, curBlock=null, speed=0, autoTimer=null, animTimer=null, breath=0, skipping=false, stage='';
+let S=null, T=null, curBlock=null, speed=0, autoTimer=null, animTimer=null, breath=0, skipping=false, stage='', endingPlaying=false;
 const logEl=$('log');
 const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function show(id,on){ $(id).hidden=!on; }
@@ -1189,7 +1265,7 @@ function setStats(){ for(const k of ['hp','joy','food','bond']){ $('v'+k).textCo
 function capText(){ const env=S.env==='pet'?(S.indoor?'家ねこ':'外に出る家ねこ'):S.env==='shelter'?'保護施設':'街のねこ'; return `${S.c.flag} ${S.c.name} ・ ${env}${S.tnr?' ・ さくら耳':''}`; }
 function redraw(){ if(!S) return; renderScene($('scene'),S,S.alive?'sit':'star',{breath}); $('cap').textContent=capText(); }
 window.__redraw=()=>{ if(S&&!$('game').hidden) redraw(); if(!$('title').hidden) renderTitle($('titleCanvas')); };
-function startAnim(){ if(animTimer||reduced) return; animTimer=setInterval(()=>{ if(!S||$('game').hidden||document.hidden) return; breath=breath?0:1; redraw(); },900); }
+function startAnim(){ if(animTimer||reduced) return; animTimer=setInterval(()=>{ if(!S||$('game').hidden||document.hidden||endingPlaying) return; breath=breath?0:1; redraw(); },900); }
 function esc(s){ return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
 function deltaText(t){ if(!t.before||!S) return ''; const names={hp:'けんこう',food:'おなか',joy:'ごきげん',bond:'ひと'}; const parts=[]; for(const k in names){ const d=S.st[k]-t.before[k]; if(Math.abs(d)>=5) parts.push(`${names[k]}${d>0?'+':''}${d}`); } return parts.join('　'); }
 function addBlock(t){
@@ -1270,12 +1346,18 @@ function startGame(){
 }
 function endGame(){
   show('actions',false); clearTimeout(autoTimer);
-  const s=S, c=s.c;
+  const s=S;
   const area=$('endArea'); area.innerHTML='';
-  const end=document.createElement('div'); end.className='card ending stack';
-  end.innerHTML=`<p class="eyebrow">エンディング</p>`+endingText(s).map(p=>`<p>${esc(p)}</p>`).join('')+`<div class="row"><button id="btnResult">リザルトを見る</button></div>`;
-  area.appendChild(end); show('endArea',true); toTop();
-  $('btnResult').onclick=()=>{ $('btnResult').remove(); showResult(area); };
+  const mv=document.createElement('div'); mv.className='row movie'; mv.style.justifyContent='space-between';
+  mv.innerHTML=`<span class="note">エンディング</span><button class="ghost small" id="btnSkipEnd">スキップ</button>`;
+  area.appendChild(mv); show('endArea',true); toTop();
+  endingPlaying=true; $('wTxt').textContent=''; $('ageTxt').classList.add('endcap');
+  const finish=()=>{ if(mv.dataset.done) return; mv.dataset.done='1'; mv.remove(); endingPlaying=false; $('ageTxt').classList.remove('endcap'); setStats(); redraw();
+    const end=document.createElement('div'); end.className='card ending stack';
+    end.innerHTML=`<p class="eyebrow">エンディング</p>`+endingText(s).map(p=>`<p>${esc(p)}</p>`).join('')+`<div class="row"><button id="btnResult">リザルトを見る</button></div>`;
+    area.appendChild(end); $('btnResult').onclick=()=>{ $('btnResult').remove(); showResult(area); }; };
+  $('btnSkipEnd').onclick=()=>{ stopEnding(); finish(); };
+  playEnding($('scene'),$('ageTxt'),s,finish);
 }
 function showResult(area){
   const s=S, c=s.c; const {who,joyLine}=summary(s); const title=titleFor(s);
