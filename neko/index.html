@@ -1360,7 +1360,7 @@ const SITE={
   ],
   /* うちに迎える：支払い後の戻り先は …/neko/?room=ok&session_id={CHECKOUT_SESSION_ID} */
   room:{label:(LANG==='en'?"Bring them home":'うちに迎える'),price:500,url:'',urlEn:''},
-  verifyUrl:'', // 支払い照合（Apps Script のウェブアプリURL）。空なら照合しない
+  verifyUrl:'https://script.google.com/macros/s/AKfycbyjR7CRnFLHKTd8z-vftrCVboYgkFnsUdsBcRDiKaAcqgJf-qHa1K2p-siOneUJweb8/exec', // 支払い照合（Apps Script のウェブアプリ）。?session=cs_... で呼ぶ
   donate:{label:(LANG==='en'?"Donate to a cat rescue group":'猫の保護団体に寄付する'),url:'',urlEn:''}, // urlEn：英語版（海外の団体へ）
   form:{label:'',url:''},
   report:{label:(LANG==='en'?"Donation record":'寄付の実績'),url:''},
@@ -1628,7 +1628,7 @@ function catRecord(s){ return {id:'', coat:s.coat.id, c:s.c.name, flag:s.c.flag,
 function adoptBegin(){ if(!S||S.alive||!linkOf(SITE.room)) return; LS.set('neko_adopt',{ts:Date.now(),cat:catRecord(S)}); location.href=linkOf(SITE.room); }
 async function verifySid(sid){
   if(!SITE.verifyUrl) return {ok:true,skip:true};
-  try{ const r=await fetch(SITE.verifyUrl+(SITE.verifyUrl.includes('?')?'&':'?')+'sid='+encodeURIComponent(sid)); return await r.json(); }
+  try{ const r=await fetch(SITE.verifyUrl+(SITE.verifyUrl.includes('?')?'&':'?')+'session='+encodeURIComponent(sid)); const v=await r.json(); if(v&&v.err==='no_key') return {ok:true,skip:true}; return v; } // 鍵が未設定のあいだは照合なし扱い
   catch(e){ return {ok:true,net:true}; }
 }
 async function adoptReturn(sid){

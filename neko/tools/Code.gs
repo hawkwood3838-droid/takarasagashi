@@ -1,7 +1,7 @@
 /**
  * 6億分の1のねこ — 支払い照合（Google Apps Script ウェブアプリ）
  *
- * 役割：ゲームから「?sid=cs_...」で呼ばれたら、Stripe に問い合わせて
+ * 役割：ゲームから「?session=cs_...」で呼ばれたら、Stripe に問い合わせて
  *       そのチェックアウトが本当に支払い済みかを返す。ついでにシートに記録する。
  *
  * 置き方（1回だけ）：
@@ -21,7 +21,7 @@
 var PROPS = PropertiesService.getScriptProperties();
 
 function doGet(e) {
-  var sid = ((e && e.parameter && e.parameter.sid) || '').trim();
+  var sid = ((e && e.parameter && (e.parameter.session || e.parameter.cs)) || '').trim(); // ?sid= は Google が予約していて使えないので ?session=
   if (!/^cs_(live|test)_[A-Za-z0-9]+$/.test(sid)) return out_({ ok: false, err: 'bad_sid' });
   var key = PROPS.getProperty('STRIPE_KEY');
   if (!key) return out_({ ok: false, err: 'no_key' });
