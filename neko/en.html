@@ -98,6 +98,11 @@ canvas{display:block;width:100%;max-width:100%;image-rendering:pixelated;image-r
 .card.epitaph{border-color:var(--amber);background:linear-gradient(180deg,#2c2748,#1f1c33)}
 .card.ending{border-color:var(--line);background:#1d1a30}
 .endcap{font-family:var(--display);letter-spacing:.06em;color:var(--amber)}
+.endov{position:fixed;inset:0;z-index:9;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px))}
+.endov canvas{width:100%;max-width:560px;border-color:var(--line)}
+.endov .cap2{font-family:var(--display);font-size:1.15rem;letter-spacing:.06em;color:var(--amber);text-align:center;min-height:2.2em;max-width:560px;line-height:1.6}
+.endov .ctl2{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+.endov .speed{margin:0}
 button.small{font-size:.85rem;padding:6px 12px}
 .ending p+p{margin-top:8px}
 .epitaph .flag{font-size:2.4rem;line-height:1}
@@ -1271,8 +1276,9 @@ function renderTitle(canvas){
 
 <script id="movie">
 /* ========== エンディングのムービー（12秒前後、スキップ可） ========== */
-let endRaf=null;
+let endRaf=null, endRate=1;
 function stopEnding(){ if(endRaf){ cancelAnimationFrame(endRaf); endRaf=null; } }
+function setEndRate(r){ endRate=r; }
 function playEnding(canvas,capEl,s,onDone){
   const ctx=canvas.getContext('2d'); const W=canvas.width,H=canvas.height; ctx.imageSmoothingEnabled=false;
   const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1297,9 +1303,9 @@ function playEnding(canvas,capEl,s,onDone){
   const R=seeded(s.t*7+s.c.name.length);
   const flakes=Array.from({length:40},()=>({x:R()*W,y:R()*H,v:.3+R()*.6}));
   const weather = (sea===(LANG==='en'?"Winter":'冬')&&s.c.cold>=.4&&scene!=='home'&&scene!=='shelter')?'snow':(sea===(LANG==='en'?"Rainy season":'雨季')||(sea===(LANG==='en'?"Summer":'夏')&&s.c.rain))&&scene!=='home'&&scene!=='shelter'?'rain':'';
-  const start=performance.now(); let lastCap=-1;
+  let acc=0, prevNow=performance.now(); let lastCap=-1;
   function frame(now){
-    const t=Math.min(total, now-start);
+    acc+=(now-prevNow)*endRate; prevNow=now; const t=Math.min(total, acc);
     ctx.clearRect(0,0,W,H);
     // 背景（拾われた子は路地→家のクロスフェード）
     if(adopted && t<prelude){ drawBackground(ctx,sceneFor({...s,env:'stray',place:s.birthPlace}),sea,s.c,W,H); if(t>prelude-900){ ctx.globalAlpha=(t-(prelude-900))/900; drawBackground(ctx,scene,sea,s.c,W,H); ctx.globalAlpha=1; } }
@@ -1456,18 +1462,26 @@ function startGame(){
 }
 function endGame(){
   show('actions',false); clearTimeout(autoTimer);
-  const s=S;
-  const area=$('endArea'); area.innerHTML='';
-  const mv=document.createElement('div'); mv.className='row movie'; mv.style.justifyContent='space-between';
-  mv.innerHTML=(LANG==='en'?`<span class="note">Ending</span><button class="ghost small" id="btnSkipEnd">Skip</button>`:`<span class="note">エンディング</span><button class="ghost small" id="btnSkipEnd">スキップ</button>`);
-  area.appendChild(mv); show('endArea',true); toTop();
-  endingPlaying=true; $('wTxt').textContent=''; $('ageTxt').classList.add('endcap');
-  const finish=()=>{ if(mv.dataset.done) return; mv.dataset.done='1'; mv.remove(); endingPlaying=false; $('ageTxt').classList.remove('endcap'); setStats(); redraw();
+  const s=S; $('giftBox').hidden=true;
+  const area=$('endArea'); area.innerHTML=''; show('endArea',true);
+  // 画面いっぱいのムービー
+  const ov=document.createElement('div'); ov.className='endov'; ov.id='endOv';
+  const cv=document.createElement('canvas'); cv.width=320; cv.height=180; cv.setAttribute('aria-label',(LANG==='en'?"Ending":'エンディング'));
+  const cap=document.createElement('div'); cap.className='cap2'; cap.textContent=' ';
+  const ctl=document.createElement('div'); ctl.className='ctl2';
+  const sp=document.createElement('div'); sp.className='speed';
+  const rateOf=v=> v==='skip'?8 : v>=16?8 : Math.max(1,Number(v)||1);
+  [['1',(LANG==='en'?"1x":'1倍')],['2',(LANG==='en'?"2x":'2倍')],['4',(LANG==='en'?"4x":'4倍')],['skip',(LANG==='en'?"Skip":'スキップ')]].forEach(([v,l])=>{ const b=document.createElement('button'); b.dataset.sp=v; b.textContent=l; b.onclick=()=>{ if(v==='skip'){ stopEnding(); finish(); return; } setEndRate(rateOf(v)); sp.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); }; sp.appendChild(b); });
+  ctl.appendChild(sp); ov.appendChild(cv); ov.appendChild(cap); ov.appendChild(ctl); document.body.appendChild(ov);
+  endingPlaying=true;
+  const finish=()=>{ if(ov.dataset.done) return; ov.dataset.done='1'; ov.remove(); endingPlaying=false; setStats(); redraw(); toTop();
     const end=document.createElement('div'); end.className='card ending stack';
     end.innerHTML=(LANG==='en'?`<p class="eyebrow">Ending</p>`:`<p class="eyebrow">エンディング</p>`)+endingText(s).map(p=>`<p>${esc(p)}</p>`).join('')+(LANG==='en'?`<div class="row"><button id="btnResult">See the result</button></div>`:`<div class="row"><button id="btnResult">リザルトを見る</button></div>`);
     area.appendChild(end); $('btnResult').onclick=()=>{ $('btnResult').remove(); showResult(area); }; };
-  $('btnSkipEnd').onclick=()=>{ stopEnding(); finish(); };
-  playEnding($('scene'),$('ageTxt'),s,finish);
+  // いまの早送り設定を引き継ぐ（OFF→1倍、16倍・スキップ→8倍）
+  const cur = speed==='skip'?'skip' : speed>=16?'4' : speed>=2?String(speed):'1';
+  setEndRate(rateOf(speed==='skip'||speed>=16?16:speed)); sp.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.sp===cur));
+  playEnding(cv,cap,s,finish);
 }
 function showResult(area){
   const s=S, c=s.c; const {who,joyLine}=summary(s); const title=titleFor(s);
