@@ -421,6 +421,7 @@ function birth(){
 function sceneFor(s){ if(s.env==='shelter') return 'shelter'; if(s.env==='pet') return s.indoor?'home':'yard'; return /牧場|農場|農家|畑|村|島|森|牧|漁村|ブッシュ|farm|ranch|village|island|forest|pasture|fishing|bush|orchard|field/i.test(s.place)?'field':'street'; }
 function ageY(s){ return Math.floor(s.t/12); }
 function seasonAt(s,t){ const i=(s.seasonIdx+Math.floor((t==null?s.t:t)/3))%4; return (CLIMATE_SEASONS[s.c.climate]||CLIMATE_SEASONS.temperate)[i]; }
+function litterText(s){ return s.litter<2? (LANG==='en'?"No littermates. An only kitten. ":'きょうだいはいない。ひとりっ子。') : (LANG==='en'?`Kitten ${s.order} of ${s.litter}. `:`${s.litter}匹きょうだいの${s.order}番目。`); }
 function ageText(s){ if(LANG==='en') return s.t<12? `${s.t} month${s.t===1?'':'s'} old` : `Age ${ageY(s)}`; if(s.t<12) return (LANG==='en'?`Month ${s.t}`:`生後${s.t}か月`); return (LANG==='en'?`Age ${ageY(s)}`:`${ageY(s)}さい`); }
 function deathAgeText(s){ if(LANG==='en'){ const m=Math.max(1,s.t); return s.t<12? `${m} month${m===1?'':'s'}` : `${ageY(s)} year${ageY(s)===1?'':'s'}`; } if(s.t<12) return (LANG==='en'?`Month ${Math.max(1,s.t)}`:`生後${Math.max(1,s.t)}か月`); return (LANG==='en'?`Age ${ageY(s)}`:`${ageY(s)}さい`); }
 function humanAge(s){ const y=ageY(s); if(s.t<12) return Math.round(s.t*1.25); if(y===1) return 15; if(y===2) return 24; return 24+(y-2)*4; }
@@ -454,9 +455,10 @@ function monthTurn(s,t){
   if(m===0){
     t.tag='birth';
     if(s.env==='stray'){ t.lines.push((LANG==='en'?`Born in ${s.place}. Your mother had lived her whole life on the street, and she never taught her kittens to go near humans.`:`${s.place}。母ねこは街で生きてきたねこで、人間に近づくことを子どもたちに教えなかった。`)); t.lines.push(pick([(LANG==='en'?"Eyes not yet open. The warmth of your mother's belly was the whole world.":'目はまだ開いていない。母ねこのおなかのあたたかさだけが、世界のすべてだった。'),(LANG==='en'?"Eyes not yet open. Listened to the rain, and to your mother's heartbeat.":'目はまだ開いていない。雨の音と、母ねこの心臓の音を聞いていた。')])); }
-    else { t.lines.push((LANG==='en'?`Born in ${s.place}. Your mother was a house cat.`:`${s.place}。母ねこは家で飼われているねこだった。`)); t.lines.push(pick([(LANG==='en'?`Kitten ${s.order} of ${s.litter}. A human peered in gently, murmuring, "so small."`:`${s.litter}匹きょうだいの${s.order}番目。人間が「小さい」と言いながら、そっとのぞきこんだ。`),(LANG==='en'?`Kitten ${s.order} of ${s.litter}. The humans added one more blanket.`:`${s.litter}匹きょうだいの${s.order}番目。人間が毛布を1枚ふやしてくれた。`)])); }
+    else { t.lines.push((LANG==='en'?`Born in ${s.place}. Your mother was a house cat.`:`${s.place}。母ねこは家で飼われているねこだった。`)); t.lines.push(litterText(s)+pick([(LANG==='en'?"A human peered in gently, murmuring, \"so small.\"":'人間が「小さい」と言いながら、そっとのぞきこんだ。'),(LANG==='en'?"The humans added one more blanket.":'人間が毛布を1枚ふやしてくれた。')])); }
   } else {
-    const ms=MONTHS[m]; const pool = s.env==='stray'?ms.stray:(s.env==='pet'?ms.pet:ms.shelter||ms.pet);
+    const ms=MONTHS[m]; let pool = s.env==='stray'?ms.stray:(s.env==='pet'?ms.pet:ms.shelter||ms.pet);
+    if(s.litter<2){ const f=pool.filter(l=>!/きょうだい|sibling|littermate|litter/i.test(l)); if(f.length) pool=f; }
     t.lines.push(pick(pool));
     if(m===3 && s.env==='stray' && !s.sibAnnounced){ s.sibAnnounced=true; const sib=s.litter-1; if(sib>0){ const dead=Math.round(sib*0.75); s.k.sibDead=dead; t.lines.push(dead>0?(LANG==='en'?`Of the ${sib} in the litter, ${dead} had vanished before anyone noticed.`:`きょうだい${sib}匹のうち${dead}匹は、いつのまにかいなくなっていた。`):(LANG==='en'?`${sib} in the litter. All still here.`:`きょうだいは${sib}匹。まだ、みんないる。`)); } }
     if(m===3 && s.env==='pet' && s.litter>1 && chance(.6)){ s.place=pick(c.home); s.k.homes++; t.lines.push(pick([(LANG==='en'?`Given to a new home: ${s.place}. First car ride. First carrier bag.`:`${s.place}へ、もらわれていった。はじめての車。はじめてのキャリーバッグ。`),(LANG==='en'?`Given to a new home: ${s.place}. The smell of your littermates stayed in your fur for a week.`:`${s.place}へ、もらわれていった。きょうだいのにおいが、1週間は毛に残っていた。`)])); }
@@ -1168,7 +1170,7 @@ function endingText(s){
   if(s.t<12){
     if(s.env==='pet') P.push(pick([(LANG==='en'?"The family put flowers in a small box and buried it in the garden.":'家族は、小さな箱に花を入れて、庭に埋めた。'),(LANG==='en'?"The family stayed beside the box all night.":'家族は、一晩じゅう箱のそばにいた。'),(LANG==='en'?"The family put the collar you never wore away at the back of a drawer.":'家族は、使わなかった首輪を、引き出しの奥にしまった。')]));
     else if(s.env==='shelter') P.push((LANG==='en'?"Your name was still the temporary one written on the cage tag.":'名前は、ケージの札に書かれた仮の名前のままだった。'));
-    else P.push(pick([(LANG==='en'?"For a while, your mother kept coming back to that spot.":'母ねこは、しばらくその場所に戻ってきていた。'),(LANG==='en'?"No one noticed. The rain washed everything away.":'誰にも気づかれなかった。雨が、すべてを流した。'),(LANG==='en'?"Of your littermates, only 1 other was left alive.":'きょうだいのうち、生き残ったのはあと1匹だった。')]));
+    else P.push(pick([(LANG==='en'?"For a while, your mother kept coming back to that spot.":'母ねこは、しばらくその場所に戻ってきていた。'),(LANG==='en'?"No one noticed. The rain washed everything away.":'誰にも気づかれなかった。雨が、すべてを流した。'),(LANG==='en'?"Of your littermates, only 1 other was left alive.":'きょうだいのうち、生き残ったのはあと1匹だった。')].filter(l=>s.litter>=3||!/きょうだい/.test(l))));
     P.push((LANG==='en'?"Around the world, tens of millions of kittens like this are born every year, and more than half do not make it through their first winter.":'世界では、1年にこういう子ねこが何千万匹も生まれて、半分以上が最初の冬を越せない。'));
   } else if(s.env==='shelter'){
     P.push((LANG==='en'?"Your name was still the temporary one written on the cage tag.":'名前は、ケージの札に書かれた仮の名前のままだった。')); P.push((LANG==='en'?"On the last day, a volunteer petted you a little longer than usual.":'ボランティアの人が、最後の日に、少し長くなでてくれた。'));
@@ -1453,7 +1455,7 @@ function startGame(){
   const intro={head:(LANG==='en'?"You are—":'あなたは——'),tag:'birth',lines:[
     (LANG==='en'?`${c.flag} Born in ${c.name}.`:`${c.flag} ${c.name}に生まれた。`),
     (LANG==='en'?`Born in ${S.season}, in ${S.place}.`:`${S.place}。${S.season}の生まれ。`),
-    (LANG==='en'?`A ${S.coat.name} ${S.sex==='♂'?(LANG==='en'?"male":'オス'):(LANG==='en'?"female":'メス')}. Number ${S.order} of a litter of ${S.litter}.`:`${S.coat.name}の${S.sex==='♂'?(LANG==='en'?"male":'オス'):(LANG==='en'?"female":'メス')}。${S.litter}匹きょうだいの${S.order}番目。`),
+    (LANG==='en'?`A ${S.coat.name} ${S.sex==='♂'?(LANG==='en'?"male":'オス'):(LANG==='en'?"female":'メス')}. ${litterText(S)}`:`${S.coat.name}の${S.sex==='♂'?(LANG==='en'?"male":'オス'):(LANG==='en'?"female":'メス')}。${litterText(S)}`),
     (LANG==='en'?`Your mother was ${S.born===(LANG==='en'?"street":'街')?(LANG==='en'?"a cat living on the street":'街で生きるねこ'):(LANG==='en'?"a cat kept in a home":'家で飼われているねこ')}.`:`母は${S.born===(LANG==='en'?"street":'街')?(LANG==='en'?"a cat living on the street":'街で生きるねこ'):(LANG==='en'?"a cat kept in a home":'家で飼われているねこ')}。`),
     (LANG==='en'?`An estimated ${fmtMan(S.same)} cats in the world share this birth (country, life, coat, sex). That is ${S.sameP<0.1?S.sameP.toFixed(2):S.sameP.toFixed(1)}% of 600 million.`:`同じ生まれ（国・暮らし・毛色・性別）のねこは、世界に推定${fmtMan(S.same)}。6億匹のうちの${S.sameP<0.1?S.sameP.toFixed(2):S.sameP.toFixed(1)}%。`)
   ]};
@@ -1469,18 +1471,14 @@ function endGame(){
   const cv=document.createElement('canvas'); cv.width=320; cv.height=180; cv.setAttribute('aria-label',(LANG==='en'?"Ending":'エンディング'));
   const cap=document.createElement('div'); cap.className='cap2'; cap.textContent=' ';
   const ctl=document.createElement('div'); ctl.className='ctl2';
-  const sp=document.createElement('div'); sp.className='speed';
-  const rateOf=v=> v==='skip'?8 : v>=16?8 : Math.max(1,Number(v)||1);
-  [['1',(LANG==='en'?"1x":'1倍')],['2',(LANG==='en'?"2x":'2倍')],['4',(LANG==='en'?"4x":'4倍')],['skip',(LANG==='en'?"Skip":'スキップ')]].forEach(([v,l])=>{ const b=document.createElement('button'); b.dataset.sp=v; b.textContent=l; b.onclick=()=>{ if(v==='skip'){ stopEnding(); finish(); return; } setEndRate(rateOf(v)); sp.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); }; sp.appendChild(b); });
-  ctl.appendChild(sp); ov.appendChild(cv); ov.appendChild(cap); ov.appendChild(ctl); document.body.appendChild(ov);
+  const sk=document.createElement('button'); sk.className='ghost small'; sk.id='btnSkipEnd'; sk.textContent=(LANG==='en'?"Skip":'スキップ'); sk.onclick=()=>{ stopEnding(); finish(); };
+  ctl.appendChild(sk); ov.appendChild(cv); ov.appendChild(cap); ov.appendChild(ctl); document.body.appendChild(ov);
   endingPlaying=true;
   const finish=()=>{ if(ov.dataset.done) return; ov.dataset.done='1'; ov.remove(); endingPlaying=false; setStats(); redraw(); toTop();
     const end=document.createElement('div'); end.className='card ending stack';
     end.innerHTML=(LANG==='en'?`<p class="eyebrow">Ending</p>`:`<p class="eyebrow">エンディング</p>`)+endingText(s).map(p=>`<p>${esc(p)}</p>`).join('')+(LANG==='en'?`<div class="row"><button id="btnResult">See the result</button></div>`:`<div class="row"><button id="btnResult">リザルトを見る</button></div>`);
     area.appendChild(end); $('btnResult').onclick=()=>{ $('btnResult').remove(); showResult(area); }; };
-  // いまの早送り設定を引き継ぐ（OFF→1倍、16倍・スキップ→8倍）
-  const cur = speed==='skip'?'skip' : speed>=16?'4' : speed>=2?String(speed):'1';
-  setEndRate(rateOf(speed==='skip'||speed>=16?16:speed)); sp.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.sp===cur));
+  setEndRate(1); // ムービーはいつも通常速度。飛ばしたいときはスキップ
   playEnding(cv,cap,s,finish);
 }
 function showResult(area){
@@ -1515,7 +1513,7 @@ function showResult(area){
     <div class="stack extra" id="adoptBox" style="gap:8px">
       <p class="eyebrow">Bring this cat home?</p>
       <p class="paynote">Everything below is a purchase with real money (credit card etc., via Stripe), not in-game currency or points. Prices are in Japanese yen, tax included; no refunds after purchase.</p>
-      <p class="note">You can make a room and keep this cat there. It comes with a few pieces of furniture to choose from. No daily chores, and nothing more to buy.</p>
+      <p class="note">You can make a room where this cat stays with you for good. It comes with a few pieces of furniture to choose from. No daily chores, and nothing more to buy.</p>
       <div class="row" id="adoptRow"></div>
     </div>
     <div class="stack extra" id="extra" style="gap:8px">
@@ -1552,7 +1550,7 @@ function showResult(area){
     <div class="stack extra" id="adoptBox" style="gap:8px">
       <p class="eyebrow">この子を、うちに迎える？</p>
       <p class="paynote">ここから下は、実際のお金（クレジットカードなど・Stripe決済）での購入です。ゲーム内の通貨やポイントではありません。価格は税込、購入後の返金はできません。</p>
-      <p class="note">部屋をつくって、この子を置いておけます。家具は最初からいくつかあって、選べます。日課も、追加の買い物もありません。</p>
+      <p class="note">部屋をつくって、この子にずっといてもらえます。家具は最初からいくつかあって、選べます。日課も、追加の買い物もありません。</p>
       <div class="row" id="adoptRow"></div>
     </div>
     <div class="stack extra" id="extra" style="gap:8px">
