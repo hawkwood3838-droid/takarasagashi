@@ -124,7 +124,8 @@ summary{cursor:pointer;font-weight:700}
 .btn-gift{background:var(--panel2);border-color:var(--rose);color:var(--fg)}
 .btn-link{background:transparent;font-size:.9rem;padding:6px 12px}
 .soon{opacity:.45;pointer-events:none}
-.chips .giftlink{background:transparent;border:none;color:var(--muted);opacity:.75;font-size:.8rem;margin-left:auto;padding:6px 4px;font-weight:400}
+.chips .giftlink{margin-left:auto;border-style:dashed;color:var(--muted)}
+.paynote{font-size:.78rem;color:var(--muted);border:1px dashed var(--line);border-radius:6px;padding:6px 10px;line-height:1.6}
 .giftbox{background:var(--panel);border:2px solid var(--line);border-radius:8px;padding:10px 12px;gap:8px}
 .wrapchips{flex-wrap:wrap;overflow:visible}
 .chips button.on,button.ghost.on{background:var(--amber);color:#1a1409;border-color:var(--amber)}
@@ -1435,7 +1436,7 @@ function renderChips(){
   if(!S||!S.alive) return;
   const list=ACTIONS[S.env]||[];
   list.forEach(a=>{ const b=document.createElement('button'); b.textContent=a.label; b.disabled=S.acted||!!(T&&T.choice); b.onclick=()=>{ const r=doAction(S,a.id); if(r==null) return; appendLine(curBlock, r, 'act'); setStats(); redraw(); renderChips(); }; box.appendChild(b); });
-  const g=document.createElement('button'); g.className='giftlink'; g.textContent=(LANG==='en'?"Gifts":'おくりもの'); g.onclick=openGiftBox; box.appendChild(g);
+  const g=document.createElement('button'); g.className='giftlink'; g.textContent=(LANG==='en'?"Gifts (paid)":'おくりもの（有料）'); g.onclick=openGiftBox; box.appendChild(g);
 }
 function startGame(){
   S=birth(); T=null;
@@ -1499,6 +1500,7 @@ function showResult(area){
     </div>
     <div class="stack extra" id="adoptBox" style="gap:8px">
       <p class="eyebrow">Bring this cat home?</p>
+      <p class="paynote">Everything below is a purchase with real money (credit card etc., via Stripe), not in-game currency or points. Prices are in Japanese yen, tax included; no refunds after purchase.</p>
       <p class="note">You can make a room and keep this cat there. It comes with a few pieces of furniture to choose from. No daily chores, and nothing more to buy.</p>
       <div class="row" id="adoptRow"></div>
     </div>
@@ -1535,6 +1537,7 @@ function showResult(area){
     </div>
     <div class="stack extra" id="adoptBox" style="gap:8px">
       <p class="eyebrow">この子を、うちに迎える？</p>
+      <p class="paynote">ここから下は、実際のお金（クレジットカードなど・Stripe決済）での購入です。ゲーム内の通貨やポイントではありません。価格は税込、購入後の返金はできません。</p>
       <p class="note">部屋をつくって、この子を置いておけます。家具は最初からいくつかあって、選べます。日課も、追加の買い物もありません。</p>
       <div class="row" id="adoptRow"></div>
     </div>
@@ -1546,8 +1549,8 @@ function showResult(area){
     </div>`);
   area.appendChild(card);
   (function(){ const gr=$('giftRow'), lr=$('linkRow');
-    SITE.gifts.forEach(g=>{ const a=document.createElement('a'); a.className='btn-gift'; a.textContent=(LANG==='en'?`${g.label} ¥${g.price}`:`${g.label} ${g.price}円`); if(linkOf(g)){ a.target='_blank'; a.rel='noopener'; a.href=linkOf(g); } else { a.classList.add('soon'); a.textContent+=(LANG==='en'?" (coming soon)":'（準備中）'); } gr.appendChild(a); });
-    (function(){ const r=SITE.room; const a=document.createElement('a'); a.className='btn-gift'; a.textContent=(LANG==='en'?`${r.label} ¥${r.price}`:`${r.label} ${r.price}円`); if(linkOf(r)){ a.href='#'; a.onclick=e=>{ e.preventDefault(); adoptBegin(); }; } else { a.classList.add('soon'); a.textContent+=(LANG==='en'?" (coming soon)":'（準備中）'); } $('adoptRow').appendChild(a); })();
+    SITE.gifts.forEach(g=>{ const a=document.createElement('a'); a.className='btn-gift'; a.textContent=(LANG==='en'?`${g.label} ¥${g.price} (card payment)`:`${g.label} ${g.price}円（カード決済）`); if(linkOf(g)){ a.target='_blank'; a.rel='noopener'; a.href=linkOf(g); } else { a.classList.add('soon'); a.textContent+=(LANG==='en'?" (coming soon)":'（準備中）'); } gr.appendChild(a); });
+    (function(){ const r=SITE.room; const a=document.createElement('a'); a.className='btn-gift'; a.textContent=(LANG==='en'?`${r.label} ¥${r.price} (card payment)`:`${r.label} ${r.price}円（カード決済）`); if(linkOf(r)){ a.href='#'; a.onclick=e=>{ e.preventDefault(); adoptBegin(); }; } else { a.classList.add('soon'); a.textContent+=(LANG==='en'?" (coming soon)":'（準備中）'); } $('adoptRow').appendChild(a); })();
     [SITE.donate,SITE.report,SITE.form].forEach(l=>{ if(!l.label) return; const a=document.createElement('a'); a.className='btn-link'; a.textContent=l.label; if(linkOf(l)){ a.target='_blank'; a.rel='noopener'; a.href=linkOf(l); } else { a.classList.add('soon'); a.textContent=l.label+(LANG==='en'?" (coming soon)":'（準備中）'); } lr.appendChild(a); });
     $('donateNote').textContent=SITE.donateNote;
   })();
@@ -1591,8 +1594,9 @@ function openGiftBox(){
   const box=$('giftBox'); if(!box.hidden){ box.hidden=true; return; }
   box.innerHTML='';
   const p=document.createElement('p'); p.className='note'; p.textContent=(LANG==='en'?"Send this cat something, as a stranger. Half goes to cat rescue groups.":'知らない誰かとして、この子に贈る。半分は猫の保護団体へ。'); box.appendChild(p);
+  const pn=document.createElement('p'); pn.className='paynote'; pn.textContent=(LANG==='en'?"These are purchases with real money (credit card etc., via Stripe), not in-game currency or points. Prices are in Japanese yen, tax included; no refunds after purchase.":'実際のお金（クレジットカードなど・Stripe決済）での購入です。ゲーム内の通貨やポイントではありません。価格は税込、購入後の返金はできません。'); box.appendChild(pn);
   const row=document.createElement('div'); row.className='row';
-  SITE.gifts.forEach(g=>{ const b=document.createElement('button'); b.className='ghost small'; b.textContent=(LANG==='en'?`${g.label} ¥${g.price}`:`${g.label} ${g.price}円`);
+  SITE.gifts.forEach(g=>{ const b=document.createElement('button'); b.className='ghost small'; b.textContent=(LANG==='en'?`${g.label} ¥${g.price} (card payment)`:`${g.label} ${g.price}円（カード決済）`);
     if(!linkOf(g)){ b.classList.add('soon'); b.textContent+=(LANG==='en'?" (coming soon)":'（準備中）'); }
     b.onclick=()=>{ if(T&&T.choice){ toast((LANG==='en'?"Make your choice first":'選択肢を選んでから')); return; } if(saveLife({pendingGift:g.id})) location.href=linkOf(g); else toast((LANG==='en'?"Gifts can't be sent right now":'いまは贈れません')); };
     row.appendChild(b); });
