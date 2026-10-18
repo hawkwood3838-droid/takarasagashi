@@ -1283,12 +1283,12 @@ function stopEnding(){ if(endRaf){ cancelAnimationFrame(endRaf); endRaf=null; } 
 function setEndRate(r){ endRate=r; }
 function playEnding(canvas,capEl,s,onDone){
   const ctx=canvas.getContext('2d'); const W=canvas.width,H=canvas.height; ctx.imageSmoothingEnabled=false;
-  const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches; // 動きを減らす設定でも、ゆっくりした絵と字幕はそのまま（歩き・雪・雨だけ省く）
   const kitten=s.t<12, born=s.born, env=s.env, y=ageY(s), sea=seasonAt(s);
   const adopted = born===(LANG==='en'?"street":'街') && env==='pet';
   const scene = env==='shelter'?'shelter':env==='pet'?(s.indoor?'home':'yard'):sceneFor(s);
   const prelude = adopted ? 2600 : 0;              // 拾われた子：路地→家
-  const walk = (env==='stray'&&!kitten) ? 2000 : 0; // 街のねこ：歩いてくる
+  const walk = (env==='stray'&&!kitten&&!reduced) ? 2000 : 0; // 街のねこ：歩いてくる
   const T0=prelude+walk;
   const total=T0+9800;
   const when = kitten? (LANG==='en'?`Month ${Math.max(1,s.t)}.`:`生後${Math.max(1,s.t)}か月。`) : (LANG==='en'?`${sea}, age ${y}.`:`${y}さいの${sea}。`);
@@ -1313,7 +1313,7 @@ function playEnding(canvas,capEl,s,onDone){
     if(adopted && t<prelude){ drawBackground(ctx,sceneFor({...s,env:'stray',place:s.birthPlace}),sea,s.c,W,H); if(t>prelude-900){ ctx.globalAlpha=(t-(prelude-900))/900; drawBackground(ctx,scene,sea,s.c,W,H); ctx.globalAlpha=1; } }
     else drawBackground(ctx,scene,sea,s.c,W,H);
     // 天気
-    if(weather){ ctx.fillStyle = weather==='snow'?'rgba(255,255,255,.9)':'rgba(200,220,255,.5)'; for(const f of flakes){ const fy=(f.y+t*f.v*0.08)%H; if(weather==='snow') ctx.fillRect(Math.round(f.x),Math.round(fy),2,2); else ctx.fillRect(Math.round(f.x),Math.round(fy),1,7); } }
+    if(weather&&!reduced){ ctx.fillStyle = weather==='snow'?'rgba(255,255,255,.9)':'rgba(200,220,255,.5)'; for(const f of flakes){ const fy=(f.y+t*f.v*0.08)%H; if(weather==='snow') ctx.fillRect(Math.round(f.x),Math.round(fy),2,2); else ctx.fillRect(Math.round(f.x),Math.round(fy),1,7); } }
     // ねこ
     const u=t-T0; // ムービー本編の時刻
     let pose='sit', alpha=1, cx=W/2-dsit.w*sc/2;
@@ -1342,10 +1342,6 @@ function playEnding(canvas,capEl,s,onDone){
     let ci=-1; for(let i=0;i<caps.length;i++) if(t>=caps[i][0]) ci=i;
     if(ci!==lastCap){ lastCap=ci; capEl.textContent = ci>=0? caps[ci][1] : ' '; capEl.style.opacity=0; requestAnimationFrame(()=>{ capEl.style.transition='opacity .6s'; capEl.style.opacity=1; }); }
     if(t<total){ endRaf=requestAnimationFrame(frame); } else { endRaf=null; onDone(); }
-  }
-  if(reduced){ // 動きを減らす設定：最後の絵と字幕だけ
-    drawBackground(ctx,scene,sea,s.c,W,H); ctx.fillStyle='rgba(10,8,24,.45)'; ctx.fillRect(0,0,W,H); px(ctx,W/2-1,13,2,6,'#ffe08a'); px(ctx,W/2-3,15,6,2,'#ffe08a');
-    capEl.textContent=(LANG==='en'?`${when} Lost to ${cause}. ${last}`:`${when}${cause}。${last}`); setTimeout(onDone,1200); return;
   }
   endRaf=requestAnimationFrame(frame);
 }
