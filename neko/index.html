@@ -124,6 +124,13 @@ summary{cursor:pointer;font-weight:700}
 .btn-gift{background:var(--panel2);border-color:var(--rose);color:var(--fg)}
 .btn-link{background:transparent;font-size:.9rem;padding:6px 12px}
 .soon{opacity:.45;pointer-events:none}
+.chips .giftlink{background:transparent;border:none;color:var(--muted);opacity:.75;font-size:.8rem;margin-left:auto;padding:6px 4px;font-weight:400}
+.giftbox{background:var(--panel);border:2px solid var(--line);border-radius:8px;padding:10px 12px;gap:8px}
+.wrapchips{flex-wrap:wrap;overflow:visible}
+.chips button.on,button.ghost.on{background:var(--amber);color:#1a1409;border-color:var(--amber)}
+.catrow{display:flex;gap:12px;align-items:center;background:var(--panel);border-radius:8px;padding:10px 12px}
+.catrow .thumb{width:64px;height:56px;flex:0 0 auto;border:none;background:var(--panel2);border-radius:6px}
+#titleLinks{gap:14px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(160px + env(safe-area-inset-bottom,0px));background:var(--mint);color:#0b1a12;padding:8px 14px;border-radius:6px;font-weight:700;z-index:7}
 </style>
 
@@ -135,8 +142,10 @@ summary{cursor:pointer;font-weight:700}
       <h1>6億分の1のねこ <span class="ver">ver 0.9</span></h1>
       <p class="lead">世界には、推定6億匹のねこがいます。<br>家で暮らすねこは、そのうちの半分より少し少ないくらい。<br>残りは、街や野山で生きています。</p>
       <p class="lead">あなたは今から、そのうちの1匹として生まれます。<br>どの国に、誰の子として生まれるかは選べません。</p>
-      <div class="row"><button id="btnBirth">生まれる</button><span class="note">1歳までは1か月ごと、そのあとは季節ごとに進みます</span></div>
+      <div class="row"><button id="btnBirth">生まれる</button><button class="ghost" id="btnHome">うちのねこ</button><button class="ghost" id="btnResume" hidden>つづきから</button></div>
+      <p class="note">1歳までは1か月ごと、そのあとは季節ごとに進みます</p>
     </div>
+    <div class="row" id="titleLinks"></div>
     <p class="note" id="titleNote"></p>
     <details><summary>このゲームの数字について</summary>
       <div class="small muted stack" style="gap:6px;margin-top:8px">
@@ -161,10 +170,28 @@ summary{cursor:pointer;font-weight:700}
     <div id="endArea" class="stack" style="margin-bottom:14px" hidden></div>
     <div class="log" id="log"></div>
   </section>
+
+  <section id="home" class="stack" hidden>
+    <div class="scenebox"><canvas id="roomCanvas" width="320" height="180" aria-label="うちのねこの部屋"></canvas><div class="cap" id="roomCap">うちのねこ</div></div>
+    <div class="row" id="roomTypes"></div>
+    <div class="chips wrapchips" id="furnChips"></div>
+    <div class="stack" id="catList" style="gap:8px"></div>
+    <details><summary>引っ越しコード（別の端末に連れていく）</summary>
+      <div class="stack small" style="margin-top:8px;gap:8px">
+        <p class="muted">この端末の「うちのねこ」をコードにします。別の端末でこのコードを読み込むと、同じねこたちが来ます。</p>
+        <textarea id="moveOut" readonly style="min-height:80px" placeholder="「コードを出す」を押すとここに出ます"></textarea>
+        <div class="row"><button class="ghost small" id="btnMoveShow">コードを出す</button><button class="ghost small" id="btnMoveCopy">コピー</button></div>
+        <textarea id="moveIn" style="min-height:80px" placeholder="ここにコードを貼る"></textarea>
+        <div class="row"><button class="ghost small" id="btnMoveIn">読み込む</button></div>
+      </div>
+    </details>
+    <div class="row"><button class="ghost" id="btnHomeBack">タイトルにもどる</button></div>
+  </section>
 </div>
 
 <div class="actions" id="actions" hidden>
   <div class="inner">
+    <div id="giftBox" class="giftbox stack" hidden></div>
     <div class="chips" id="chips"></div>
     <div class="ctl">
       <div class="speed" id="speed" role="group" aria-label="次の選択肢までの早送り">
@@ -1248,8 +1275,16 @@ function playEnding(canvas,capEl,s,onDone){
 /* 公開サイト用の設定：リンクが空のボタンは表示されない */
 const SITE={
   xText:'', // 共有文の末尾に足す（例：@アカウント）
-  gifts:[{label:'おやつを贈る 120円',url:''},{label:'お花を贈る 240円',url:''},{label:'お星さまを贈る 480円',url:''}],
-  donate:{label:'保護活動に寄付する',url:''},
+  /* おくりもの：Stripeの支払いリンク。支払い後の戻り先は ?gift=おくりものID（例 …/neko/?gift=oyatsu） */
+  gifts:[
+    {id:'oyatsu',label:'おやつを贈る',price:120,url:'',fx:{food:15,joy:10},lines:{pet:'知らない誰かから、おやつが届いた。家族より先に、においで気づいた。',stray:'知らない誰かが、おやつを置いていった。今日は、おなかいっぱい。',shelter:'知らない誰かから、おやつの差し入れが届いた。ケージの前で、しっぽが立った。'}},
+    {id:'hana',label:'お花を贈る',price:240,url:'',fx:{joy:10,bond:10},lines:{pet:'知らない誰かから、お花が届いた。窓辺に飾られて、部屋が少し明るくなった。',stray:'知らない誰かが、いつもの場所に小さな花を置いていった。',shelter:'知らない誰かから、お花が届いた。スタッフが、ケージのそばに飾ってくれた。'}},
+    {id:'hoshi',label:'お星さまを贈る',price:480,url:'',fx:{hp:15,joy:10},lines:{pet:'知らない誰かが、お星さまを贈ってくれた。その夜は、いつもより深く眠れた。',stray:'知らない誰かが、お星さまを贈ってくれた。その夜の空は、いつもより明るかった。',shelter:'知らない誰かが、お星さまを贈ってくれた。ケージの窓から、星がひとつ見えた。'}}
+  ],
+  /* うちに迎える：支払い後の戻り先は …/neko/?room=ok&session_id={CHECKOUT_SESSION_ID} */
+  room:{label:'うちに迎える',price:500,url:''},
+  verifyUrl:'', // 支払い照合（Apps Script のウェブアプリURL）。空なら照合しない
+  donate:{label:'猫の保護団体に寄付する',url:''},
   form:{label:'',url:''},
   report:{label:'寄付の実績',url:'kifu.html'},
   donateNote:'おくりものの半分は猫の保護団体へ。残りの半分は、作者のねこ（とらじろうとココ）のおやつ代と、このゲームの維持費です。寄付は、決済手数料など7.2%を除いた全額を届けます。実績は毎月、寄付のページに。',
@@ -1327,11 +1362,12 @@ function renderChips(){
   if(!S||!S.alive) return;
   const list=ACTIONS[S.env]||[];
   list.forEach(a=>{ const b=document.createElement('button'); b.textContent=a.label; b.disabled=S.acted||!!(T&&T.choice); b.onclick=()=>{ const r=doAction(S,a.id); if(r==null) return; appendLine(curBlock, r, 'act'); setStats(); redraw(); renderChips(); }; box.appendChild(b); });
+  const g=document.createElement('button'); g.className='giftlink'; g.textContent='おくりもの'; g.onclick=openGiftBox; box.appendChild(g);
 }
 function startGame(){
   S=birth(); T=null;
-  try{ if(!localStorage.getItem('neko_played')){ S.mercy=true; localStorage.setItem('neko_played','1'); } }catch(e){} curBlock=null; logEl.innerHTML=''; $('endArea').innerHTML=''; show('endArea',false);
-  show('title',false); show('game',true); show('actions',true);
+  try{ if(!localStorage.getItem('neko_played')){ S.mercy=true; localStorage.setItem('neko_played','1'); } }catch(e){} curBlock=null; logEl.innerHTML=''; $('endArea').innerHTML=''; show('endArea',false); $('giftBox').hidden=true;
+  show('title',false); show('home',false); show('game',true); show('actions',true);
   setStats(); redraw(); startAnim(); renderChips();
   const c=S.c;
   const intro={head:'あなたは——',tag:'birth',lines:[
@@ -1386,6 +1422,11 @@ function showResult(area){
       <textarea id="shareOut" readonly></textarea>
       <div class="row"><button id="btnCopy">文をコピー</button><a id="btnX" class="btn-x" target="_blank" rel="noopener" href="#">Xに投稿する</a><button class="ghost" id="btnAgain">もう一度生まれる</button></div>
     </div>
+    <div class="stack extra" id="adoptBox" style="gap:8px">
+      <p class="eyebrow">この子を、うちに迎える？</p>
+      <p class="note">部屋をつくって、この子を置いておけます。家具は最初からいくつかあって、選べます。日課も、追加の買い物もありません。</p>
+      <div class="row" id="adoptRow"></div>
+    </div>
     <div class="stack extra" id="extra" style="gap:8px">
       <p class="eyebrow">この子に、なにか贈る？</p>
       <div class="row" id="giftRow"></div>
@@ -1394,7 +1435,8 @@ function showResult(area){
     </div>`;
   area.appendChild(card);
   (function(){ const gr=$('giftRow'), lr=$('linkRow');
-    SITE.gifts.forEach(g=>{ const a=document.createElement('a'); a.className='btn-gift'; a.textContent=g.label; if(g.url){ a.target='_blank'; a.rel='noopener'; a.href=g.url; } else { a.classList.add('soon'); a.textContent=g.label+'（準備中）'; } gr.appendChild(a); });
+    SITE.gifts.forEach(g=>{ const a=document.createElement('a'); a.className='btn-gift'; a.textContent=`${g.label} ${g.price}円`; if(g.url){ a.target='_blank'; a.rel='noopener'; a.href=g.url; } else { a.classList.add('soon'); a.textContent+='（準備中）'; } gr.appendChild(a); });
+    (function(){ const r=SITE.room; const a=document.createElement('a'); a.className='btn-gift'; a.textContent=`${r.label} ${r.price}円`; if(r.url){ a.href='#'; a.onclick=e=>{ e.preventDefault(); adoptBegin(); }; } else { a.classList.add('soon'); a.textContent+='（準備中）'; } $('adoptRow').appendChild(a); })();
     [SITE.donate,SITE.report,SITE.form].forEach(l=>{ if(!l.label) return; const a=document.createElement('a'); a.className='btn-link'; a.textContent=l.label; if(l.url){ a.target='_blank'; a.rel='noopener'; a.href=l.url; } else { a.classList.add('soon'); a.textContent=l.label+'（準備中）'; } lr.appendChild(a); });
     $('donateNote').textContent=SITE.donateNote;
   })();
@@ -1402,7 +1444,7 @@ function showResult(area){
   refresh();
   $('nameIn').addEventListener('input',e=>{ s.name=e.target.value.trim(); refresh(); });
   $('btnCopy').onclick=()=>{ const ta=$('shareOut'); const done=()=>toast('コピーしました'); if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(ta.value).then(done).catch(()=>{ ta.select(); done(); }); } else { ta.select(); done(); } };
-  $('btnAgain').onclick=()=>{ show('game',false); show('title',true); renderTitle($('titleCanvas')); window.scrollTo({top:0}); };
+  $('btnAgain').onclick=()=>{ show('game',false); show('title',true); renderTitle($('titleCanvas')); refreshTitle(); window.scrollTo({top:0}); };
   card.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});
 }
 function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),1500); }
@@ -1411,8 +1453,176 @@ $('btnNext').onclick=()=>{ nextTurn(); };
 document.querySelectorAll('#speed button').forEach(b=>b.onclick=()=>setSpeed(b.dataset.sp));
 renderTitle($('titleCanvas'));
 (function(){ const n=$('titleNote'); const parts=[]; if(SITE.report.url) parts.push(`<a href="${SITE.report.url}" target="_blank" rel="noopener" style="color:var(--muted)">おくりもの・寄付について</a>`); if(SITE.authorNote) parts.push(SITE.authorNote); n.innerHTML=parts.join('<br>'); })();
-if(/[?&]gift=ok/.test(location.search)){ setTimeout(()=>toast('ありがとう。半分は、猫たちへ。'),600); try{ history.replaceState(null,'',location.pathname); }catch(e){} }
-if(/[?&]kifu=ok/.test(location.search)){ setTimeout(()=>toast('ありがとう。猫たちに届けます。'),600); try{ history.replaceState(null,'',location.pathname); }catch(e){} }
+</script>
+
+<script id="home">
+/* ========== 保存まわり（localStorage） ========== */
+const LS={ get(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }, del(k){ try{ localStorage.removeItem(k); }catch(e){} } };
+
+/* ========== にゃん生の保存／復元（おくりものに出かけるとき・つづきから） ========== */
+function packLife(){ return {v:1, ts:Date.now(), s:{...S, c:S.c.name, coat:S.coat.id}, log:logEl.innerHTML}; }
+function unpackLife(d){ if(!d||!d.s) return null; const s={...d.s}; s.c=COUNTRIES.find(x=>x.name===s.c); s.coat=COATS.find(x=>x.id===s.coat); if(!s.c||!s.coat||!s.st) return null; return s; }
+function saveLife(extra){ if(!S||!S.alive||T) return false; return LS.set('neko_life',Object.assign(packLife(),extra||{})); }
+function resumeLife(d){ const s=unpackLife(d); if(!s) return false;
+  S=s; T=null; logEl.innerHTML=d.log||''; curBlock=logEl.firstElementChild; $('endArea').innerHTML=''; show('endArea',false);
+  show('title',false); show('home',false); show('game',true); show('actions',true); setSpeed(0);
+  setStats(); redraw(); startAnim(); renderChips(); LS.del('neko_life'); window.scrollTo({top:0}); return true; }
+
+/* ========== おくりもの（にゃん生の途中） ========== */
+function giftArrive(g){
+  const line=(g.lines&&(g.lines[S.env]||g.lines.pet))||'知らない誰かから、おくりものが届いた。';
+  const t={lines:[line],choice:null,tag:'good',head:(S.t<12?`生後${S.t}か月`:`${ageY(S)}さいの${seasonAt(S)}`)+'・おくりもの',before:{...S.st}};
+  for(const k in g.fx) dstat(S,k,g.fx[k]); S.k.gifts=(S.k.gifts||0)+1;
+  const block=addBlock(t); const dt=deltaText(t); if(dt){ const d=document.createElement('div'); d.className='delta'; d.textContent=dt; block.appendChild(d); }
+  setStats(); redraw(); renderChips(); toTop();
+}
+function openGiftBox(){
+  const box=$('giftBox'); if(!box.hidden){ box.hidden=true; return; }
+  box.innerHTML='';
+  const p=document.createElement('p'); p.className='note'; p.textContent='知らない誰かとして、この子に贈る。半分は猫の保護団体へ。'; box.appendChild(p);
+  const row=document.createElement('div'); row.className='row';
+  SITE.gifts.forEach(g=>{ const b=document.createElement('button'); b.className='ghost small'; b.textContent=`${g.label} ${g.price}円`;
+    if(!g.url){ b.classList.add('soon'); b.textContent+='（準備中）'; }
+    b.onclick=()=>{ if(T&&T.choice){ toast('選択肢を選んでから'); return; } if(saveLife({pendingGift:g.id})) location.href=g.url; else toast('いまは贈れません'); };
+    row.appendChild(b); });
+  const c=document.createElement('button'); c.className='ghost small'; c.textContent='とじる'; c.onclick=()=>{ box.hidden=true; }; row.appendChild(c);
+  box.appendChild(row); box.hidden=false;
+}
+
+/* ========== うちに迎える（500円）→ 部屋 ========== */
+const ROOMS=[{id:'wa',n:'和室'},{id:'yo',n:'洋室'},{id:'en',n:'縁側'}];
+const FURN=[{id:'cushion',n:'クッション'},{id:'tower',n:'キャットタワー'},{id:'windowbed',n:'窓辺のベッド'},{id:'kotatsu',n:'こたつ'},{id:'box',n:'段ボール箱'},{id:'scratcher',n:'爪とぎ'},{id:'plant',n:'観葉植物'},{id:'shelf',n:'本棚'},{id:'bowl',n:'ごはん皿'}];
+function loadHome(){ const h=LS.get('neko_home')||{}; return {v:1, room:ROOMS.some(r=>r.id===h.room)?h.room:'wa', furn:Array.isArray(h.furn)?h.furn:['cushion','tower','bowl'], cats:Array.isArray(h.cats)?h.cats:[]}; }
+function saveHome(h){ LS.set('neko_home',h); }
+function catRecord(s){ return {id:'', coat:s.coat.id, c:s.c.name, flag:s.c.flag, name:s.name||'', sex:s.sex, title:titleFor(s), deathAge:s.deathAge, born:s.born, birthPlace:s.birthPlace, env:s.env, indoor:!!s.indoor, cause:s.cause, k:{sun:s.k.sun,pets:s.k.pets,meals:s.k.meals,purr:s.k.purr}, at:new Date().toISOString().slice(0,10)}; }
+function adoptBegin(){ if(!S||S.alive||!SITE.room.url) return; LS.set('neko_adopt',{ts:Date.now(),cat:catRecord(S)}); location.href=SITE.room.url; }
+async function verifySid(sid){
+  if(!SITE.verifyUrl) return {ok:true,skip:true};
+  try{ const r=await fetch(SITE.verifyUrl+(SITE.verifyUrl.includes('?')?'&':'?')+'sid='+encodeURIComponent(sid)); return await r.json(); }
+  catch(e){ return {ok:true,net:true}; }
+}
+async function adoptReturn(sid){
+  const p=LS.get('neko_adopt'); if(!p||!p.cat){ setTimeout(()=>toast('ありがとう'),600); return; }
+  const v=await verifySid(sid); if(v&&v.ok===false){ toast('お支払いが確認できませんでした'); return; }
+  const cat=p.cat; cat.id=sid||('local_'+Date.now().toString(36)); cat.sid=sid||''; cat.ok=!!(v&&v.ok&&!v.skip&&!v.net);
+  const h=loadHome(); if(!h.cats.some(x=>x.id===cat.id)) h.cats.push(cat); saveHome(h); LS.del('neko_adopt');
+  openHome(); setTimeout(()=>toast('うちに来ました'),500);
+}
+
+/* --- 部屋の絵 --- */
+function drawRoom(ctx,h,poses,breath,W,H){
+  const D=4, g=(x,y,w,h2,col)=>px(ctx,x*D,y*D,w*D,h2*D,col); const cw=W/D, ch=H/D; const FT=26; // 床の上端
+  const hr=new Date().getHours(); const night=hr>=19||hr<6; const R=seeded(h.room.length*17+h.furn.length);
+  const furn=id=>h.furn.includes(id);
+  if(h.room==='wa'){
+    g(0,0,cw,FT,'#efe6cf'); g(0,FT-3,cw,3,'#a77b52'); g(0,FT-3,cw,1,'#c29569');
+    g(0,FT,cw,ch-FT,'#c9c48a'); for(let y=FT;y<ch;y+=2) g(0,y,cw,1,'#bfba7f');
+    g(0,FT,cw,1,'#5c6a44'); g(0,36,cw,1,'#5c6a44'); for(const x of [0,27,53,79]) g(x,FT,1,ch-FT,'#5c6a44');
+    // 障子
+    g(55,2,22,20,'#8a6a46'); g(56,3,20,18,night?'#b9b6c9':'#fbf7ea'); for(let x=61;x<76;x+=5) g(x,3,1,18,'#b08e64'); for(let y=7;y<21;y+=4) g(56,y,20,1,'#b08e64');
+    // 掛け軸
+    g(24,2,8,18,'#f3eedd'); g(24,2,8,1,'#5a4634'); g(24,19,8,1,'#5a4634'); g(27,6,1,9,'#3b3a3a'); g(26,8,3,1,'#3b3a3a'); g(28,11,2,1,'#3b3a3a'); g(29,16,2,2,'#c4443a');
+  } else if(h.room==='yo'){
+    g(0,0,cw,FT,'#dfe3ec'); for(let x=4;x<cw;x+=8) g(x,0,1,FT,'#d5dae5'); g(0,FT-2,cw,2,'#f5f3ee');
+    g(0,FT,cw,ch-FT,'#b98c62'); for(let y=FT+3;y<ch;y+=3) g(0,y,cw,1,'#ad8159'); for(let x=10;x<cw;x+=20) g(x,FT,1,ch-FT,'#a1764f');
+    // 窓とカーテン
+    g(53,2,24,18,'#ffffff'); g(54,3,22,16,night?'#1a1c3d':'#9fd3f0'); g(64,3,1,16,'#ffffff'); g(54,10,22,1,'#ffffff');
+    if(night){ for(let i=0;i<9;i++) g(55+Math.floor(R()*20),4+Math.floor(R()*12),1,1,'#f1e9d8'); g(70,5,3,3,'#f6e7a8'); } else { g(57,5,5,2,'#ffffff'); g(67,13,6,2,'#ffffff'); }
+    g(50,1,3,20,'#f2c7c7'); g(77,1,3,20,'#f2c7c7'); g(49,1,31,1,'#8a6a46');
+    // 額
+    g(24,5,9,7,'#8a6a46'); g(25,6,7,5,'#9fd6a8'); g(26,8,3,2,'#5f8a4e'); g(30,7,1,1,'#f6e7a8');
+  } else {
+    // 縁側：左がふすま、右は庭
+    g(0,0,31,FT,'#efe4c8'); g(0,0,1,FT,'#8a6a46'); g(15,0,1,FT,'#8a6a46'); g(0,0,31,1,'#8a6a46'); g(0,FT-1,31,1,'#8a6a46'); g(7,13,2,2,'#5a4634'); g(22,13,2,2,'#5a4634');
+    g(31,0,cw-31,18,night?'#1a1c3d':'#9fd6f2'); g(31,18,cw-31,FT-18,'#78b864');
+    if(night){ for(let i=0;i<14;i++) g(33+Math.floor(R()*44),2+Math.floor(R()*12),1,1,'#f1e9d8'); g(70,4,4,4,'#f6e7a8'); } else { g(42,4,8,2,'#ffffff'); g(44,3,4,1,'#ffffff'); }
+    g(36,15,10,6,'#5f8a4e'); g(50,17,8,5,'#5f8a4e'); g(64,7,8,10,'#5f8a4e'); g(67,17,2,5,'#7a5a3a'); g(58,22,5,2,'#9a9a9a');
+    g(31,0,cw-31,2,'#6b4f36'); g(30,0,2,FT,'#8a6a46'); g(77,0,2,FT,'#8a6a46');
+    g(0,FT,cw,ch-FT,'#c99b6a'); for(let y=FT+3;y<ch;y+=3) g(0,y,cw,1,'#b08858'); g(0,ch-2,cw,2,'#7a5a3a');
+  }
+  // 家具（奥）
+  if(furn('shelf')){ g(2,9,11,17,'#8a6a46'); g(3,10,9,15,'#5a4634'); for(const [y,cols] of [[11,['#ec93a6','#8fc1ea','#f2b35c','#8fd6a8']],[16,['#8fc1ea','#f1e9d8','#ec93a6']],[21,['#f2b35c','#8fd6a8','#8fc1ea','#f1e9d8']]]){ let x=4; for(const c of cols){ g(x,y,2,4,c); x+=2; } } }
+  if(furn('plant')){ g(15,19,6,7,'#b06a48'); g(14,18,8,2,'#c87d58'); g(17,9,4,9,'#6b8f5a'); g(14,11,4,4,'#86b070'); g(20,10,4,4,'#86b070'); g(16,6,3,4,'#6b8f5a'); }
+  if(furn('windowbed')){ g(53,FT,15,5,'#7fb8e8'); g(53,FT,15,1,'#315b7a'); g(53,FT+4,15,1,'#315b7a'); g(55,FT+1,11,3,'#a9d1f2'); }
+  if(furn('tower')){ g(68,ch-3,12,2,'#8a6a46'); g(74,FT+1,3,ch-FT-4,'#c9a070'); g(68,FT+1,12,2,'#8a6a46'); g(69,FT,11,1,'#c9a070'); g(70,FT+8,9,2,'#8a6a46'); }
+  if(furn('kotatsu')){ g(30,34,20,7,'#d9583d'); g(28,35,24,2,'#d9583d'); g(32,38,16,3,'#b8432a'); g(31,33,18,1,'#8a6a46'); g(30,34,20,1,'#6b4f36'); }
+  if(furn('box')){ g(16,36,12,7,'#c9a070'); g(16,36,12,1,'#b08858'); g(14,35,4,2,'#d4b483'); g(26,35,4,2,'#d4b483'); g(19,39,6,1,'#8a6a46'); }
+  if(furn('cushion')){ g(5,39,12,4,'#e8a4b4'); g(6,38,10,1,'#f3c0cc'); g(6,43,10,1,'#c7849a'); }
+  if(furn('scratcher')){ g(44,41,12,3,'#d4b483'); for(let x=45;x<56;x+=2) g(x,41,1,3,'#c0a070'); }
+  if(furn('bowl')){ g(36,42,4,2,'#7fb8e8'); g(37,41,2,1,'#f2b35c'); g(41,42,4,2,'#f1e9d8'); g(42,41,2,1,'#9fd3f0'); }
+  // ねこたち（座る場所：家具 → 床）
+  const seats=[]; if(furn('kotatsu')) seats.push({x:40,y:33}); if(furn('cushion')) seats.push({x:11,y:40}); if(furn('tower')) seats.push({x:74,y:FT}); if(furn('windowbed')) seats.push({x:60,y:FT+4}); if(furn('box')) seats.push({x:22,y:36}); if(furn('tower')) seats.push({x:74,y:FT+8});
+  seats.push({x:40,y:43},{x:14,y:44},{x:58,y:43},{x:28,y:39},{x:50,y:38},{x:72,y:44});
+  const cats=h.cats.slice(0,8); const sc=cats.length<=2?3:2;
+  const placed=cats.map((c,i)=>{ const coat=COATS.find(k=>k.id===c.coat)||COATS[0]; const seat=seats[i%seats.length]; return {c,coat,seat,pose:poses[c.id]||'sit'}; });
+  placed.sort((a,b)=>a.seat.y-b.seat.y);
+  for(const p of placed){ const d=CAT_IMG[(p.pose==='sleep'&&p.coat.sleep)||p.coat.img]; const x=p.seat.x*D-d.w*sc/2, y=p.seat.y*D+2-d.h*sc; drawCat(ctx,p.coat,p.pose,x,y,sc,{breath}); }
+  if(night){ ctx.fillStyle='rgba(10,8,24,.32)'; ctx.fillRect(0,0,W,H); ctx.fillStyle='rgba(255,220,150,.10)'; ctx.beginPath(); ctx.arc(W*0.3,0,120,0,Math.PI*2); ctx.fill(); }
+}
+let HOME=null, homeTimer=null, homePoses={}, homeBreath=0;
+function renderRoom(){ if(!HOME) return; const cv=$('roomCanvas'); const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false; ctx.clearRect(0,0,cv.width,cv.height); drawRoom(ctx,HOME,homePoses,homeBreath,cv.width,cv.height); }
+function catThumb(cv,c){ const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false; ctx.clearRect(0,0,cv.width,cv.height); const coat=COATS.find(k=>k.id===c.coat)||COATS[0]; const d=CAT_IMG[coat.img]; const sc=2; drawCat(ctx,coat,'sit',cv.width/2-d.w*sc/2,cv.height-d.h*sc-2,sc,null); }
+function renderHomeUI(){
+  const h=HOME; $('roomCap').textContent=`うちのねこ ・ ${h.cats.length}匹`;
+  const rt=$('roomTypes'); rt.innerHTML=''; ROOMS.forEach(r=>{ const b=document.createElement('button'); b.className='ghost small'+(h.room===r.id?' on':''); b.textContent=r.n; b.onclick=()=>{ h.room=r.id; saveHome(h); renderHomeUI(); renderRoom(); }; rt.appendChild(b); });
+  const fc=$('furnChips'); fc.innerHTML=''; FURN.forEach(f=>{ const b=document.createElement('button'); b.className=h.furn.includes(f.id)?'on':''; b.textContent=(h.furn.includes(f.id)?'✓ ':'')+f.n; b.onclick=()=>{ h.furn=h.furn.includes(f.id)?h.furn.filter(x=>x!==f.id):h.furn.concat(f.id); saveHome(h); renderHomeUI(); renderRoom(); }; fc.appendChild(b); });
+  const list=$('catList'); list.innerHTML='';
+  if(!h.cats.length){ const p=document.createElement('p'); p.className='note'; p.textContent='まだ誰もいません。にゃん生の最後に「うちに迎える」と、ここに来ます。'; list.appendChild(p); }
+  h.cats.forEach((c,i)=>{ const row=document.createElement('div'); row.className='catrow';
+    const cv=document.createElement('canvas'); cv.width=64; cv.height=56; cv.className='thumb'; row.appendChild(cv); catThumb(cv,c);
+    const box=document.createElement('div'); box.className='stack'; box.style.gap='4px'; box.style.flex='1';
+    const inp=document.createElement('input'); inp.type='text'; inp.maxLength=12; inp.placeholder='名前をつける'; inp.value=c.name||''; inp.addEventListener('input',e=>{ c.name=e.target.value.trim(); saveHome(h); }); box.appendChild(inp);
+    const coat=COATS.find(k=>k.id===c.coat)||COATS[0];
+    const p=document.createElement('p'); p.className='small muted'; p.textContent=`${c.flag||''} ${c.c}・${coat.name}の${c.sex==='♂'?'オス':'メス'}・${c.deathAge}まで ／ 称号：${c.title}`; box.appendChild(p);
+    const p2=document.createElement('p'); p2.className='small muted'; p2.textContent=`${c.at} に迎えた${c.ok?'':''}`; box.appendChild(p2);
+    row.appendChild(box); list.appendChild(row); });
+  $('btnHome').textContent=h.cats.length?`うちのねこ（${h.cats.length}）`:'うちのねこ';
+}
+function openHome(){ HOME=loadHome(); homePoses={}; show('title',false); show('game',false); show('actions',false); show('home',true); renderHomeUI(); renderRoom(); window.scrollTo({top:0});
+  if(!homeTimer&&!reduced) homeTimer=setInterval(()=>{ if($('home').hidden||document.hidden) return; homeBreath=homeBreath?0:1; for(const c of HOME.cats){ if(Math.random()<.06) homePoses[c.id]=homePoses[c.id]==='sleep'?'sit':'sleep'; } renderRoom(); },900); }
+function closeHome(){ show('home',false); show('title',true); renderTitle($('titleCanvas')); refreshTitle(); window.scrollTo({top:0}); }
+/* 引っ越しコード */
+function moveCode(){ const h=loadHome(); const s=JSON.stringify({v:1,room:h.room,furn:h.furn,cats:h.cats}); return 'NEKO1.'+btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+async function importCode(code){
+  code=(code||'').trim(); if(!code.startsWith('NEKO1.')) return 'コードの形がちがいます';
+  let d; try{ let b=code.slice(6).replace(/-/g,'+').replace(/_/g,'/'); while(b.length%4) b+='='; d=JSON.parse(decodeURIComponent(escape(atob(b)))); }catch(e){ return '読み込めませんでした'; }
+  if(!d||!Array.isArray(d.cats)) return '読み込めませんでした';
+  const h=loadHome(); let added=0, bad=0;
+  for(const c of d.cats){ if(!c||!c.id||!c.coat) continue; if(h.cats.some(x=>x.id===c.id)) continue;
+    if(SITE.verifyUrl&&c.sid){ const v=await verifySid(c.sid); if(v&&v.ok===false){ bad++; continue; } }
+    else if(SITE.verifyUrl&&!c.sid){ bad++; continue; }
+    h.cats.push({id:c.id,sid:c.sid||'',coat:c.coat,c:c.c||'',flag:c.flag||'',name:c.name||'',sex:c.sex||'♂',title:c.title||'',deathAge:c.deathAge||'',born:c.born||'',birthPlace:c.birthPlace||'',env:c.env||'',indoor:!!c.indoor,cause:c.cause||'',k:c.k||{},at:c.at||'',ok:!!c.ok}); added++; }
+  if(ROOMS.some(r=>r.id===d.room)) h.room=d.room; if(Array.isArray(d.furn)) h.furn=d.furn.filter(f=>FURN.some(x=>x.id===f));
+  saveHome(h); HOME=h; renderHomeUI(); renderRoom();
+  return added?`${added}匹が引っ越してきました`:(bad?'確認できないねこがいました':'新しいねこはいませんでした');
+}
+
+/* ========== タイトル画面の追加ボタン ========== */
+function refreshTitle(){
+  const h=loadHome(); $('btnHome').textContent=h.cats.length?`うちのねこ（${h.cats.length}）`:'うちのねこ';
+  const d=LS.get('neko_life'); const ok=d&&d.s&&d.s.alive&&(Date.now()-(d.ts||0))<36e5*48; show('btnResume',!!ok);
+}
+$('btnHome').onclick=openHome; $('btnHomeBack').onclick=closeHome;
+$('btnResume').onclick=()=>{ const d=LS.get('neko_life'); if(!d||!resumeLife(d)){ toast('つづきが見つかりませんでした'); refreshTitle(); } };
+$('btnMoveShow').onclick=()=>{ $('moveOut').value=moveCode(); };
+$('btnMoveCopy').onclick=()=>{ const ta=$('moveOut'); if(!ta.value) ta.value=moveCode(); const done=()=>toast('コピーしました'); if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(ta.value).then(done).catch(()=>{ ta.select(); done(); }); } else { ta.select(); done(); } };
+$('btnMoveIn').onclick=async()=>{ const b=$('btnMoveIn'); b.disabled=true; const msg=await importCode($('moveIn').value); b.disabled=false; toast(msg); if(/引っ越して/.test(msg)) $('moveIn').value=''; };
+(function(){ const row=$('titleLinks'); const add=(l,cls)=>{ if(!l||!l.label) return; const a=document.createElement('a'); a.className=cls; a.textContent=l.label; if(l.url){ a.href=l.url; a.target='_blank'; a.rel='noopener'; } else { a.classList.add('soon'); a.textContent=l.label+'（準備中）'; } row.appendChild(a); };
+  add(SITE.donate,'btn-link'); })();
+window.__redraw=()=>{ if(S&&!$('game').hidden) redraw(); if(!$('title').hidden) renderTitle($('titleCanvas')); if(!$('home').hidden) renderRoom(); };
+refreshTitle();
+
+/* ========== 支払いから戻ってきたとき ========== */
+(function(){
+  const q=new URLSearchParams(location.search); if(![...q.keys()].length) return;
+  const clean=()=>{ try{ history.replaceState(null,'',location.pathname); }catch(e){} };
+  if(q.has('gift')){ const id=q.get('gift'); const g=SITE.gifts.find(x=>x.id===id); const d=LS.get('neko_life'); clean();
+    if(g&&d&&d.pendingGift===id&&d.s&&d.s.alive&&resumeLife(d)){ setTimeout(()=>giftArrive(g),300); setTimeout(()=>toast('ありがとう。半分は、猫たちへ。'),900); }
+    else setTimeout(()=>toast('ありがとう。半分は、猫たちへ。'),600); }
+  if(q.has('kifu')){ clean(); setTimeout(()=>toast('ありがとう。猫たちに届けます。'),600); }
+  if(q.has('room')){ const sid=q.get('session_id')||''; clean(); adoptReturn(sid); }
+})();
+
 </script>
 
 <footer style="max-width:560px;margin:0 auto;padding:24px 0 150px;font-size:.8rem;color:#aaa2c0;text-align:center;line-height:2">
