@@ -207,8 +207,9 @@ summary{cursor:pointer;font-weight:700}
   </div>
 </div>
 
+<script>window.__SITE=1;</script>
 <script id="lang">
-const LANG=(()=>{ try{ const q=new URLSearchParams(location.search).get('lang'); if(q==='ja'||q==='en'){ localStorage.setItem('neko_lang',q); return q; } const v=localStorage.getItem('neko_lang'); if(v==='ja'||v==='en') return v; }catch(e){} return /^ja/i.test(navigator.language||'')?'ja':'en'; })();
+const LANG=(()=>{ if(window.__FORCE_LANG) return window.__FORCE_LANG; try{ const q=new URLSearchParams(location.search).get('lang'); if(q==='ja'||q==='en'){ localStorage.setItem('neko_lang',q); return q; } const v=localStorage.getItem('neko_lang'); if(v==='ja'||v==='en') return v; }catch(e){} return /^ja/i.test(navigator.language||'')?'ja':'en'; })();
 document.documentElement.lang=LANG;
 const cap1=x=>x?x.charAt(0).toUpperCase()+x.slice(1):x;
 if(LANG==='en'){
@@ -230,7 +231,7 @@ if(LANG==='en'){
   const ph={moveOut:'Press "Show code" and it appears here',moveIn:'Paste a code here'}; for(const id in ph){ const el=document.getElementById(id); if(el) el.placeholder=ph[id]; }
   const ar={titleCanvas:'Pixel art of cats sitting in a night alley',scene:'The current scene',roomCanvas:'My cats\' room',speed:'Fast-forward to the next choice'}; for(const id in ar){ const el=document.getElementById(id); if(el) el.setAttribute('aria-label',ar[id]); }
 }
-document.querySelectorAll('#langsw button').forEach(b=>{ b.classList.toggle('on',b.dataset.lang===LANG); b.onclick=()=>{ if(b.dataset.lang===LANG) return; try{ if(typeof S!=='undefined'&&S&&S.alive&&!T&&typeof saveLife==='function') saveLife({langSwitch:true}); }catch(e){} location.href=location.pathname+'?lang='+b.dataset.lang; }; });
+document.querySelectorAll('#langsw button').forEach(b=>{ b.classList.toggle('on',b.dataset.lang===LANG); b.onclick=()=>{ if(b.dataset.lang===LANG) return; try{ if(typeof S!=='undefined'&&S&&S.alive&&!T&&typeof saveLife==='function') saveLife({langSwitch:true}); }catch(e){} const base=location.pathname.replace(/(index|en)\.html$/,''); const toEn=b.dataset.lang==='en'; location.href=(window.__SITE? base+(toEn?'en.html':'index.html') : location.pathname)+'?lang='+b.dataset.lang; }; });
 </script>
 <script id="logic">
 /* ========== データ ========== */
@@ -482,6 +483,9 @@ function seasonTurn(s,t){
       t.lines.push(pick([(LANG==='en'?"On moving day, the family never came back.":'引っ越しの日、家族は帰ってこなかった。'),(LANG==='en'?"Your owner died. None of the relatives would take you.":'飼い主が亡くなった。親戚は誰も引き取らなかった。'),(LANG==='en'?"In an unfamiliar place, a car door opened, and then the car drove away.":'知らない場所でドアが開き、そのまま車は走り去った。')])); t.lines.push((LANG==='en'?`Now there was no choice but to survive in ${s.place}.`:`${s.place}で、生きていくしかなくなった。`)); }
     else if(!s.indoor && chance(0.003)){ becomeStray(s); s.lostOnce=true; t.lines.push((LANG==='en'?"Wandered too far and could not find the way home.":'遠くまで行きすぎて、帰り道がわからなくなった。')); dstat(s,'joy',-15); }
   } else if(s.env==='shelter'){ shelterSeason(s,t); if(!s.alive) return; }
+  if(s.prime>0){ s.prime--; if(s.prime===0&&chance(.5)) t.lines.push(s.env==='pet'?(LANG==='en'?"One day you noticed: the top of the fridge was no longer one jump away.":'気がつくと、冷蔵庫の上に一跳びでは乗れなくなっていた。'):(LANG==='en'?"One day you noticed: the top of the wall was no longer one jump away.":'気がつくと、塀の上まで一跳びでは届かなくなっていた。')); }
+  else if(!s.primeDone && s.alive && y>=2 && y<=7 && s.st.hp>=55 && chance(s.env==='pet'?0.07:0.04)){ s.primeDone=true; s.prime=3; for(const k of ['hp','food','joy','bond']) dstat(s,k,12); t.tag='good';
+    t.lines.push(s.env==='pet'?(LANG==='en'?"This might be the prime of your life. Your body felt light, and most days were about as good as days get.":'いまが、にゃん生の絶頂期かもしれない。体が軽くて、毎日がだいたい最高だった。'):s.env==='stray'?(LANG==='en'?"This was the prime of your life. Wall to wall, you could go anywhere.":'いまが、にゃん生の絶頂期だった。塀から塀へ、どこまでも行けた。'):(LANG==='en'?"This was when your body felt its best. Even inside the cage, you could tell.":'いまが、いちばん体の調子がいい時期だった。ケージの中でも、それはわかった。')); }
   if(s.sex==='♀' && !s.neutered && y>=1 && y<=8 && s.alive && (sea===(LANG==='en'?"Spring":'春')||sea===(LANG==='en'?"Autumn":'秋'))){
     const p = (s.env==='stray'?0.8:(1-c.vet*0.8))/2;
     if(chance(p)){ const n=ri(2,5); const dead=s.env==='stray'?Math.round(n*0.75):Math.round(n*0.1); s.k.kittens+=n;
@@ -521,12 +525,49 @@ function drift(s,step){
     s.k.sun+=Math.round(ri(10,30)*f); s.k.meals+=Math.round(ri(50,100)*f); s.k.humans+=Math.round(ri(0,3)*f); s.k.pets+=Math.round(ri(0,2)*c.rescue*f);
     if(s.sex==='♂'&&!s.neutered&&y>=1) s.k.fights+=Math.round(ri(0,2)*f);
   } else if(s.env==='pet'){
-    dstat(s,'food',ri(3,10)*f); dstat(s,'hp',(ri(-3,3)+(y>=12?-3:0)+(c.vet-0.5)*3)*f); dstat(s,'joy',(ri(-3,6)+(s.indoor?0:2))*f); dstat(s,'bond',ri(-2,4)*f);
+    dstat(s,'food',ri(-6,9)*f); dstat(s,'hp',(ri(-4,3)+(y>=12?-3:0)+(c.vet-0.5)*3)*f); dstat(s,'joy',(ri(-5,5)+(s.indoor?0:2))*f); dstat(s,'bond',ri(-3,3)*f);
     s.k.sun+=Math.round(ri(25,55)*f); s.k.meals+=Math.round(ri(175,183)*f); s.k.pets+=Math.round(ri(50,375)*f); s.k.humans+=Math.round(ri(0,4)*f); s.k.purr+=Math.round(ri(20,90)*f);
     if(!s.indoor){ s.k.humans+=Math.round(ri(1,3)*f); if(s.sex==='♂'&&!s.neutered) s.k.fights+=Math.round(ri(0,1)*f); }
   } else { dstat(s,'joy',-4*f); dstat(s,'food',4*f); }
-  s.joySum+=s.st.joy; s.joyN++;
+  /* ふだんは80前後が上限。絶頂期（s.prime）のあいだだけ100まで */
+  if(s.prime>0){ for(const k of ['hp','food','joy','bond']) dstat(s,k,4*f); }
+  else { for(const k of ['hp','food','joy','bond']){ const cap=73+ri(0,8); if(s.st[k]>cap) s.st[k]=clamp(s.st[k]-(s.st[k]-cap)*0.6); } }
+  s.joySum+=s.st.joy; s.joyN++; (s.joyHist||(s.joyHist=[])).push([s.t,s.st.joy]);
 }
+/* いちばんしあわせだった時期：ごきげんの移動平均がいちばん高かったころ */
+function bestPeriod(s){
+  const h=s.joyHist||[]; if(h.length<4) return null;
+  const w=h.length>=12?4:2; let best=-1,at=0;
+  for(let i=0;i+w<=h.length;i++){ let sum=0; for(let j=i;j<i+w;j++) sum+=h[j][1]; if(sum>best){ best=sum; at=h[i+Math.floor(w/2)][0]; } }
+  const tmp={...s,t:at}; return at<12? (LANG==='en'?`around ${Math.max(1,at)} months old`:`生後${Math.max(1,at)}か月のころ`) : (LANG==='en'?`around ${seasonAt(s,at)}, age ${ageY(tmp)}`:`${ageY(tmp)}さいの${seasonAt(s,at)}ごろ`);
+}
+/* 死因のひとこと */
+const CAUSE_NOTES={
+ [(LANG==='en'?"chronic kidney disease":'慢性腎臓病')]:(LANG==='en'?"The most common cause of death in older cats. More than 30% of cats over 15 are said to have it.":'高齢のねこの死因で、いちばん多い病気。15歳をこえたねこの3割以上がかかると言われる。'),
+ [(LANG==='en'?"old age":'老衰')]:(LANG==='en'?"Not many cats live this long, even among house cats.":'ここまで生きるねこは、家で暮らすねこでも多くない。'),
+ [(LANG==='en'?"cancer":'がん')]:(LANG==='en'?"Cancer is hard to spot in cats. Often it's only noticed when they stop eating.":'ねこのがんは見つけにくい。食べなくなって、はじめて気づかれることが多い。'),
+ [(LANG==='en'?"heart disease":'心臓の病気')]:(LANG==='en'?"Hypertrophic cardiomyopathy. A cat that looks perfectly healthy collapses one day without warning.":'肥大型心筋症。元気に見えるねこが、ある日とつぜん倒れる。'),
+ [(LANG==='en'?"thyroid disease":'甲状腺の病気')]:(LANG==='en'?"Common in older cats. The first sign: losing weight while still eating.":'高齢のねこに多い。食べているのにやせていくのが、最初のサイン。'),
+ [(LANG==='en'?"swallowing something you shouldn't have":'誤飲')]:(LANG==='en'?"String, rubber bands, houseplants. A home is more dangerous for a cat than it looks.":'ひも、ゴム、観葉植物。家の中は、ねこにとって意外と危ない。'),
+ [(LANG==='en'?"an infectious disease":'感染症')]:(LANG==='en'?"Many of these diseases can be prevented by vaccines, but for kittens it's sometimes too late.":'ワクチンで防げる病気も多いが、子ねこは間に合わないことがある。'),
+ [(LANG==='en'?"cat flu (a viral infection)":'猫風邪（ウイルス性の感染症）')]:(LANG==='en'?"The most common cause of death for street-born kittens. A blocked nose, and they can't nurse.":'街で生まれた子ねこの死因で、いちばん多い。鼻がつまって、ミルクが飲めなくなる。'),
+ [(LANG==='en'?"cold and hunger":'寒さと飢え')]:(LANG==='en'?"75% of street-born kittens don't survive six months (Nutter, 2004).":'街で生まれた子ねこの75%は、半年を生きられない（Nutter, 2004）。'),
+ [(LANG==='en'?"a crow attack":'カラスの襲撃')]:(LANG==='en'?"While you are small, even crows and kites are predators.":'小さいうちは、カラスやトビも敵になる。'),
+ [(LANG==='en'?"a traffic accident":'交通事故')]:(LANG==='en'?"The most common cause of death for cats that live outdoors. At night, frozen in the headlights.":'外で暮らすねこの死因で、いちばん多い。夜、ヘッドライトの中で動けなくなる。'),
+ [(LANG==='en'?"separation from your mother":'母ねことはぐれたこと')]:(LANG==='en'?"Kittens under a month old can't keep themselves warm without their mother.":'生後1か月までの子ねこは、母ねこがいないと体温を保てない。'),
+ [(LANG==='en'?"an infectious disease such as FIV or feline leukemia":'猫エイズや白血病などの感染症')]:(LANG==='en'?"Spread through fights and mating. Most street tomcats pick it up somewhere along the way.":'ケンカや交尾でうつる。街のオスねこの多くが、どこかでかかっている。'),
+ [(LANG==='en'?"an infected fight wound":'ケンカの傷からの感染')]:(LANG==='en'?"A bite wound may be small, but it festers inside. Street cats don't get to see a vet.":'かみ傷は小さくても、中で膿む。街のねこは、病院に行けない。'),
+ [(LANG==='en'?"the midwinter cold":'真冬の寒さ')]:(LANG==='en'?"Some cats, curled under a car hood or an air-conditioner unit, don't make it to morning.":'車のボンネットや室外機の下で、朝を迎えられないねこがいる。'),
+ [(LANG==='en'?"eating something poisonous":'毒のあるものを食べてしまったこと')]:(LANG==='en'?"Antifreeze, rat poison, lilies. Many of them smell sweet.":'不凍液、ネズミの毒、ユリの花。甘いにおいのものが多い。'),
+ [(LANG==='en'?"a dog":'犬')]:(LANG==='en'?"Not unusual where dogs roam loose or run wild.":'放し飼いの犬や野犬のいる地域では、めずらしくない。'),
+ [(LANG==='en'?"kidney disease":'腎臓の病気')]:(LANG==='en'?"Street cats can't drink much water. The kidneys give out first.":'街のねこは水をあまり飲めない。腎臓が、先に弱る。'),
+ [(LANG==='en'?"hunger":'飢え')]:(LANG==='en'?"When the feeding spot disappears, a cat doesn't last a week.":'ごはん場所がなくなると、1週間もたない。'),
+ [(LANG==='en'?"culling to protect wildlife":'野生動物保護のための駆除')]:(LANG==='en'?"In this country, stray cats are culled to protect native birds and small animals.":'この国では、野生の鳥や小動物を守るために、野良ねこの駆除が行われている。'),
+ [(LANG==='en'?"war":'戦火')]:(LANG==='en'?"When the people leave a town, sometimes only the cats remain.":'人がいなくなった町に、ねこだけが残ることがある。'),
+ [(LANG==='en'?"a congenital illness":'生まれつきの病気')]:(LANG==='en'?"About one in ten newborn kittens fades away, and no one ever knows why.":'生まれた子ねこの1割ほどは、理由がわからないまま弱っていく。'),
+ [(LANG==='en'?"time running out at the shelter, no new family found":'保護施設で、新しい家族が見つからないまま')]:(LANG==='en'?"In Japan in fiscal 2024, 4,866 cats were euthanized in shelters.":'日本では2024年度、4,866匹のねこが施設で殺処分された。')
+};
+function causeNote(s){ return CAUSE_NOTES[s.cause]||''; }
 function mortality(s,t,frac){
   const c=s.c; let q=0; const y=ageY(s);
   if(s.t<12){
@@ -1094,7 +1135,7 @@ function titleFor(s){
   if(k.kittens>=15) c.push([(LANG==='en'?"Mother of Many":'大家族のかあさん'),7]);
   if(k.homes>=3) c.push([(LANG==='en'?"Traveling Cat":'旅するねこ'),6]);
   if(k.box>=7) c.push([(LANG==='en'?"Box Dweller":'箱の住人'),6]);
-  if(s.st.bond>=95&&s.k.pets>=10000&&s.env==='pet') c.push([(LANG==='en'?"Everyone's Darling":'人たらし'),7]);
+  if(s.st.bond>=84&&s.k.pets>=10000&&s.env==='pet') c.push([(LANG==='en'?"Everyone's Darling":'人たらし'),7]);
   if(k.fights>=20&&s.env==='stray') c.push([(LANG==='en'?"King of the Alley":'路地の王'),7]);
   if(k.sun>=3200) c.push([(LANG==='en'?"Sunbeam Master":'日向の達人'),5]);
   if(k.purr>=4500) c.push([(LANG==='en'?"Purr Virtuoso":'ゴロゴロ名人'),5]);
@@ -1108,7 +1149,7 @@ function titleFor(s){
   if(s.env==='pet'&&k.naps>=25) c.push([(LANG==='en'?"Oversleeper":'寝すぎ'),4]);
   if(s.env==='pet'&&y>=3&&k.hunt===0&&k.fights===0&&s.indoor) c.push([(LANG==='en'?"Freeloader":'ニート'),4]);
   if(s.env==='pet'&&k.box>=4&&k.box<7) c.push([(LANG==='en'?"Box Critic":'段ボール評論家'),4]);
-  if(s.env==='pet'&&s.st.food>=95&&s.w<4.2) c.push([(LANG==='en'?"Eats and Stays Slim":'食べても太らない'),3]);
+  if(s.env==='pet'&&s.st.food>=80&&s.w<4.2) c.push([(LANG==='en'?"Eats and Stays Slim":'食べても太らない'),3]);
   if(s.env==='stray'&&k.humans>=120) c.push([(LANG==='en'?"Knows Everyone":'顔が広い'),4]);
   if(s.sex==='♂'&&!s.neutered&&y>=4&&k.fights<=2) c.push([(LANG==='en'?"Pacifist":'平和主義'),4]);
   if(s.env==='pet'&&s.st.bond<=40&&y>=3) c.push([(LANG==='en'?"Tsundere":'ツンデレ'),5]);
@@ -1151,7 +1192,7 @@ function shareText(s,url){
   const l3=(LANG==='en'?`Sunbathing: ${s.k.sun} / Petted: ${s.k.pets} / Kittens: ${s.k.kittens}`:`日向ぼっこ ${s.k.sun}回 ／ なでられた ${s.k.pets}回 ／ 子ども ${s.k.kittens}匹`);
   return (LANG==='en'?`${l1}\n${l2}\n${l3}\n\nWhere will you be born? #1of600MillionCats${url?'\n'+url:''}`:`${l1}\n${l2}\n${l3}\n\nあなたはどこに生まれる？ #6億分の1のねこ${url?'\n'+url:''}`);
 }
-if(typeof module!=='undefined') module.exports={COUNTRIES,COATS,birth,startTurn,resolveChoice,shareText,TOTAL_M,ageY,summary,doAction,ACTIONS,titleFor,endingText};
+if(typeof module!=='undefined') module.exports={COUNTRIES,COATS,birth,startTurn,resolveChoice,shareText,TOTAL_M,ageY,summary,doAction,ACTIONS,titleFor,endingText,bestPeriod,causeNote};
 </script>
 
 <script id="art">
@@ -1435,7 +1476,9 @@ function showResult(area){
     <p><span class="title-badge">Title: ${esc(title)}</span></p>
     <p>${esc(c.name)}. Born in ${esc(s.birthPlace)}, ${movedText(s)} lived <b>${esc(s.deathAge)}</b>. In human years, ${humanAge(s)}.</p>
     <p class="muted">In the end, it was ${esc(s.cause)}. ${s.env==='pet'?(LANG==='en'?"By the family's side.":'家族のそばで。'):s.env==='shelter'?(LANG==='en'?"In a cage.":'ケージの中で。'):(LANG==='en'?"Unknown to anyone.":'誰にも知られずに。')}</p>
+    ${causeNote(s)?`<p class="small muted">${esc(causeNote(s))}</p>`:''}
     <p class="joyline">${esc(joyLine)}</p>
+    ${bestPeriod(s)?(LANG==='en'?`<p class="small"><span class="muted">Happiest time: </span>${esc(bestPeriod(s))}</p>`:`<p class="small"><span class="muted">いちばんしあわせだった時期：</span>${esc(bestPeriod(s))}</p>`):''}
     <div class="nums">
       <div class="num"><b>${s.k.sun}</b><span>Sunbaths</span></div>
       <div class="num"><b>${s.k.pets}</b><span>Times petted</span></div>
@@ -1469,7 +1512,9 @@ function showResult(area){
     <p><span class="title-badge">称号：${esc(title)}</span></p>
     <p>${esc(c.name)}、${esc(s.birthPlace)}に生まれ、${movedText(s)}<b>${esc(s.deathAge)}</b>の一生を終えた。人間でいえば${humanAge(s)}歳。</p>
     <p class="muted">最期は、${esc(s.cause)}で。${s.env==='pet'?(LANG==='en'?"By the family's side.":'家族のそばで。'):s.env==='shelter'?(LANG==='en'?"In a cage.":'ケージの中で。'):(LANG==='en'?"Unknown to anyone.":'誰にも知られずに。')}</p>
+    ${causeNote(s)?`<p class="small muted">${esc(causeNote(s))}</p>`:''}
     <p class="joyline">${esc(joyLine)}</p>
+    ${bestPeriod(s)?(LANG==='en'?`<p class="small"><span class="muted">Happiest time: </span>${esc(bestPeriod(s))}</p>`:`<p class="small"><span class="muted">いちばんしあわせだった時期：</span>${esc(bestPeriod(s))}</p>`):''}
     <div class="nums">
       <div class="num"><b>${s.k.sun}</b><span>日向ぼっこ（回）</span></div>
       <div class="num"><b>${s.k.pets}</b><span>なでられた（回）</span></div>
