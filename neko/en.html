@@ -1288,7 +1288,7 @@ function playEnding(canvas,capEl,s,onDone){
   const kitten=s.t<12, born=s.born, env=s.env, y=ageY(s), sea=seasonAt(s);
   const adopted = born===(LANG==='en'?"street":'街') && env==='pet';
   const scene = env==='shelter'?'shelter':env==='pet'?(s.indoor?'home':'yard'):sceneFor(s);
-  const prelude = adopted ? 2600 : 0;              // 拾われた子：路地→家
+  const prelude = adopted ? 3800 : 0;              // 拾われた子：路地→家
   const walk = (env==='stray'&&!kitten&&!reduced) ? 2000 : 0; // 街のねこ：歩いてくる
   const T0=prelude+walk;
   const total=T0+9800;
@@ -1300,7 +1300,7 @@ function playEnding(canvas,capEl,s,onDone){
   else if(env==='shelter') last = (LANG==='en'?"A new family was never found.":'新しい家族は、最後まで見つからなかった。');
   else last = s.fed?(LANG==='en'?"The next day, the old woman put food out again.":'次の日も、おばあさんはごはんを置いた。'):s.st.bond>=60?(LANG==='en'?"The children on their way to school kept looking for a while.":'通学路の子どもたちが、しばらく探していた。'):(LANG==='en'?"No one noticed.":'誰にも気づかれなかった。');
   const caps=[[T0+300,when],[T0+2600,(LANG==='en'?`Lost to ${cause},`:`${cause}で、`)],[T0+5200,last],[T0+8000,(LANG==='en'?"Here, one cat lived.":'ここに、1匹のねこが生きた。')]];
-  if(adopted){ caps.unshift([300,(LANG==='en'?"Born on the street,":'街に生まれて、')]); caps.splice(1,0,[prelude+200,(LANG==='en'?"and lived in a home.":'家で、生きた。')]); }
+  if(adopted){ caps.unshift([300,(LANG==='en'?"Born on the street,":'街に生まれて、')]); caps.splice(1,0,[2000,(LANG==='en'?"and lived in a home.":'家で、生きた。')]); }
   const sc=kitten?3:4; const d=CAT_IMG[(s.coat.sleep)||s.coat.img]; const dsit=CAT_IMG[s.coat.img];
   const ground=(Math.ceil(H/4)-7)*4;
   const R=seeded(s.t*7+s.c.name.length);
@@ -1308,10 +1308,10 @@ function playEnding(canvas,capEl,s,onDone){
   const weather = (sea===(LANG==='en'?"Winter":'冬')&&s.c.cold>=.4&&scene!=='home'&&scene!=='shelter')?'snow':(sea===(LANG==='en'?"Rainy season":'雨季')||(sea===(LANG==='en'?"Summer":'夏')&&s.c.rain))&&scene!=='home'&&scene!=='shelter'?'rain':'';
   let acc=0, prevNow=performance.now(); let lastCap=-1;
   function frame(now){
-    acc+=(now-prevNow)*endRate; prevNow=now; const t=Math.min(total, acc);
+    acc+=Math.min(now-prevNow,120)*endRate; prevNow=now; const t=Math.min(total, acc); /* タブを離れていた分は進めない */
     ctx.clearRect(0,0,W,H);
     // 背景（拾われた子は路地→家のクロスフェード）
-    if(adopted && t<prelude){ drawBackground(ctx,sceneFor({...s,env:'stray',place:s.birthPlace}),sea,s.c,W,H); if(t>prelude-900){ ctx.globalAlpha=(t-(prelude-900))/900; drawBackground(ctx,scene,sea,s.c,W,H); ctx.globalAlpha=1; } }
+    if(adopted && t<prelude){ drawBackground(ctx,sceneFor({...s,env:'stray',place:s.birthPlace}),sea,s.c,W,H); if(t>prelude-1600){ ctx.globalAlpha=(t-(prelude-1600))/1600; drawBackground(ctx,scene,sea,s.c,W,H); ctx.globalAlpha=1; } }
     else drawBackground(ctx,scene,sea,s.c,W,H);
     // 天気
     if(weather&&!reduced){ ctx.fillStyle = weather==='snow'?'rgba(255,255,255,.9)':'rgba(200,220,255,.5)'; for(const f of flakes){ const fy=(f.y+t*f.v*0.08)%H; if(weather==='snow') ctx.fillRect(Math.round(f.x),Math.round(fy),2,2); else ctx.fillRect(Math.round(f.x),Math.round(fy),1,7); } }
