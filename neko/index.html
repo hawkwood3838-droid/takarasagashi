@@ -103,6 +103,7 @@ canvas{display:block;width:100%;max-width:100%;image-rendering:pixelated;image-r
 .endov .cap2{font-family:var(--display);font-size:1.15rem;letter-spacing:.06em;color:var(--amber);text-align:center;min-height:2.2em;max-width:560px;line-height:1.6}
 .endov .ctl2{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
 .endov .speed{margin:0}
+.year .replay{margin-top:8px}
 button.small{font-size:.85rem;padding:6px 12px}
 .ending p+p{margin-top:8px}
 .epitaph .flag{font-size:2.4rem;line-height:1}
@@ -1458,24 +1459,30 @@ function startGame(){
   addBlock(intro); S.turns.push('intro'); S.acted=true; renderChips();
   toTop(); scheduleAuto();
 }
-function endGame(){
-  show('actions',false); clearTimeout(autoTimer);
-  const s=S; $('giftBox').hidden=true;
-  const area=$('endArea'); area.innerHTML=''; show('endArea',true);
-  // 画面いっぱいのムービー
+function showEndingMovie(s,onDone){
   const ov=document.createElement('div'); ov.className='endov'; ov.id='endOv';
   const cv=document.createElement('canvas'); cv.width=320; cv.height=180; cv.setAttribute('aria-label',(LANG==='en'?"Ending":'エンディング'));
   const cap=document.createElement('div'); cap.className='cap2'; cap.textContent=' ';
   const ctl=document.createElement('div'); ctl.className='ctl2';
-  const sk=document.createElement('button'); sk.className='ghost small'; sk.id='btnSkipEnd'; sk.textContent=(LANG==='en'?"Skip":'スキップ'); sk.onclick=()=>{ stopEnding(); finish(); };
+  const sk=document.createElement('button'); sk.className='ghost small'; sk.id='btnSkipEnd'; sk.textContent=(LANG==='en'?"Skip":'スキップ'); sk.onclick=()=>{ stopEnding(); done(); };
   ctl.appendChild(sk); ov.appendChild(cv); ov.appendChild(cap); ov.appendChild(ctl); document.body.appendChild(ov);
   endingPlaying=true;
-  const finish=()=>{ if(ov.dataset.done) return; ov.dataset.done='1'; ov.remove(); endingPlaying=false; setStats(); redraw(); toTop();
+  const done=()=>{ if(ov.dataset.done) return; ov.dataset.done='1'; ov.remove(); endingPlaying=false; onDone&&onDone(); };
+  setEndRate(1); // ムービーはいつも通常速度。飛ばしたいときはスキップ
+  playEnding(cv,cap,s,done);
+}
+function endGame(){
+  show('actions',false); clearTimeout(autoTimer);
+  const s=S; $('giftBox').hidden=true;
+  const area=$('endArea'); area.innerHTML=''; show('endArea',true);
+  const deathBlock=curBlock;
+  showEndingMovie(s,()=>{ setStats(); redraw(); toTop();
     const end=document.createElement('div'); end.className='card ending stack';
     end.innerHTML=(LANG==='en'?`<p class="eyebrow">Ending</p>`:`<p class="eyebrow">エンディング</p>`)+endingText(s).map(p=>`<p>${esc(p)}</p>`).join('')+(LANG==='en'?`<div class="row"><button id="btnResult">See the result</button></div>`:`<div class="row"><button id="btnResult">リザルトを見る</button></div>`);
-    area.appendChild(end); $('btnResult').onclick=()=>{ $('btnResult').remove(); showResult(area); }; };
-  setEndRate(1); // ムービーはいつも通常速度。飛ばしたいときはスキップ
-  playEnding(cv,cap,s,finish);
+    area.appendChild(end); $('btnResult').onclick=()=>{ $('btnResult').remove(); showResult(area); };
+    // 最期のログに「もう一度見る」
+    if(deathBlock&&!deathBlock.querySelector('.replay')){ const rb=document.createElement('button'); rb.className='ghost small replay'; rb.textContent=(LANG==='en'?"▶ Watch the ending again":'▶ エンディングをもう一度'); rb.onclick=()=>{ if(!$('endOv')) showEndingMovie(s,()=>{ redraw(); }); }; const d=deathBlock.querySelector('.delta'); if(d) deathBlock.insertBefore(rb,d); else deathBlock.appendChild(rb); }
+  });
 }
 function showResult(area){
   const s=S, c=s.c; const {who,joyLine}=summary(s); const title=titleFor(s);
