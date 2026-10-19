@@ -222,7 +222,7 @@ const LANG=(()=>{ if(window.__FORCE_LANG) return window.__FORCE_LANG; const ok=v
   if(low.startsWith('ja')) return 'ja'; const hit=LANGS.find(l=>l.id!=='ja'&&l.id!=='en'&&low.startsWith(l.id.toLowerCase().split('-')[0])); if(hit&&(!/^zh/.test(low)||/tw|hk|hant/.test(low))) return hit.id; return 'en'; })();
 document.documentElement.lang=LANG;
 var DICT={}; if(typeof DICTS!=='undefined'&&DICTS[LANG]) DICT=DICTS[LANG];
-if(LANG!=='ja'&&window.__SITE&&!(typeof DICTS!=='undefined'&&DICTS[LANG])) document.write('<script src="lang/'+LANG+'.js?v=415805"><\/script>');
+if(LANG!=='ja'&&window.__SITE&&!(typeof DICTS!=='undefined'&&DICTS[LANG])) document.write('<script src="lang/'+LANG+'.js?v=416400"><\/script>');
 function T(k){ return (LANG!=='ja'&&DICT[k]!=null)?DICT[k]:k; }
 function TT(k,a){ const t=(LANG!=='ja'&&DICT[k]!=null)?DICT[k]:k; return a? t.replace(/\$\{(\d+)\}/g,(m,i)=>a[+i]) : t; }
 const cap1=x=>x?x.charAt(0).toUpperCase()+x.slice(1):x;
@@ -1496,10 +1496,42 @@ function endGame(){
     if(deathBlock&&!deathBlock.querySelector('.replay')){ const rb=document.createElement('button'); rb.className='ghost small replay'; rb.textContent=T("▶ エンディングをもう一度"); rb.onclick=()=>{ if(!$('endOv')) showEndingMovie(s,()=>{ redraw(); }); }; const d=deathBlock.querySelector('.delta'); if(d) deathBlock.insertBefore(rb,d); else deathBlock.appendChild(rb); }
   });
 }
+/* リザルトを1枚の画像に（Xに貼る用 1200×675） */
+function resultCard(s){
+  const W=1200,H=675, cv=document.createElement('canvas'); cv.width=W; cv.height=H; const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  ctx.fillStyle='#17152a'; ctx.fillRect(0,0,W,H);
+  const sc=document.createElement('canvas'); sc.width=320; sc.height=180; renderScene(sc,s,'star',null);
+  const night=sc.getContext('2d'); night.fillStyle='rgba(10,8,24,.35)'; night.fillRect(0,0,320,180);
+  ctx.drawImage(sc,0,0,320,180,40,40,640,360);
+  ctx.strokeStyle='#3d3960'; ctx.lineWidth=4; ctx.strokeRect(40,40,640,360);
+  const font=(px,w)=>`${w||400} ${px}px "DotGothic16","Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif`;
+  const wrap=(text,x,y,maxW,lh,max)=>{ let line='', n=0; const chars=[...text]; for(let i=0;i<chars.length;i++){ const t=line+chars[i]; if(ctx.measureText(t).width>maxW && line){ ctx.fillText(line,x,y+n*lh); n++; line=chars[i]; if(n>=max-1){ const rest=chars.slice(i).join(''); let r=rest; while(ctx.measureText(r+'…').width>maxW&&r.length) r=r.slice(0,-1); ctx.fillText(r+(r.length<rest.length?'…':''),x,y+n*lh); return n+1; } } else line=t; } if(line){ ctx.fillText(line,x,y+n*lh); n++; } return n; };
+  const lines=shareText(s,'').split('\n').filter(x=>x.trim());
+  const title=titleFor(s);
+  // 右側：称号と国
+  ctx.textBaseline='top'; ctx.fillStyle='#f2b35c'; ctx.font=font(26); ctx.fillText(T(T("称号")),720,48);
+  ctx.fillStyle='#f1e9d8'; ctx.font=font(52); wrap(title,720,84,440,60,2);
+  ctx.font=font(80); ctx.fillText(s.c.flag||'',720,230);
+  ctx.fillStyle='#aaa2c0'; ctx.font=font(30); wrap(cap1(s.c.name),836,252,330,36,2);
+  // 下：一生の要約
+  ctx.fillStyle='#f1e9d8'; ctx.font=font(34);
+  let y=432; for(const l of lines.slice(0,2)){ y+=wrap(l,40,y,1120,44,2)*44+8; }
+  ctx.fillStyle='#8fc1ea'; ctx.font=font(26); wrap(lines[2]||'',40,Math.min(y+4,H-104),1120,34,1);
+  ctx.fillStyle='#f2b35c'; ctx.font=font(28); ctx.fillText(T(T("#6億分の1のねこ")),40,H-56);
+  ctx.fillStyle='#aaa2c0'; ctx.font=font(24); const host=location.host||'6oku-neko'; const tw=ctx.measureText(host).width; ctx.fillText(host,W-40-tw,H-52);
+  return cv;
+}
+async function shareImage(s){
+  try{ if(document.fonts&&document.fonts.load) await document.fonts.load('30px "DotGothic16"'); }catch(e){}
+  const cv=resultCard(s); const blob=await new Promise(r=>cv.toBlob(r,'image/png')); if(!blob){ toast(T(T("画像を作れませんでした"))); return; }
+  const file=new File([blob],'neko-result.png',{type:'image/png'});
+  try{ if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],text:$('shareOut').value}); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='neko-result.png'; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000); toast(T(T("画像を保存しました")));
+}
 function showResult(area){
   const s=S, c=s.c; const {who,joyLine}=summary(s); const title=titleFor(s);
   const card=document.createElement('div'); card.className='card epitaph stack';
-  card.innerHTML=TT("\n    <div class=\"row\"><span class=\"flag\">${0}</span><div><p class=\"eyebrow\">リザルト</p><p class=\"big\" id=\"epName\">${1}</p></div></div>\n    <p><span class=\"title-badge\">称号：${2}</span></p>\n    <p>${3}、${4}に生まれ、${5}<b>${6}</b>の一生を終えた。人間でいえば${7}歳。</p>\n    <p class=\"muted\">最期は、${8}で。${9}</p>\n    ${10}\n    <p class=\"joyline\">${11}</p>\n    ${12}\n    <div class=\"nums\">\n      <div class=\"num\"><b>${13}</b><span>日向ぼっこ（回）</span></div>\n      <div class=\"num\"><b>${14}</b><span>なでられた（回）</span></div>\n      <div class=\"num\"><b>${15}</b><span>ごはん（食）</span></div>\n      <div class=\"num\"><b>${16}</b><span>ゴロゴロ（回）</span></div>\n      <div class=\"num\"><b>${17}</b><span>子ども（匹）</span></div>\n      <div class=\"num\"><b>${18}</b><span>暮らした家</span></div>\n    </div>\n    <p class=\"rarity\">同じ生まれのねこは、世界に推定${19}。</p>\n    <div class=\"stack\" style=\"gap:8px\">\n      <label for=\"nameIn\" class=\"small muted\">このねこに名前をつける（共有文に入ります）</label>\n      <input type=\"text\" id=\"nameIn\" maxlength=\"12\" placeholder=\"例：とらじろう\">\n    </div>\n    <div class=\"stack\" style=\"gap:8px\">\n      <label for=\"shareOut\" class=\"small muted\">Xに貼る文</label>\n      <textarea id=\"shareOut\" readonly></textarea>\n      <div class=\"row\"><button id=\"btnCopy\">文をコピー</button><a id=\"btnX\" class=\"btn-x\" target=\"_blank\" rel=\"noopener\" href=\"#\">Xに投稿する</a><button class=\"ghost\" id=\"btnAgain\">もう一度生まれる</button></div>\n    </div>\n    <div class=\"stack extra\" id=\"adoptBox\" style=\"gap:8px\">\n      <p class=\"eyebrow\">この子を、うちに迎える？</p>\n      <p class=\"paynote\">ここから下は、実際のお金（クレジットカードなど・Stripe決済）での購入です。ゲーム内の通貨やポイントではありません。価格は税込、購入後の返金はできません。</p>\n      <p class=\"note\">部屋をつくって、この子にずっといてもらえます。家具は最初からいくつかあって、選べます。日課も、追加の買い物もありません。</p>\n      <div class=\"row\" id=\"adoptRow\"></div>\n    </div>\n    <div class=\"stack extra\" id=\"extra\" style=\"gap:8px\">\n      <p class=\"eyebrow\">この子に、なにか贈る？</p>\n      <div class=\"row\" id=\"giftRow\"></div>\n      <p class=\"note\" id=\"donateNote\"></p>\n      <div class=\"row\" id=\"linkRow\"></div>\n    </div>",[c.flag,esc(who),esc(title),esc(c.name),esc(s.birthPlace),movedText(s),esc(s.deathAge),humanAge(s),esc(s.cause),s.env==='pet'?T("家族のそばで。"):s.env==='shelter'?T("ケージの中で。"):T("誰にも知られずに。"),causeNote(s)?`<p class="small muted">${esc(causeNote(s))}</p>`:'',esc(joyLine),bestPeriod(s)?TT("<p class=\"small\"><span class=\"muted\">いちばんしあわせだった時期：</span>${0}</p>",[esc(bestPeriod(s))]):'',s.k.sun,s.k.pets,s.k.meals,s.k.purr,s.k.kittens,s.k.homes,fmtMan(s.same)]);
+  card.innerHTML=TT("\n    <div class=\"row\"><span class=\"flag\">${0}</span><div><p class=\"eyebrow\">リザルト</p><p class=\"big\" id=\"epName\">${1}</p></div></div>\n    <p><span class=\"title-badge\">称号：${2}</span></p>\n    <p>${3}、${4}に生まれ、${5}<b>${6}</b>の一生を終えた。人間でいえば${7}歳。</p>\n    <p class=\"muted\">最期は、${8}で。${9}</p>\n    ${10}\n    <p class=\"joyline\">${11}</p>\n    ${12}\n    <div class=\"nums\">\n      <div class=\"num\"><b>${13}</b><span>日向ぼっこ（回）</span></div>\n      <div class=\"num\"><b>${14}</b><span>なでられた（回）</span></div>\n      <div class=\"num\"><b>${15}</b><span>ごはん（食）</span></div>\n      <div class=\"num\"><b>${16}</b><span>ゴロゴロ（回）</span></div>\n      <div class=\"num\"><b>${17}</b><span>子ども（匹）</span></div>\n      <div class=\"num\"><b>${18}</b><span>暮らした家</span></div>\n    </div>\n    <p class=\"rarity\">同じ生まれのねこは、世界に推定${19}。</p>\n    <div class=\"stack\" style=\"gap:8px\">\n      <label for=\"nameIn\" class=\"small muted\">このねこに名前をつける（共有文に入ります）</label>\n      <input type=\"text\" id=\"nameIn\" maxlength=\"12\" placeholder=\"例：とらじろう\">\n    </div>\n    <div class=\"stack\" style=\"gap:8px\">\n      <label for=\"shareOut\" class=\"small muted\">Xに貼る文</label>\n      <textarea id=\"shareOut\" readonly></textarea>\n      <div class=\"row\"><button id=\"btnImg\">画像で保存</button><button class=\"ghost\" id=\"btnCopy\">文をコピー</button><a id=\"btnX\" class=\"btn-x\" target=\"_blank\" rel=\"noopener\" href=\"#\">Xに投稿する</a><button class=\"ghost\" id=\"btnAgain\">もう一度生まれる</button></div>\n    </div>\n    <div class=\"stack extra\" id=\"adoptBox\" style=\"gap:8px\">\n      <p class=\"eyebrow\">この子を、うちに迎える？</p>\n      <p class=\"paynote\">ここから下は、実際のお金（クレジットカードなど・Stripe決済）での購入です。ゲーム内の通貨やポイントではありません。価格は税込、購入後の返金はできません。</p>\n      <p class=\"note\">部屋をつくって、この子にずっといてもらえます。家具は最初からいくつかあって、選べます。日課も、追加の買い物もありません。</p>\n      <div class=\"row\" id=\"adoptRow\"></div>\n    </div>\n    <div class=\"stack extra\" id=\"extra\" style=\"gap:8px\">\n      <p class=\"eyebrow\">この子に、なにか贈る？</p>\n      <div class=\"row\" id=\"giftRow\"></div>\n      <p class=\"note\" id=\"donateNote\"></p>\n      <div class=\"row\" id=\"linkRow\"></div>\n    </div>",[c.flag,esc(who),esc(title),esc(c.name),esc(s.birthPlace),movedText(s),esc(s.deathAge),humanAge(s),esc(s.cause),s.env==='pet'?T("家族のそばで。"):s.env==='shelter'?T("ケージの中で。"):T("誰にも知られずに。"),causeNote(s)?`<p class="small muted">${esc(causeNote(s))}</p>`:'',esc(joyLine),bestPeriod(s)?TT("<p class=\"small\"><span class=\"muted\">いちばんしあわせだった時期：</span>${0}</p>",[esc(bestPeriod(s))]):'',s.k.sun,s.k.pets,s.k.meals,s.k.purr,s.k.kittens,s.k.homes,fmtMan(s.same)]);
   area.appendChild(card);
   (function(){ const gr=$('giftRow'), lr=$('linkRow');
     SITE.gifts.forEach(g=>{ const a=document.createElement('a'); a.className='btn-gift'; a.textContent=TT("${0} ${1}円（カード決済）",[g.label,g.price]); if(linkOf(g)){ a.target='_blank'; a.rel='noopener'; a.href=linkOf(g); } else { a.classList.add('soon'); a.textContent+=T("（準備中）"); } gr.appendChild(a); });
@@ -1510,6 +1542,7 @@ function showResult(area){
   const refresh=()=>{ const txt=shareText(s,location.href.split('#')[0].split('?')[0])+(SITE.xText?'\n'+SITE.xText:''); $('shareOut').value=txt; $('epName').textContent=summary(s).who; $('btnX').href='https://x.com/intent/post?text='+encodeURIComponent(txt); };
   refresh();
   $('nameIn').addEventListener('input',e=>{ s.name=e.target.value.trim(); refresh(); });
+  $('btnImg').onclick=()=>shareImage(s);
   $('btnCopy').onclick=()=>{ const ta=$('shareOut'); const done=()=>toast(T("コピーしました")); if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(ta.value).then(done).catch(()=>{ ta.select(); done(); }); } else { ta.select(); done(); } };
   $('btnAgain').onclick=()=>{ show('game',false); show('title',true); renderTitle($('titleCanvas')); refreshTitle(); window.scrollTo({top:0}); };
   card.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});
