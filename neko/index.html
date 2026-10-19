@@ -222,7 +222,7 @@ const LANG=(()=>{ if(window.__FORCE_LANG) return window.__FORCE_LANG; const ok=v
   if(low.startsWith('ja')) return 'ja'; const hit=LANGS.find(l=>l.id!=='ja'&&l.id!=='en'&&low.startsWith(l.id.toLowerCase().split('-')[0])); if(hit&&(!/^zh/.test(low)||/tw|hk|hant/.test(low))) return hit.id; return 'en'; })();
 document.documentElement.lang=LANG;
 var DICT={}; if(typeof DICTS!=='undefined'&&DICTS[LANG]) DICT=DICTS[LANG];
-if(LANG!=='ja'&&window.__SITE&&!(typeof DICTS!=='undefined'&&DICTS[LANG])) document.write('<script src="lang/'+LANG+'.js?v=306706"><\/script>');
+if(LANG!=='ja'&&window.__SITE&&!(typeof DICTS!=='undefined'&&DICTS[LANG])) document.write('<script src="lang/'+LANG+'.js?v=415805"><\/script>');
 function T(k){ return (LANG!=='ja'&&DICT[k]!=null)?DICT[k]:k; }
 function TT(k,a){ const t=(LANG!=='ja'&&DICT[k]!=null)?DICT[k]:k; return a? t.replace(/\$\{(\d+)\}/g,(m,i)=>a[+i]) : t; }
 const cap1=x=>x?x.charAt(0).toUpperCase()+x.slice(1):x;
@@ -1373,10 +1373,10 @@ const SITE={
   /* うちに迎える：支払い後の戻り先は …/neko/?room=ok&session_id={CHECKOUT_SESSION_ID} */
   room:{label:T("うちに迎える"),price:500,url:'',urlEn:''},
   verifyUrl:'https://script.google.com/macros/s/AKfycbyjR7CRnFLHKTd8z-vftrCVboYgkFnsUdsBcRDiKaAcqgJf-qHa1K2p-siOneUJweb8/exec', // 支払い照合（Apps Script のウェブアプリ）。?session=cs_... で呼ぶ
-  donate:{label:T("猫の保護団体に寄付する"),url:'',urlEn:''}, // urlEn：英語版（海外の団体へ）
+  donate:{label:'',url:'',urlEn:''}, // 寄付を直接受け付けるボタンは置かない（Stripe：日本では個人の寄付集めが禁止）。寄付は作者が売上から行う
   form:{label:'',url:''},
-  report:{label:T("寄付の実績"),url:''},
-  donateNote:T("おくりものの半分は猫の保護団体へ。残りの半分は、作者のねこ（とらじろうとココ）のおやつ代と、このゲームの維持費です。寄付は、決済手数料など7.2%を除いた全額を届けます。実績は毎月、寄付のページに。"),
+  report:{label:T("売上の寄付について"),url:''},
+  donateNote:T("おくりものの売上の半分を、作者が猫の保護団体に寄付しています。残りの半分は、作者のねこ（とらじろうとココ）のおやつ代と、このゲームの維持費です。寄付の実績は毎月、寄付のページに載せています。"),
   authorNote:T("作者は、元野良ねこの飼い主です。3匹いたうち、2匹は感染症で亡くなって、いま1匹と暮らしています。プログラムは素人で、背景の絵はまだ仮。おかしなところは #6億分の1のねこ で教えてください。")
 };
 const $=id=>document.getElementById(id);
@@ -1546,7 +1546,7 @@ function giftArrive(g){
 function openGiftBox(){
   const box=$('giftBox'); if(!box.hidden){ box.hidden=true; return; }
   box.innerHTML='';
-  const p=document.createElement('p'); p.className='note'; p.textContent=T("知らない誰かとして、この子に贈る。半分は猫の保護団体へ。"); box.appendChild(p);
+  const p=document.createElement('p'); p.className='note'; p.textContent=T("知らない誰かとして、この子に贈る。売上の半分は、作者が猫の保護団体に寄付します。"); box.appendChild(p);
   const pn=document.createElement('p'); pn.className='paynote'; pn.textContent=T("実際のお金（クレジットカードなど・Stripe決済）での購入です。ゲーム内の通貨やポイントではありません。価格は税込、購入後の返金はできません。"); box.appendChild(pn);
   const row=document.createElement('div'); row.className='row';
   SITE.gifts.forEach(g=>{ const b=document.createElement('button'); b.className='ghost small'; b.textContent=TT("${0} ${1}円（カード決済）",[g.label,g.price]);
