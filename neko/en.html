@@ -222,7 +222,7 @@ const LANG=(()=>{ if(window.__FORCE_LANG) return window.__FORCE_LANG; const ok=v
   if(low.startsWith('ja')) return 'ja'; const hit=LANGS.find(l=>l.id!=='ja'&&l.id!=='en'&&low.startsWith(l.id.toLowerCase().split('-')[0])); if(hit&&(!/^zh/.test(low)||/tw|hk|hant/.test(low))) return hit.id; return 'en'; })();
 document.documentElement.lang=LANG;
 var DICT={}; if(typeof DICTS!=='undefined'&&DICTS[LANG]) DICT=DICTS[LANG];
-if(LANG!=='ja'&&window.__SITE&&!(typeof DICTS!=='undefined'&&DICTS[LANG])) document.write('<script src="lang/'+LANG+'.js?v=480821"><\/script>');
+if(LANG!=='ja'&&window.__SITE&&!(typeof DICTS!=='undefined'&&DICTS[LANG])) document.write('<script src="lang/'+LANG+'.js?v=484255"><\/script>');
 function T(k){ return (LANG!=='ja'&&DICT[k]!=null)?DICT[k]:k; }
 function TT(k,a){ const t=(LANG!=='ja'&&DICT[k]!=null)?DICT[k]:k; return a? t.replace(/\$\{(\d+)\}/g,(m,i)=>a[+i]) : t; }
 const cap1=x=>x?x.charAt(0).toUpperCase()+x.slice(1):x;
@@ -1366,12 +1366,12 @@ const SITE={
   xText:'', // 共有文の末尾に足す（例：@アカウント）
   /* おくりもの：Stripeの支払いリンク。支払い後の戻り先は ?gift=おくりものID（例 …/neko/?gift=oyatsu） */
   gifts:[
-    {id:'oyatsu',label:T("おやつを贈る"),price:120,url:'https://buy.stripe.com/5kQfZh2tu6PycsY4S0fQI07',urlEn:'',fx:{food:15,joy:10},lines:{pet:T("知らない誰かから、おやつが届いた。家族より先に、においで気づいた。"),stray:T("知らない誰かが、おやつを置いていった。今日は、おなかいっぱい。"),shelter:T("知らない誰かから、おやつの差し入れが届いた。ケージの前で、しっぽが立った。")}},
-    {id:'hana',label:T("お花を贈る"),price:240,url:'https://buy.stripe.com/7sY6oH0lm0ra1OkgAIfQI03',urlEn:'',fx:{joy:10,bond:10},lines:{pet:T("知らない誰かから、お花が届いた。窓辺に飾られて、部屋が少し明るくなった。"),stray:T("知らない誰かが、いつもの場所に小さな花を置いていった。"),shelter:T("知らない誰かから、お花が届いた。スタッフが、ケージのそばに飾ってくれた。")}},
-    {id:'hoshi',label:T("お星さまを贈る"),price:480,url:'https://buy.stripe.com/3cIaEXc44ddWfFabgofQI04',urlEn:'',fx:{hp:15,joy:10},lines:{pet:T("知らない誰かが、お星さまを贈ってくれた。その夜は、いつもより深く眠れた。"),stray:T("知らない誰かが、お星さまを贈ってくれた。その夜の空は、いつもより明るかった。"),shelter:T("知らない誰かが、お星さまを贈ってくれた。ケージの窓から、星がひとつ見えた。")}}
+    {id:'oyatsu',label:T("おやつを贈る"),price:120,url:'https://buy.stripe.com/5kQ8wP6JK8XGgJe708fQI08',urlEn:'https://buy.stripe.com/5kQfZh2tu6PycsY4S0fQI07',fx:{food:15,joy:10},lines:{pet:T("知らない誰かから、おやつが届いた。家族より先に、においで気づいた。"),stray:T("知らない誰かが、おやつを置いていった。今日は、おなかいっぱい。"),shelter:T("知らない誰かから、おやつの差し入れが届いた。ケージの前で、しっぽが立った。")}},
+    {id:'hana',label:T("お花を贈る"),price:240,url:'https://buy.stripe.com/00w6oH0lmfm4gJedowfQI09',urlEn:'https://buy.stripe.com/7sY6oH0lm0ra1OkgAIfQI03',fx:{joy:10,bond:10},lines:{pet:T("知らない誰かから、お花が届いた。窓辺に飾られて、部屋が少し明るくなった。"),stray:T("知らない誰かが、いつもの場所に小さな花を置いていった。"),shelter:T("知らない誰かから、お花が届いた。スタッフが、ケージのそばに飾ってくれた。")}},
+    {id:'hoshi',label:T("お星さまを贈る"),price:480,url:'https://buy.stripe.com/4gMdR91pq3Dm9gMfwEfQI0a',urlEn:'https://buy.stripe.com/3cIaEXc44ddWfFabgofQI04',fx:{hp:15,joy:10},lines:{pet:T("知らない誰かが、お星さまを贈ってくれた。その夜は、いつもより深く眠れた。"),stray:T("知らない誰かが、お星さまを贈ってくれた。その夜の空は、いつもより明るかった。"),shelter:T("知らない誰かが、お星さまを贈ってくれた。ケージの窓から、星がひとつ見えた。")}}
   ],
   /* うちに迎える：支払い後の戻り先は …/neko/?room=ok&session_id={CHECKOUT_SESSION_ID} */
-  room:{label:T("うちに迎える"),price:500,url:'https://buy.stripe.com/fZuaEX9VW2zifFa0BKfQI05',urlEn:''},
+  room:{label:T("うちに迎える"),price:500,url:'https://buy.stripe.com/9B6aEX5FG5Lu3WsesAfQI0b',urlEn:'https://buy.stripe.com/fZuaEX9VW2zifFa0BKfQI05'},
   verifyUrl:'https://script.google.com/macros/s/AKfycbyjR7CRnFLHKTd8z-vftrCVboYgkFnsUdsBcRDiKaAcqgJf-qHa1K2p-siOneUJweb8/exec', // 支払い照合（Apps Script のウェブアプリ）。?session=cs_... で呼ぶ
   donate:{label:'',url:'',urlEn:''}, // 寄付を直接受け付けるボタンは置かない（Stripe：日本では個人の寄付集めが禁止）。寄付は作者が売上から行う
   form:{label:'',url:''},
@@ -1380,7 +1380,7 @@ const SITE={
   authorNote:T("作者は、元野良ねこの飼い主です。3匹いたうち、2匹は感染症で亡くなって、いま1匹と暮らしています。プログラムは素人で、背景の絵はまだ仮。おかしなところは #6億分の1のねこ で教えてください。")
 };
 const $=id=>document.getElementById(id);
-function linkOf(o){ return (LANG!=='ja'&&o.urlEn)?o.urlEn:o.url; } // 日本語以外＝海外セットのリンク
+function linkOf(o){ return (LANG!=='ja'&&o.urlEn)?o.urlEn:o.url; } // 日本語＝国内向けリンク（Managed Payments なし）／日本語以外＝海外向けリンク（Managed Payments あり：各国の税はStripeが処理）
 let S=null, TURN=null, curBlock=null, speed=0, autoTimer=null, animTimer=null, breath=0, skipping=false, stage='', endingPlaying=false;
 const logEl=$('log');
 const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
