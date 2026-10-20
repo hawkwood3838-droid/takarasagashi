@@ -222,7 +222,7 @@ const LANG=(()=>{ if(window.__FORCE_LANG) return window.__FORCE_LANG; const ok=v
   if(low.startsWith('ja')) return 'ja'; const hit=LANGS.find(l=>l.id!=='ja'&&l.id!=='en'&&low.startsWith(l.id.toLowerCase().split('-')[0])); if(hit&&(!/^zh/.test(low)||/tw|hk|hant/.test(low))) return hit.id; return 'en'; })();
 document.documentElement.lang=LANG;
 var DICT={}; if(typeof DICTS!=='undefined'&&DICTS[LANG]) DICT=DICTS[LANG];
-if(LANG!=='ja'&&window.__SITE&&!(typeof DICTS!=='undefined'&&DICTS[LANG])) document.write('<script src="lang/'+LANG+'.js?v=484255"><\/script>');
+if(LANG!=='ja'&&window.__SITE&&!(typeof DICTS!=='undefined'&&DICTS[LANG])) document.write('<script src="lang/'+LANG+'.js?v=486658"><\/script>');
 function T(k){ return (LANG!=='ja'&&DICT[k]!=null)?DICT[k]:k; }
 function TT(k,a){ const t=(LANG!=='ja'&&DICT[k]!=null)?DICT[k]:k; return a? t.replace(/\$\{(\d+)\}/g,(m,i)=>a[+i]) : t; }
 const cap1=x=>x?x.charAt(0).toUpperCase()+x.slice(1):x;
@@ -580,13 +580,26 @@ const CAUSE_NOTES={
  [T("ケンカの傷からの感染")]:T("かみ傷は小さくても、中で膿む。街のねこは、病院に行けない。"),
  [T("真冬の寒さ")]:T("車のボンネットや室外機の下で、朝を迎えられないねこがいる。"),
  [T("毒のあるものを食べてしまったこと")]:T("不凍液、ネズミの毒、ユリの花。甘いにおいのものが多い。"),
- [T("犬")]:T("放し飼いの犬や野犬のいる地域では、めずらしくない。"),
+ [T("犬に襲われたこと")]:T("放し飼いの犬や野犬のいる地域では、めずらしくない。"),
  [T("腎臓の病気")]:T("街のねこは水をあまり飲めない。腎臓が、先に弱る。"),
  [T("飢え")]:T("ごはん場所がなくなると、1週間もたない。"),
  [T("野生動物保護のための駆除")]:T("この国では、野生の鳥や小動物を守るために、野良ねこの駆除が行われている。"),
  [T("戦火")]:T("人がいなくなった町に、ねこだけが残ることがある。"),
  [T("生まれつきの病気")]:T("生まれた子ねこの1割ほどは、理由がわからないまま弱っていく。"),
  [T("保護施設で、新しい家族が見つからないまま")]:T("日本では2024年度、4,866匹のねこが施設で殺処分された。")
+};
+// 街のねこ（1歳以上）の最期の一文：死因ごとに、何が起きたかがわかる文にする
+const STRAY_DEATH={
+ [T("交通事故")]:[T("ある夜、道を渡りきれなかった。"),T("ヘッドライトの中で、足が止まった。それが最後だった。")],
+ [T("猫エイズや白血病などの感染症")]:[T("口の中が痛んで、食べられなくなった。猫エイズや白血病などの感染症だった。"),T("少しずつやせて、ある朝、もう起き上がれなかった。猫エイズや白血病などの感染症だった。")],
+ [T("ケンカの傷からの感染")]:[T("ケンカの傷が、中で膿んでいた。熱が下がらないまま、動けなくなった。")],
+ [T("真冬の寒さ")]:[T("いちばん冷えた夜、朝を迎えられなかった。")],
+ [T("毒のあるものを食べてしまったこと")]:[T("甘いにおいのするものを口にした。それが毒だった。")],
+ [T("犬に襲われたこと")]:[T("放し飼いの犬に追われて、逃げきれなかった。"),T("路地で野犬の群れに囲まれた。それが最後だった。")],
+ [T("腎臓の病気")]:[T("水を飲んでも、のどが渇くようになった。腎臓が、先に弱っていた。")],
+ [T("飢え")]:[T("ごはん場所がなくなって、1週間がたった。もう、歩く力が残っていなかった。")],
+ [T("野生動物保護のための駆除")]:[T("ある朝、駆除の罠にかかった。")],
+ [T("戦火")]:[T("砲撃の音が響いた夜から、戻らなかった。")]
 };
 function causeNote(s){ return CAUSE_NOTES[s.cause]||''; }
 function mortality(s,t,frac){
@@ -611,7 +624,7 @@ function mortality(s,t,frac){
     }
     s.cause=deathCause(s);
     const line = s.t<12 ? TT("${0}で、短い一生を終えた。",[s.cause])
-      : s.env==='stray' ? pick([TT("${0}で、命を落とした。",[s.cause]),TT("${0}。それが最後だった。",[s.cause]),TT("ある${0}、${1}で動けなくなった。",[pick([T("朝"),T("夜"),T("雨の日")]),s.cause])])
+      : s.env==='stray' ? (STRAY_DEATH[s.cause]? pick(STRAY_DEATH[s.cause]) : TT("${0}で、命を落とした。",[s.cause]))
       : (y>=15? TT("${0}。家族が見守る中、静かに息を引き取った。",[s.cause]) : TT("${0}で、家族より先に旅立った。",[s.cause]));
     die(s,t,line);
   }
@@ -623,7 +636,7 @@ function deathCause(s){
     return pick([T("生まれつきの病気"),T("感染症")]);
   }
   if(s.env==='stray'){
-    const list=[[T("交通事故"),c.traffic*1.2],[T("猫エイズや白血病などの感染症"),1],[T("ケンカの傷からの感染"),s.sex==='♂'&&!s.neutered?1:.3],[T("真冬の寒さ"),c.cold*1.2],[T("毒のあるものを食べてしまったこと"),.3],[T("犬"),.4],[T("腎臓の病気"),y>=6?.8:.1],[T("飢え"),s.st.food<20?1.5:.3]];
+    const list=[[T("交通事故"),c.traffic*1.2],[T("猫エイズや白血病などの感染症"),1],[T("ケンカの傷からの感染"),s.sex==='♂'&&!s.neutered?1:.3],[T("真冬の寒さ"),c.cold*1.2],[T("毒のあるものを食べてしまったこと"),.3],[T("犬に襲われたこと"),.4],[T("腎臓の病気"),y>=6?.8:.1],[T("飢え"),s.st.food<20?1.5:.3]];
     if(c.cull) list.push([T("野生動物保護のための駆除"),1.2]); if(c.id==='ua') list.push([T("戦火"),.5]);
     return weighted(list,x=>x[1])[0];
   }
