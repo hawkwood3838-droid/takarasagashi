@@ -30,6 +30,8 @@
   --body:'Zen Maru Gothic','Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;
   color-scheme:dark;
 }
+:root:lang(zh-TW){--display:'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif;--body:'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif}
+:root:lang(ko){--display:'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;--body:'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{height:100%}
@@ -215,16 +217,22 @@ summary{cursor:pointer;font-weight:700}
 <script>window.__SITE=1;</script>
 <script id="lang">
 /* 言語：ブラウザの言語で自動。?lang=xx か右上の切り替えで固定。辞書（lang/xx.js）は LANG が ja 以外のとき読み込む */
-const LANGS=[{id:'ja',n:'日本語'},{id:'en',n:'English'}]; // 木曜に ko / zh-TW / es / pt-BR を追加
+const LANGS=[{id:'ja',n:'日本語'},{id:'en',n:'English'},{id:'ko',n:'한국어'},{id:'zh-TW',n:'繁體中文'},{id:'es',n:'Español'},{id:'pt-BR',n:'Português'}];
 const LANG=(()=>{ if(window.__FORCE_LANG) return window.__FORCE_LANG; const ok=v=>LANGS.some(l=>l.id===v);
   try{ const q=new URLSearchParams(location.search).get('lang'); if(ok(q)){ localStorage.setItem('neko_lang',q); return q; } const v=localStorage.getItem('neko_lang'); if(ok(v)) return v; }catch(e){}
   const nav=(navigator.languages&&navigator.languages[0])||navigator.language||''; const low=nav.toLowerCase();
   if(low.startsWith('ja')) return 'ja'; const hit=LANGS.find(l=>l.id!=='ja'&&l.id!=='en'&&low.startsWith(l.id.toLowerCase().split('-')[0])); if(hit&&(!/^zh/.test(low)||/tw|hk|hant/.test(low))) return hit.id; return 'en'; })();
 document.documentElement.lang=LANG;
 var DICT={}; if(typeof DICTS!=='undefined'&&DICTS[LANG]) DICT=DICTS[LANG];
-if(LANG!=='ja'&&window.__SITE&&!(typeof DICTS!=='undefined'&&DICTS[LANG])) document.write('<script src="lang/'+LANG+'.js?v=486658"><\/script>');
+if(LANG!=='ja'&&window.__SITE&&!(typeof DICTS!=='undefined'&&DICTS[LANG])) document.write('<script src="lang/'+LANG+'.js?v=626085"><\/script>');
 function T(k){ return (LANG!=='ja'&&DICT[k]!=null)?DICT[k]:k; }
-function TT(k,a){ const t=(LANG!=='ja'&&DICT[k]!=null)?DICT[k]:k; return a? t.replace(/\$\{(\d+)\}/g,(m,i)=>a[+i]) : t; }
+function TT(k,a){ const t=(LANG!=='ja'&&DICT[k]!=null)?DICT[k]:k; return a? one(t.replace(/\$\{(\d+)\}/g,(m,i)=>a[+i])) : t; }
+// スペイン語・ポルトガル語の「1 años」「1 meses」などを単数に直す
+const ONE={es:{años:'año',meses:'mes',gatos:'gato',crías:'cría',veces:'vez',hogares:'hogar'},'pt-BR':{anos:'ano',meses:'mês',gatos:'gato',filhotes:'filhote',vezes:'vez',lares:'lar'}}[LANG];
+function one(t){ if(!ONE) return t; t=t.replace(/(^|[^\d.,])1 ([a-zñãçêáéíóú]+)/gi,(m,p,w)=>ONE[w.toLowerCase()]?p+'1 '+ONE[w.toLowerCase()]:m);
+  if(LANG==='es') t=t.replace(/\b([Aa]) el /g,'$1l ').replace(/\b([Dd])e el /g,'$1el ');
+  else t=t.replace(/\b([Ee])m o /g,(m,e)=>(e==='E'?'N':'n')+'o ').replace(/\b([Ee])m a /g,(m,e)=>(e==='E'?'N':'n')+'a ').replace(/\b([Ee])m os /g,(m,e)=>(e==='E'?'N':'n')+'os ').replace(/\b([Ee])m as /g,(m,e)=>(e==='E'?'N':'n')+'as ').replace(/\b([Dd])e o /g,'$1o ').replace(/\b([Dd])e a /g,'$1a ').replace(/\ba o /g,'ao ');
+  return t; }
 const cap1=x=>x?x.charAt(0).toUpperCase()+x.slice(1):x;
 </script>
 <script id="ui_static">
@@ -1517,8 +1525,9 @@ function resultCard(s){
   const night=sc.getContext('2d'); night.fillStyle='rgba(10,8,24,.35)'; night.fillRect(0,0,320,180);
   ctx.drawImage(sc,0,0,320,180,40,40,640,360);
   ctx.strokeStyle='#3d3960'; ctx.lineWidth=4; ctx.strokeRect(40,40,640,360);
-  const font=(px,w)=>`${w||400} ${px}px "DotGothic16","Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif`;
-  const wrap=(text,x,y,maxW,lh,max)=>{ let line='', n=0; const chars=[...text]; for(let i=0;i<chars.length;i++){ const t=line+chars[i]; if(ctx.measureText(t).width>maxW && line){ ctx.fillText(line,x,y+n*lh); n++; line=chars[i]; if(n>=max-1){ const rest=chars.slice(i).join(''); let r=rest; while(ctx.measureText(r+'…').width>maxW&&r.length) r=r.slice(0,-1); ctx.fillText(r+(r.length<rest.length?'…':''),x,y+n*lh); return n+1; } } else line=t; } if(line){ ctx.fillText(line,x,y+n*lh); n++; } return n; };
+  const fam=(getComputedStyle(document.documentElement).getPropertyValue('--display')||'').trim()||'"DotGothic16","Zen Maru Gothic",sans-serif';
+  const font=(px,w)=>`${w||400} ${px}px ${fam}`;
+  const wrap=(text,x,y,maxW,lh,max)=>{ let line='', n=0; const chars=(LANG==='ja'||LANG==='zh-TW')?[...text]:text.split(/(?<=\s)/); for(let i=0;i<chars.length;i++){ const t=line+chars[i]; if(ctx.measureText(t).width>maxW && line){ ctx.fillText(line,x,y+n*lh); n++; line=chars[i]; if(n>=max-1){ const rest=chars.slice(i).join(''); let r=rest; while(ctx.measureText(r+'…').width>maxW&&r.length) r=r.slice(0,-1); ctx.fillText(r+(r.length<rest.length?'…':''),x,y+n*lh); return n+1; } } else line=t; } if(line){ ctx.fillText(line,x,y+n*lh); n++; } return n; };
   const lines=shareText(s,'').split('\n').filter(x=>x.trim());
   const title=titleFor(s);
   // 右側：称号と国
@@ -1527,8 +1536,12 @@ function resultCard(s){
   ctx.font=font(80); ctx.fillText(s.c.flag||'',720,230);
   ctx.fillStyle='#aaa2c0'; ctx.font=font(30); wrap(cap1(s.c.name),836,252,330,36,2);
   // 下：一生の要約
-  ctx.fillStyle='#f1e9d8'; ctx.font=font(34);
-  let y=432; for(const l of lines.slice(0,2)){ y+=wrap(l,40,y,1120,44,2)*44+8; }
+  ctx.fillStyle='#f1e9d8';
+  // 下の2行が入りきるように文字の大きさを選ぶ（言語によって長さが違うため）
+  const cnt=(text)=>{ const parts=(LANG==='ja'||LANG==='zh-TW')?[...text]:text.split(/(?<=\s)/); let line='',n=1; for(const c of parts){ const t=line+c; if(ctx.measureText(t).width>1120&&line){ n++; line=c; } else line=t; } return Math.min(n,2); };
+  let fs=34; for(const f of [34,31,28,25]){ fs=f; ctx.font=font(f); const lh=Math.round(f*1.3); const need=lines.slice(0,2).reduce((a,l)=>a+cnt(l)*lh+8,0); if(432+need<=H-108) break; }
+  ctx.font=font(fs); const LH=Math.round(fs*1.3);
+  let y=432; for(const l of lines.slice(0,2)){ y+=wrap(l,40,y,1120,LH,2)*LH+8; }
   ctx.fillStyle='#8fc1ea'; ctx.font=font(26); wrap(lines[2]||'',40,Math.min(y+4,H-104),1120,34,1);
   ctx.fillStyle='#f2b35c'; ctx.font=font(28); ctx.fillText(T(T("#6億分の1のねこ")),40,H-56);
   ctx.fillStyle='#aaa2c0'; ctx.font=font(24); const host=location.host||'6oku-neko'; const tw=ctx.measureText(host).width; ctx.fillText(host,W-40-tw,H-52);
@@ -1741,8 +1754,9 @@ refreshTitle();
 </script>
 
 <footer style="max-width:560px;margin:0 auto;padding:24px 0 150px;font-size:.8rem;color:#aaa2c0;text-align:center;line-height:2">
-<a href="kifu.html" style="color:#aaa2c0">寄付について</a>　<a href="tokushoho.html" style="color:#aaa2c0">特定商取引法に基づく表記</a>　<a href="privacy.html" style="color:#aaa2c0">プライバシー</a><br>
+<a id="ftKifu" href="kifu.html" style="color:#aaa2c0">寄付について</a>　<a id="ftLaw" href="tokushoho.html" style="color:#aaa2c0">特定商取引法に基づく表記</a>　<a id="ftPriv" href="privacy.html" style="color:#aaa2c0">プライバシー</a><br>
 © 2026 髙木大資
 </footer>
+<script>(function(){ if(typeof LANG==='undefined'||LANG==='ja') return; const F={en:['About donations','Legal notice (Japanese)','Privacy (Japanese)'],ko:['기부에 대해','특정상거래법 표기 (일본어)','개인정보 (일본어)'],'zh-TW':['關於捐款','特定商業交易法標示（日文）','隱私權（日文）'],es:['Sobre las donaciones','Aviso legal (en japonés)','Privacidad (en japonés)'],'pt-BR':['Sobre as doações','Aviso legal (em japonês)','Privacidade (em japonês)']}[LANG]||['About donations','Legal notice (Japanese)','Privacy (Japanese)']; const a=document.getElementById('ftKifu'); a.textContent=F[0]; a.href='kifu_en.html'; document.getElementById('ftLaw').textContent=F[1]; document.getElementById('ftPriv').textContent=F[2]; })();</script>
 </body>
 </html>
