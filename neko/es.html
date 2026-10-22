@@ -224,7 +224,7 @@ const LANG=(()=>{ if(window.__FORCE_LANG) return window.__FORCE_LANG; const ok=v
   if(low.startsWith('ja')) return 'ja'; const hit=LANGS.find(l=>l.id!=='ja'&&l.id!=='en'&&low.startsWith(l.id.toLowerCase().split('-')[0])); if(hit&&(!/^zh/.test(low)||/tw|hk|hant/.test(low))) return hit.id; return 'en'; })();
 document.documentElement.lang=LANG;
 var DICT={}; if(typeof DICTS!=='undefined'&&DICTS[LANG]) DICT=DICTS[LANG];
-if(LANG!=='ja'&&window.__SITE&&!(typeof DICTS!=='undefined'&&DICTS[LANG])) document.write('<script src="lang/'+LANG+'.js?v=626085"><\/script>');
+if(LANG!=='ja'&&window.__SITE&&!(typeof DICTS!=='undefined'&&DICTS[LANG])) document.write('<script src="lang/'+LANG+'.js?v=631354"><\/script>');
 function T(k){ return (LANG!=='ja'&&DICT[k]!=null)?DICT[k]:k; }
 function TT(k,a){ const t=(LANG!=='ja'&&DICT[k]!=null)?DICT[k]:k; return a? one(t.replace(/\$\{(\d+)\}/g,(m,i)=>a[+i])) : t; }
 // スペイン語・ポルトガル語の「1 años」「1 meses」などを単数に直す
@@ -1527,7 +1527,8 @@ function resultCard(s){
   ctx.strokeStyle='#3d3960'; ctx.lineWidth=4; ctx.strokeRect(40,40,640,360);
   const fam=(getComputedStyle(document.documentElement).getPropertyValue('--display')||'').trim()||'"DotGothic16","Zen Maru Gothic",sans-serif';
   const font=(px,w)=>`${w||400} ${px}px ${fam}`;
-  const wrap=(text,x,y,maxW,lh,max)=>{ let line='', n=0; const chars=(LANG==='ja'||LANG==='zh-TW')?[...text]:text.split(/(?<=\s)/); for(let i=0;i<chars.length;i++){ const t=line+chars[i]; if(ctx.measureText(t).width>maxW && line){ ctx.fillText(line,x,y+n*lh); n++; line=chars[i]; if(n>=max-1){ const rest=chars.slice(i).join(''); let r=rest; while(ctx.measureText(r+'…').width>maxW&&r.length) r=r.slice(0,-1); ctx.fillText(r+(r.length<rest.length?'…':''),x,y+n*lh); return n+1; } } else line=t; } if(line){ ctx.fillText(line,x,y+n*lh); n++; } return n; };
+  const NOSTART=/^[」』）)\]】。、，．,.！？!?ー…・：:；;”’»]/; // 行頭に来てはいけない文字（ぶら下げる）
+  const wrap=(text,x,y,maxW,lh,max)=>{ let line='', n=0; const chars=(LANG==='ja'||LANG==='zh-TW')?[...text]:text.split(/(?<=\s)/); for(let i=0;i<chars.length;i++){ const t=line+chars[i]; if(ctx.measureText(t).width>maxW && line && !NOSTART.test(chars[i])){ ctx.fillText(line,x,y+n*lh); n++; line=chars[i]; if(n>=max-1){ const rest=chars.slice(i).join(''); let r=rest; while(ctx.measureText(r+'…').width>maxW&&r.length) r=r.slice(0,-1); ctx.fillText(r+(r.length<rest.length?'…':''),x,y+n*lh); return n+1; } } else line=t; } if(line){ ctx.fillText(line,x,y+n*lh); n++; } return n; };
   const lines=shareText(s,'').split('\n').filter(x=>x.trim());
   const title=titleFor(s);
   // 右側：称号と国
@@ -1538,7 +1539,7 @@ function resultCard(s){
   // 下：一生の要約
   ctx.fillStyle='#f1e9d8';
   // 下の2行が入りきるように文字の大きさを選ぶ（言語によって長さが違うため）
-  const cnt=(text)=>{ const parts=(LANG==='ja'||LANG==='zh-TW')?[...text]:text.split(/(?<=\s)/); let line='',n=1; for(const c of parts){ const t=line+c; if(ctx.measureText(t).width>1120&&line){ n++; line=c; } else line=t; } return Math.min(n,2); };
+  const cnt=(text)=>{ const parts=(LANG==='ja'||LANG==='zh-TW')?[...text]:text.split(/(?<=\s)/); let line='',n=1; for(const c of parts){ const t=line+c; if(ctx.measureText(t).width>1120&&line&&!NOSTART.test(c)){ n++; line=c; } else line=t; } return Math.min(n,2); };
   let fs=34; for(const f of [34,31,28,25]){ fs=f; ctx.font=font(f); const lh=Math.round(f*1.3); const need=lines.slice(0,2).reduce((a,l)=>a+cnt(l)*lh+8,0); if(432+need<=H-108) break; }
   ctx.font=font(fs); const LH=Math.round(fs*1.3);
   let y=432; for(const l of lines.slice(0,2)){ y+=wrap(l,40,y,1120,LH,2)*LH+8; }
