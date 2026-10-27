@@ -157,6 +157,14 @@
     if (nm === 'treasure' || nm === 'cards') refreshSpots();
   });
   $('likes').addEventListener('blur', () => { $('likes').value = $('likes').value.trim().replace(/\s/g, ''); });
+  // 手紙の差出人（2026-10-27）：「そのほか」のときだけ入力欄を出す
+  const SENDER_RE = /^[ぁ-ゖァ-ヺー・]+( [ぁ-ゖァ-ヺー・]+)*$/;
+  const senderPick = () => (form.querySelector('input[name="sender"]:checked') || {}).value || '';
+  const sender = () => senderPick() === '*'
+    ? $('sender-other').value.replace(/[\s\u3000]+/g, ' ').trim()
+    : senderPick();
+  const refreshSender = () => { $('sender-other-box').hidden = senderPick() !== '*'; };
+  form.addEventListener('change', e => { if (e.target.name === 'sender') refreshSender(); });
 
   // ── 入力のチェック ──
   function showErr(id, msg, input) {
@@ -177,6 +185,7 @@
       level: level(),
       birthday_age: occasion() === 'birthday' ? (multi ? Number($('bday-age').value) : age()) : age(),
       likes: $('likes').value.trim().replace(/\s/g, ''),
+      sender: sender(),
       treasure: treasure(),
       card_spots: cards(),
     };
@@ -204,6 +213,9 @@
     bad('age-err', o.age ? '' : '年齢を選んでください', form.querySelector('input[name="age"]'));
     bad('likes-err', !o.likes ? '' : !KANA.test(o.likes) ? '好きなものは、ひらがな・カタカナで入れてください'
       : o.likes.length > K.LIKES_MAX ? `好きなものは${K.LIKES_MAX}文字までです` : '', $('likes'));
+    bad('sender-err', senderPick() === '*' && !o.sender ? '差出人の名前を入れてください（例：おばあちゃん）'
+      : !o.sender ? '' : !SENDER_RE.test(o.sender) ? '差出人は、ひらがな・カタカナで入れてください'
+      : o.sender.length > K.SENDER_MAX ? `差出人は${K.SENDER_MAX}文字までです` : '', senderPick() === '*' ? $('sender-other') : form.querySelector('input[name="sender"]'));
     bad('treasure-err', o.treasure ? '' : 'プレゼントを隠す場所を選んでください', form.querySelector('input[name="treasure"]'));
     const n = need();
     bad('cards-err', o.card_spots.length === n ? '' : `カードを隠す場所を${n}つ選んでください（いま${o.card_spots.length}つ）`, form.querySelector('input[name="cards"]:not(:disabled)'));
@@ -238,7 +250,7 @@
         + (puzzleAgeOf(o.age, o.level) <= K.LITTLE_AGE ? '・字を読まない版' : '')],
     ];
     if (o.occasion === 'birthday' && o.names.length > 1) rows.push(['おたんじょうび', `${o.names[0].name}${o.names[0].suffix}・${o.birthday_age}さい`]);
-    rows.push(['好きなもの', o.likes || '（なし）'], ['プレゼントの場所', labelOf(o.treasure)], ['カードの場所', o.card_spots.map(labelOf).join('、')]);
+    rows.push(['好きなもの', o.likes || '（なし）'], ['手紙の差出人', o.sender ? o.sender + '（と お話の案内役）' : 'お話の案内役'], ['プレゼントの場所', labelOf(o.treasure)], ['カードの場所', o.card_spots.map(labelOf).join('、')]);
     if (RD) rows.unshift([RD.label + 'の注文番号', rdNo()], ['PDFの届け先', rdEmail()]);
     $('summary-order').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('');
     if ($('summary-story')) $('summary-story').textContent = st.name;  // 引き換えのときは この欄がない
@@ -349,6 +361,10 @@
     refreshLevel();
     if (o.birthday_age) { $('bday-age').value = String(o.birthday_age); $('bday-age').dataset.touched = '1'; }
     $('likes').value = o.likes || '';
+    const preset = form.querySelector(`input[name="sender"][value="${o.sender || ''}"]`);
+    if (preset) preset.checked = true;
+    else if (o.sender) { form.querySelector('input[name="sender"][value="*"]').checked = true; $('sender-other').value = o.sender; }
+    refreshSender();
     const t = form.querySelector(`input[name="treasure"][value="${o.treasure}"]`);
     if (t) t.checked = true;
     refreshSpots();
