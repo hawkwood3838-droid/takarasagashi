@@ -271,3 +271,6 @@ input[aria-invalid="true"] { border-color: var(--rust); background: #FFF6F3; }
   * { transition: none !important; animation: none !important; }
   .letter { transform: none; }
 }
+
+/* hidden の属性をつけた要素は、.btn などの display より優先して隠す（2026-10-27。名前をふやすボタンが上限でも消えなかったため） */
+[hidden] { display: none !important; }

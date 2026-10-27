@@ -48,7 +48,8 @@
     refreshBirthday();
   }
 
-  // ── 名前（1〜4人） ──
+  // ── 名前（1〜4人。お正月など names_max のある用途はその人数まで） ──
+  const namesMax = () => ((K.OCCASIONS[occasion()] || {}).names_max || K.NAMES_MAX);
   function nameRow(v = {}) {
     const row = document.createElement('div');
     row.className = 'name-row';
@@ -73,7 +74,7 @@
   function refreshNames() {
     const rows = document.querySelectorAll('.name-row');
     rows.forEach((r, i) => { r.querySelector('.name-del').hidden = rows.length === 1; r.dataset.n = i + 1; });
-    $('add-name').hidden = rows.length >= K.NAMES_MAX;
+    $('add-name').hidden = rows.length >= namesMax();
     $('age-multi').hidden = rows.length < 2;
     refreshBirthday();
   }
@@ -151,7 +152,7 @@
   form.addEventListener('change', e => {
     const nm = e.target.name;
     if (nm === 'story') refreshOccasions();
-    if (nm === 'occasion') refreshOccasionNote();
+    if (nm === 'occasion') { refreshOccasionNote(); refreshNames(); }
     if (nm === 'age') { refreshBirthday(); refreshLevel(); refreshSpots(); }
     if (nm === 'level') { refreshLevel(); refreshSpots(); }
     if (nm === 'treasure' || nm === 'cards') refreshSpots();
@@ -209,6 +210,7 @@
       nameInputs[i].setAttribute('aria-invalid', msg ? 'true' : 'false');
       if (msg && !nameMsg) { nameMsg = (o.names.length > 1 ? `${i + 1}人目：` : '') + msg; nameInput = nameInputs[i]; }
     });
+    if (!nameMsg && o.names.length > namesMax()) { nameMsg = `この用途では、名前は${namesMax()}人までです`; nameInput = nameInputs[nameInputs.length - 1]; }
     bad('name-err', nameMsg, nameInput);
     bad('age-err', o.age ? '' : '年齢を選んでください', form.querySelector('input[name="age"]'));
     bad('likes-err', !o.likes ? '' : !KANA.test(o.likes) ? '好きなものは、ひらがな・カタカナで入れてください'
@@ -353,7 +355,7 @@
     const oc = form.querySelector(`input[name="occasion"][value="${o.occasion}"]`);
     if (oc) oc.checked = true;
     $('name-rows').innerHTML = '';
-    (o.names && o.names.length ? o.names : [{}]).slice(0, K.NAMES_MAX).forEach(n => nameRow(n));
+    (o.names && o.names.length ? o.names : [{}]).slice(0, Math.max(K.NAMES_MAX, (K.OCCASIONS[o.occasion] || {}).names_max || 0)).forEach(n => nameRow(n));
     const a = form.querySelector(`input[name="age"][value="${o.age}"]`);
     if (a) a.checked = true;
     const lv = form.querySelector(`input[name="level"][value="${o.level || 'normal'}"]`);

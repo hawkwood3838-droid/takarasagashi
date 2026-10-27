@@ -8,7 +8,7 @@ window.KIT = {
   // 受付の仕組み（Apps Script ウェブアプリ）のURL。空のあいだは支払いボタンが「準備中」になる
   API_URL: 'https://script.google.com/macros/s/AKfycbw1iDJKzfDWksZPnbNmDfRAX9ipbbwVlo_1CgePaHks8NQpIzshOXSw4oCSZVxGbSvFDw/exec',
   NAME_MAX: 8,
-  NAMES_MAX: 4,
+  NAMES_MAX: 4, // 用途に names_max があればそちら（お正月は6）
   LIKES_MAX: 10,
   SENDER_MAX: 10, // 手紙の差出人（じいじと ばあば など。空なら お話の案内役だけ）。2026-10-27
   AGES: [3, 4, 5, 6, 7, 8],
@@ -26,6 +26,7 @@ window.KIT = {
     birthday: { label: 'おたんじょうび', note: '手紙に「〇さいの たんじょうび おめでとう」が入り、合言葉は「おめでとう」' },
     everyday: { label: 'ふだんの日', note: 'ごほうびや雨の日の遊びに。合言葉はお話ごとにちがいます' },
     christmas: { label: 'クリスマス', note: 'クリスマスだけのお話です' },
+    shougatsu: { label: 'お正月', note: 'お正月だけのお話です。家族やいとこと遊べるよう、名前は6人まで入れられます', names_max: 6 },
   },
   // ほかの通販サイトで買った人の引き換え（order.html?redeem=booth）。受付の仕組みの CONFIG.REDEEM.CHANNELS と同じキー
   REDEEM: {
@@ -34,6 +35,7 @@ window.KIT = {
   // 季節のお話を売る期間（月-日）。期間の外は「〇月から」と出して選べなくする
   SEASONS: {
     christmas: { from: '11-01', until: '12-25', soon: '11月から' },
+    shougatsu: { from: '12-01', until: '01-07', soon: '12月から' },
   },
   // お話（キット作成の stories.py と同じキー）
   // title は {漢字|よみ} の形で書く。販売ページでは漢字の上に小さくふりがなが付き、
@@ -64,6 +66,8 @@ window.KIT = {
       blurb: 'いたずら好きのトナカイが隠したプレゼントを追いかけます。' },
     { key: 'xmas_santa', title: 'サンタからの {挑戦状|ちょうせんじょう}', host: 'サンタクロース', line: 'christmas', occasions: ['christmas'],
       blurb: 'サンタクロースからの挑戦状。暗号をといてプレゼントへ。' },
+    { key: 'shougatsu_fuku', title: '{福|ふく}の{神|かみ}の お{年玉|としだま}', host: 'ふくのかみ ニコ', line: 'shougatsu', occasions: ['shougatsu'],
+      blurb: '福の神が隠したお年玉を、家族やいとこと探します。' },
   ],
   // 隠し場所（キット作成側の SPOTS と同じ並び・同じキー）
   SPOTS: [
