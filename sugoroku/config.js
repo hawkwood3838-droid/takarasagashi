@@ -6,13 +6,18 @@ window.SUGO = {
   OPEN: false,
   // 種類と値段（受付の仕組み Code.gs の CONFIG.SUGOROKU.PLANS と同じ）。price が 0 のものは「準備中」
   PLANS: [
-    { key: 'yasashii', name: '名前入り やさしい版', price: 1480, pages: 19,
-      note: '小学生（10さいくらい）から。ふつうの長さ（2人で35分〜）。はじめての方に。' },
+    { key: 'yasashii', name: '名前入り やさしい版', price: 1480, pages: 15, chooseJobs: true,
+      note: '小学生（10さいくらい）から。ふつうの長さ（2人で35分〜）。職業は4つ選べます。' },
     { key: 'deluxe', name: '名前入り デラックス版', price: 1980, pages: 29,
-      note: 'やさしい＋ほんかく＋ガッツリ。家族で むずかしさを まぜて遊べます。' },
+      note: 'やさしい＋ほんかく＋ガッツリ。8職業ぜんぶ入り。家族で むずかしさを まぜて遊べます。' },
     { key: 'family', name: '家族の名前入り（〇〇家版）', price: 2480, pages: 32,
-      note: '家族みんなの名前と なりたい職業が入る デラックス版。' },
+      note: '家族みんなの名前と なりたい職業が入る デラックス版（8職業ぜんぶ入り）。' },
   ],
+  // 職業の売り方（2026-10-27 決定。Code.gs の CONFIG.SUGOROKU と同じ）：やさしい版は「選べる4職」、
+  // 5つ目から追加（+1職150円・+2職250円・+3職350円・全部（+4職）400円）。デラックス版・〇〇家版は 8職 全部
+  BASE_JOBS: 4,
+  ADD_JOB_PRICES: [0, 150, 250, 350, 400],
+  FILL_JOBS: ['patissier', 'keisatsu', 'youtuber', 'model'], // はじめに えらんでおく職業（名前なし版の4職と同じ）
   JOBS: [
     { key: 'kaishain', name: '会社員', color: '#2F6FB0' },
     { key: 'ishi', name: '医師', color: '#2E9455' },
@@ -43,6 +48,9 @@ window.SUGO.planOf = key => window.SUGO.PLANS.find(p => p.key === key);
 window.SUGO.jobOf = key => window.SUGO.JOBS.find(j => j.key === key);
 window.SUGO.isOpen = () => window.SUGO.OPEN || new URLSearchParams(location.search).get('test') === '1';
 window.SUGO.yen = n => n.toLocaleString('ja-JP');
+// 追加の職業の数と 代金（やさしい版で 4つより多く えらんだ分）
+window.SUGO.addJobs = o => { const p = window.SUGO.planOf(o.plan); return p && p.chooseJobs && Array.isArray(o.jobs) ? Math.max(0, o.jobs.length - window.SUGO.BASE_JOBS) : 0; };
+window.SUGO.priceOf = o => { const p = window.SUGO.planOf(o.plan); return p ? p.price + window.SUGO.ADD_JOB_PRICES[window.SUGO.addJobs(o)] : 0; };
 
 // data-sugo="..." の場所に値段などを入れる
 document.addEventListener('DOMContentLoaded', () => {

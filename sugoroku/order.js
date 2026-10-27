@@ -28,6 +28,48 @@
   $('me-age').innerHTML = ageOptions;
   $('job-list').innerHTML = G.JOBS.map(j => `<label class="job-opt" style="--jc:${j.color}"><input type="radio" name="job" value="${j.key}"><span>${esc(j.name)}</span></label>`).join('');
 
+  // ── 入れる職業（やさしい版：4つ〜全部。主役の職業は かならず入る） ──
+  $('jobs-list').innerHTML = G.JOBS.map(j => `<label class="job-opt" style="--jc:${j.color}"><input type="checkbox" name="jobs" value="${j.key}"><span>${esc(j.name)}</span></label>`).join('');
+  const jobBoxes = () => Array.from(form.querySelectorAll('input[name="jobs"]'));
+  const mainJob = () => (form.querySelector('input[name="job"]:checked') || {}).value || '';
+  let jobsTouched = false;
+  let lastMain = '';
+  function syncJobs() {
+    const main = mainJob();
+    const boxes = jobBoxes();
+    if (!jobsTouched) {
+      // まだ さわっていなければ、主役の職業＋名前なし版の4職で 4つに しておく
+      const pick = main ? [main] : [];
+      G.FILL_JOBS.forEach(k => { if (pick.length < G.BASE_JOBS && pick.indexOf(k) < 0) pick.push(k); });
+      boxes.forEach(b => { b.checked = pick.indexOf(b.value) >= 0; });
+    } else if (main && main !== lastMain) {
+      // 主役の職業を かえたら、前の主役の職業と 入れかえる（数は かえない＝代金が かわらない）
+      const nb = boxes.find(b => b.value === main);
+      const ob = boxes.find(b => b.value === lastMain);
+      if (nb && !nb.checked) { nb.checked = true; if (ob) ob.checked = false; }
+    }
+    lastMain = main;
+    boxes.forEach(b => {
+      const me = b.value === main;
+      b.disabled = me;
+      if (me) b.checked = true;
+      const span = b.nextElementSibling;
+      const tag = span.querySelector('.me-tag');
+      if (me && !tag) span.insertAdjacentHTML('beforeend', '<span class="me-tag">主役</span>');
+      if (!me && tag) tag.remove();
+    });
+    refreshJobsSum();
+  }
+  const chosenJobs = () => jobBoxes().filter(b => b.checked).map(b => b.value);
+  function refreshJobsSum() {
+    const p = G.planOf(plan());
+    if (!p || !p.chooseJobs) return;
+    const n = chosenJobs().length;
+    const add = Math.max(0, n - G.BASE_JOBS);
+    $('jobs-sum').textContent = n < G.BASE_JOBS ? `いま ${n}つ。あと ${G.BASE_JOBS - n}つ 選んでください`
+      : `${n}職（${add ? `追加 +${add}職 ${G.yen(G.ADD_JOB_PRICES[add])}円` : '追加なし'}）・合計 ${G.yen(p.price + G.ADD_JOB_PRICES[add])}円`;
+  }
+
   // ── 家族 ──
   let memberSeq = 0;
   function memberRow(v = {}) {
@@ -66,6 +108,9 @@
   function refreshPlan() {
     $('single-block').hidden = isFam();
     $('family-block').hidden = !isFam();
+    const pp = G.planOf(plan());
+    $('jobs-field').hidden = !(pp && pp.chooseJobs);
+    syncJobs();
     if (isFam() && !document.querySelector('.member')) { memberRow(); memberRow({ honorific: '' }); }
     let n = 0;
     form.querySelectorAll('.field').forEach(f => {
@@ -109,7 +154,7 @@
       age: Number($('me-age').value || 0),
       job: (form.querySelector('input[name="job"]:checked') || {}).value || '',
       likes: Array.from(form.querySelectorAll('.like')).map(el => squash(el.value)).filter(x => x),
-    });
+    }, (G.planOf(plan()) || {}).chooseJobs ? { jobs: chosenJobs() } : {});
   }
 
   function showErr(id, msg, input) {
@@ -130,7 +175,7 @@
     const p = G.planOf(o.plan);
     bad('plan-err', !p ? '種類を選んでください' : !p.price ? 'この種類は、まだ販売していません' : '', form.querySelector('input[name="plan"]:not(:disabled)'));
     if (o.plan === 'family') {
-      ['name-err', 'age-err', 'job-err', 'likes-err'].forEach(id => showErr(id, ''));
+      ['name-err', 'age-err', 'job-err', 'jobs-err', 'likes-err'].forEach(id => showErr(id, ''));
       const fam = !o.family ? 'みょうじを入れてください' : !KANA.test(o.family) ? 'みょうじは、ひらがな・カタカナで入れてください'
         : o.family.length > G.FAMILY_MAX ? `みょうじは${G.FAMILY_MAX}文字までです` : '';
       bad('fam-err', fam, $('fam-name'));
@@ -153,6 +198,8 @@
       bad('name-err', nameMsg(o.name, G.NAME_MAX), $('me-name'));
       bad('age-err', o.age ? '' : '年齢を選んでください', $('me-age'));
       bad('job-err', G.jobOf(o.job) ? '' : 'なりたい職業を選んでください', form.querySelector('input[name="job"]'));
+      bad('jobs-err', o.jobs && o.jobs.length < G.BASE_JOBS ? `入れる職業を${G.BASE_JOBS}つ選んでください（いま${o.jobs.length}つ）` : '',
+        form.querySelector('input[name="jobs"]:not(:checked)'));
       bad('likes-err', likesMsg(o.likes), form.querySelector('.like'));
     }
     bad('req-err', o.job_request.length > G.REQUEST_MAX ? `リクエストは${G.REQUEST_MAX}文字までです` : '', $('job-request'));
@@ -167,6 +214,8 @@
   form.addEventListener('input', recheck);
   form.addEventListener('change', e => {
     if (e.target.name === 'plan') refreshPlan();
+    if (e.target.name === 'job') syncJobs();
+    if (e.target.name === 'jobs') { jobsTouched = true; refreshJobsSum(); }
     recheck();
   });
 
@@ -189,13 +238,15 @@
     } else {
       rows = [['種類', p.name], ['題', `〜${o.name}${o.honorific}の人生〜`], ['年齢', ageLabel(o.age) + `（人生シート：${diffOf(o.plan, o.age)}）`],
         ['なりたい職業', G.jobOf(o.job).name], ['好きなもの', likes(o.likes)]];
+      rows.push(['入る職業', o.jobs ? `${G.JOBS.filter(j => o.jobs.indexOf(j.key) >= 0).map(j => j.name).join('・')}（${o.jobs.length}職）` : `${G.JOBS.length}職業ぜんぶ`]);
     }
     if (o.job_request) rows.push(['リクエスト', o.job_request]);
     rows.push(['メッセージ', o.message || '（なし）'], ['贈る人', o.from || '（なし）']);
     $('summary-order').innerHTML = rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
-    $('summary-plan').textContent = p.name;
-    $('summary-price').textContent = G.yen(p.price);
-    $('pay-price').textContent = G.yen(p.price);
+    const add = G.addJobs(o);
+    $('summary-plan').textContent = p.name + (add ? `＋追加の職業 +${add}職` : '');
+    $('summary-price').textContent = G.yen(G.priceOf(o));
+    $('pay-price').textContent = G.yen(G.priceOf(o));
     form.hidden = true;
     confirmBox.hidden = false;
     $('step-input').removeAttribute('aria-current');
@@ -257,6 +308,11 @@
       const j = form.querySelector(`input[name="job"][value="${o.job}"]`);
       if (j) j.checked = true;
       form.querySelectorAll('.like').forEach((el, i) => { el.value = (o.likes || [])[i] || ''; });
+      if (Array.isArray(o.jobs)) {
+        jobsTouched = true;
+        lastMain = o.job || '';
+        jobBoxes().forEach(b => { b.checked = o.jobs.indexOf(b.value) >= 0; });
+      }
     }
     $('job-request').value = o.job_request || '';
     $('message').value = o.message || '';
