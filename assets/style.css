@@ -269,3 +269,5 @@ input[aria-invalid="true"] { border-color: var(--rust); background: #FFF6F3; }
   * { transition: none !important; animation: none !important; }
   .letter { transform: none; }
 }
+/* 9〜12さい（なぞときチャレンジ）の年齢の見出し（2026-10-27） */
+.seg .age-older-label { flex-basis: 100%; display: block; min-width: 0; min-height: 0; padding: 8px 0 0; border: none; border-radius: 0; background: none; font-weight: 700; font-size: .92em; }

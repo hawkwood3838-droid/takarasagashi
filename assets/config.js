@@ -3,6 +3,10 @@ window.KIT = {
   PRODUCT_NAME: 'おうちクエスト',
   SHOP_NAME: 'ひなた あそび工房',
   PRICE: 980,
+  // 9〜12さい「なぞときチャレンジ」（漢字にふりがな・9さい以上の むずかしい暗号）。2026-10-27 決定。受付の CONFIG.OLDER_AGE・PRICE_OLDER_JPY と同じ
+  OLDER_AGE: 9,
+  PRICE_OLDER: 1280,
+  OLDER_NAME: 'なぞときチャレンジ',
   SELLER: '髙木大資',
   CONTACT: 'hawkwood3838@gmail.com',
   // 受付の仕組み（Apps Script ウェブアプリ）のURL。空のあいだは支払いボタンが「準備中」になる
@@ -10,7 +14,7 @@ window.KIT = {
   NAME_MAX: 8,
   NAMES_MAX: 4,
   LIKES_MAX: 10,
-  AGES: [3, 4, 5, 6, 7, 8],
+  AGES: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
   LITTLE_AGE: 4, // この年齢以下は字を読まない版（隠し場所は4か所）
   // むずかしさえらび（受付の CONFIG.LEVELS・キット作成の LEVELS と同じ）。謎の年齢を本当の年齢から shift だけずらす
   LEVELS: [
@@ -108,6 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
     product: k.PRODUCT_NAME,
     shop: k.SHOP_NAME,
     price: k.PRICE.toLocaleString('ja-JP'),
+    price_older: k.PRICE_OLDER.toLocaleString('ja-JP'),
+    older_name: k.OLDER_NAME,
     seller: k.SELLER,
     contact: k.CONTACT,
     stories: String(k.STORIES.length),
