@@ -78,6 +78,12 @@
       <p class="sub">どのお話も、年齢に合わせて謎の難しさが変わります。おたんじょうび用と、ふだんの日（ごほうび・雨の日）用が選べます。</p>
       <div class="lineup" id="lineup-year"></div>
 
+      <a class="santa-band set-band" href="set.html">
+        <span class="set-mark" aria-hidden="true">3</span>
+        <span><span class="story-badge">まとめ買い</span><b><span class="js-set-title">3回分セット</span>　<span class="js-set-price">2,480</span>円</b>
+        <small>好きなお話を、好きな日に3回作れる引き換えコード。おたんじょうび・クリスマス・雨の日に。贈り物にも（3〜8さい）</small></span>
+      </a>
+
       <h3 class="lineup-head">季節のお話：クリスマス</h3>
       <p class="sub">3本は同じなかまが出てくるシリーズです。続けて遊ぶと、お話がつながります。</p>
       <div class="lineup" id="lineup-christmas"></div>
@@ -135,7 +141,7 @@
   <section class="section section-sea">
     <div class="wrap">
       <h2>年齢に合わせて、難しさが変わります</h2>
-      <p class="sub">注文のときに「やさしめ・ふつう・むずかしめ」も選べます（やさしめは1さい下、むずかしめは1さい上の謎）。きょうだいで遊ぶときは、下の子の年齢に合わせるのがおすすめです。</p>
+      <p class="sub">注文のときに「やさしめ・ふつう・むずかしめ」も選べます（やさしめは1さい下、むずかしめは1さい上の謎）。きょうだいで遊ぶときは、下の子の年齢に合わせるか、「きょうだい版」（＋300円）で上の子用と下の子用の謎を両方入れられます。</p>
       <div class="ages ages-3">
         <div class="age">
           <h3><small>ちびっこクエスト</small>3〜4さい</h3>
@@ -182,7 +188,7 @@
       <h2>よくある質問</h2>
       <details><summary>いつ届きますか？</summary><p>お支払いが済んでから、ふつうは数分でメールが届きます。届かないときは、迷惑メールのフォルダも確かめてください。</p></details>
       <details><summary>支払い方法は？</summary><p>クレジットカードです。Stripe（ストライプ）の支払い画面で入力します。カード番号は販売者には届きません。</p></details>
-      <details><summary>きょうだいで遊べますか？</summary><p>遊べます。名前は4人まで（お正月のお話は6人まで）入れられます。難しさは1つの年齢に合わせるので、下の子に合わせるのがおすすめです。</p></details>
+      <details><summary>きょうだいで遊べますか？</summary><p>遊べます。名前は4人まで（お正月のお話は6人まで）入れられます。ふつうは難しさを1つの年齢に合わせるので、下の子に合わせるのがおすすめです。年の離れたきょうだいには「きょうだい版」（＋300円）があります。手紙とカードが上の子用（★）と下の子用（●）の2枚ずつになり、どちらの謎を解いても同じ場所に着きます。下の子が3〜4さいなら、下の子用は字を読まない絵のなぞです。</p></details>
       <details><summary>うちの子には難しすぎ（簡単すぎ）ないですか？</summary><p>注文のときに「やさしめ・ふつう・むずかしめ」を選べます。やさしめは1さい下、むずかしめは1さい上の謎になります。詰まったときは、保護者ページのヒントで少しずつ助けられます。</p></details>
       <details><summary>字がまだ読めなくても遊べますか？</summary><p>3〜4さいを選ぶと、字を読まなくても解ける絵のなぞになります。カードの文は大人の方が読み上げてください。</p></details>
       <details><summary>白黒で印刷しても遊べますか？</summary><p>5さい以上のキットは遊べます（マークは形でも見分けられます）。3〜4さい向けは色で解くなぞがあるので、カラーで印刷してください。</p></details>
@@ -239,6 +245,11 @@
     document.querySelectorAll('.js-adv-letters').forEach(function (el) { el.textContent = K.ADVENT.LETTERS; });
     document.querySelectorAll('.js-adv-first').forEach(function (el) { el.textContent = 24 - K.ADVENT.LETTERS + 1; });
     document.querySelectorAll('.js-adv-price').forEach(function (el) { el.textContent = K.ADVENT.PRICE.toLocaleString('ja-JP'); });
+  }
+  // 3回分セット（set.html）の題と値段
+  if (K.SET) {
+    document.querySelectorAll('.js-set-title').forEach(function (el) { el.textContent = K.SET.TITLE; });
+    document.querySelectorAll('.js-set-price').forEach(function (el) { el.textContent = K.SET.PRICE.toLocaleString('ja-JP'); });
   }
   document.getElementById('lineup-shougatsu').innerHTML = K.STORIES.filter(function (s) { return s.line === 'shougatsu'; }).map(card).join('');
 

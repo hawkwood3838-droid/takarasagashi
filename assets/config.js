@@ -20,6 +20,11 @@ window.KIT = {
   AGE_LABEL: '3〜12さい',
   PLAY_TIME: '15〜30分',
   LITTLE_AGE: 4, // この年齢以下は字を読まない版（隠し場所は4か所）
+  // きょうだい版（2026-10-28）：下の子用（●）の手紙とカードを足す。受付の CONFIG.KYOUDAI・キット作成の KYOUDAI_AGES と同じ
+  KYOUDAI: { PLUS: 300, AGES: [3, 4, 5, 6, 7, 8] },
+  // 3回分セット（2026-10-28。set.html）：買うと引き換えコード（T…）がメールで届き、好きなお話を好きな日に3回作れる。
+  // 3〜8さい版だけ。有効期限は6か月。受付の CONFIG.SET と同じ
+  SET: { TITLE: '3回分セット', COUNT: 3, PRICE: 2480, VALID_MONTHS: 6 },
   // むずかしさえらび（受付の CONFIG.LEVELS・キット作成の LEVELS と同じ）。謎の年齢を本当の年齢から shift だけずらす
   LEVELS: [
     { key: 'easy', label: 'やさしめ', shift: -1 },
@@ -35,6 +40,10 @@ window.KIT = {
   // ほかの通販サイトで買った人の引き換え（order.html?redeem=booth）。受付の仕組みの CONFIG.REDEEM.CHANNELS と同じキー
   REDEEM: {
     booth: { label: 'BOOTH', where: 'BOOTHの「購入履歴」で、この商品の注文番号（数字）を見られます。' },
+    // 3回分セットの引き換えコード（T＋数字6けた－英数字5もじ）。支払いはセットで済んでいる
+    set: { label: '3回分セット', field: '引き換えコード', placeholder: 'T261101-ABCDE', re: '^T[0-9]{6}-[A-Z0-9]{5}$', code: true,
+      where: '3回分セットを買ったときのメールに、引き換えコード（Tから始まる番号）が書いてあります。',
+      legend: '3回分セットで作る', title: '3回分セットで作る', bad: '引き換えコード（Tから始まる番号）を確かめてください' },
   },
   // サンタからの手紙（12月の毎日1通の なぞとき。santa.html）。受付の CONFIG.ADVENT・キット作成の advent.py と同じ。
   // 通数は決まるまで仮に12（12/13〜12/24）。変えるときは3か所そろえる

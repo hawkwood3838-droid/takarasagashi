@@ -248,6 +248,9 @@ input[aria-invalid="true"] { border-color: var(--rust); background: #FFF6F3; }
 .santa-band b { display: block; font-size: 18px; font-weight: 900; }
 .santa-band small { display: block; font-size: 14px; color: var(--ink-soft); margin-top: 2px; }
 .santa-band:hover b { text-decoration: underline; }
+.set-band { background: #EAF2F8; }
+.set-mark { display: flex; align-items: center; justify-content: center; aspect-ratio: 1.45; border: 1px solid var(--ink); border-radius: 6px; background: #fff; color: var(--rust); font-size: 52px; font-weight: 900; line-height: 1; }
+.set-mark::after { content: "回"; font-size: 20px; margin-left: 2px; }
 .story .btn-sm { font-size: 14px; min-height: 36px; padding: 4px 14px; }
 .story .btn[aria-disabled] { background: #E6E9EE; color: #7B8796; border-color: #AEB8C4; box-shadow: none; cursor: default; }
 .lineup-head { margin: 40px 0 4px; font-size: 21px; font-weight: 900; }
