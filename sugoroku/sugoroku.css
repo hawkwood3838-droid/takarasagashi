@@ -84,6 +84,9 @@
 .job-opt span { display: block; padding: 10px 12px; border: 2px solid var(--line); border-left: 8px solid var(--jc); border-radius: 10px; background: #fff; font-weight: 900; }
 .job-opt input:checked + span { border-color: var(--ink); border-left-color: var(--jc); background: var(--sea); box-shadow: inset 0 0 0 1px var(--ink); }
 .job-opt input:checked + span::before { content: "✓ "; color: var(--rust); }
+.job-opt input:disabled + span { cursor: default; }
+.job-opt .me-tag { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 6px; background: var(--ink); color: #fff; font-size: 11px; vertical-align: 2px; }
+.jobs-sum { margin: 8px 0 0; font-weight: 900; }
 
 .sg .field { min-width: 0; }
 .likes-row { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); max-width: 560px; }
