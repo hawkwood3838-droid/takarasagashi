@@ -80,7 +80,13 @@
   $('add-name').addEventListener('click', () => { nameRow().querySelector('.kid-name').focus(); });
 
   // ── 年齢 ──
-  $('age-list').innerHTML = K.AGES.map(a => `<label><input type="radio" name="age" value="${a}"><span>${a}さい</span></label>`).join('');
+  // 9〜12さいは「なぞときチャレンジ」（値段が別）。引き換え（ほかの通販サイトで買った人）は 8さいまで
+  const ageItem = a => `<label><input type="radio" name="age" value="${a}"><span>${a}さい</span></label>`;
+  const AGES = RD ? K.AGES.filter(a => a < K.OLDER_AGE) : K.AGES;
+  $('age-list').innerHTML = AGES.filter(a => a < K.OLDER_AGE).map(ageItem).join('')
+    + (AGES.some(a => a >= K.OLDER_AGE)
+      ? `<span class="age-older-label">${K.OLDER_NAME}（漢字にふりがな・むずかしい暗号）${K.PRICE_OLDER.toLocaleString('ja-JP')}円</span>`
+        + AGES.filter(a => a >= K.OLDER_AGE).map(ageItem).join('') : '');
   for (let a = 1; a <= 15; a++) $('bday-age').insertAdjacentHTML('beforeend', `<option value="${a}">${a}さい</option>`);
   const age = () => Number((form.querySelector('input[name="age"]:checked') || {}).value || 0);
 
@@ -88,8 +94,19 @@
   $('level-list').innerHTML = K.LEVELS.map(l => `<label><input type="radio" name="level" value="${l.key}"${l.key === 'normal' ? ' checked' : ''}><span>${l.label}</span></label>`).join('');
   const levelOf = key => K.LEVELS.find(l => l.key === key) || K.LEVELS[1];
   const level = () => (form.querySelector('input[name="level"]:checked') || {}).value || 'normal';
-  const ageMin = Math.min(...K.AGES), ageMax = Math.max(...K.AGES);
-  const puzzleAgeOf = (a, lv) => (a ? Math.min(Math.max(a + levelOf(lv).shift, ageMin), ageMax) : 0);
+  // 3〜8さい と 9〜12さい（なぞときチャレンジ）は 別の商品なので、むずかしさで またがない
+  const band = a => K.AGES.filter(x => (x >= K.OLDER_AGE) === (a >= K.OLDER_AGE));
+  const ageMin = a => Math.min(...band(a)), ageMax = a => Math.max(...band(a));
+  const puzzleAgeOf = (a, lv) => (a ? Math.min(Math.max(a + levelOf(lv).shift, ageMin(a)), ageMax(a)) : 0);
+  const isOlder = a => a >= K.OLDER_AGE;
+  const priceOf = a => (isOlder(a) ? K.PRICE_OLDER : K.PRICE);
+  // 値段の表示（確認画面・支払いボタン）を年齢に合わせる
+  function refreshPrice() {
+    const a = age();
+    document.querySelectorAll('#confirm [data-kit="price"]').forEach(el => { el.textContent = priceOf(a).toLocaleString('ja-JP'); });
+    const nm = $('summary-older');
+    if (nm) nm.textContent = isOlder(a) ? ' ' + K.OLDER_NAME : '';
+  }
   const puzzleAge = () => puzzleAgeOf(age(), level());
   const need = () => (puzzleAge() && puzzleAge() <= K.LITTLE_AGE ? 4 : 5);
   // 3さいの「やさしめ」、8さいの「むずかしめ」は変わらないので選べなくする
@@ -100,11 +117,12 @@
       if (i.disabled && i.checked) form.querySelector('input[name="level"][value="normal"]').checked = true;
     });
     const p = puzzleAge();
-    const kind = p && p <= K.LITTLE_AGE ? '（字を読まない絵のなぞ・隠し場所4か所）' : '（文字の暗号・隠し場所5か所）';
+    const kind = p && p <= K.LITTLE_AGE ? '（字を読まない絵のなぞ・隠し場所4か所）'
+      : p >= K.OLDER_AGE ? '（漢字にふりがなの手紙・むずかしい暗号・隠し場所5か所）' : '（文字の暗号・隠し場所5か所）';
     $('level-note').textContent = !a ? 'やさしめは1さい下、むずかしめは1さい上の謎になります。'
       : `${levelOf(level()).label}：${p}さい向けの謎${kind}になります。`
-        + (a === ageMin ? '3さいは、いまの版がいちばんやさしい謎です。' : '')
-        + (a === ageMax ? `${ageMax}さいは、いまの版がいちばんむずかしい謎です。` : '');
+        + (a === ageMin(a) ? `${a}さいは、${isOlder(a) ? K.OLDER_NAME + 'の' : 'いまの版の'}いちばんやさしい謎です。` : '')
+        + (a === ageMax(a) ? `${a}さいは、${isOlder(a) ? K.OLDER_NAME + 'の' : '3〜8さい版の'}いちばんむずかしい謎です。` : '');
   }
   refreshLevel();
   // おたんじょうびで2人以上のときだけ、おたんじょうびの子の年齢をたずねる（1人なら年齢と同じ）
@@ -152,7 +170,7 @@
     const nm = e.target.name;
     if (nm === 'story') refreshOccasions();
     if (nm === 'occasion') refreshOccasionNote();
-    if (nm === 'age') { refreshBirthday(); refreshLevel(); refreshSpots(); }
+    if (nm === 'age') { refreshBirthday(); refreshLevel(); refreshSpots(); refreshPrice(); }
     if (nm === 'level') { refreshLevel(); refreshSpots(); }
     if (nm === 'treasure' || nm === 'cards') refreshSpots();
   });
@@ -242,6 +260,7 @@
     if (RD) rows.unshift([RD.label + 'の注文番号', rdNo()], ['PDFの届け先', rdEmail()]);
     $('summary-order').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('');
     if ($('summary-story')) $('summary-story').textContent = st.name;  // 引き換えのときは この欄がない
+    refreshPrice();
     form.hidden = true;
     confirmBox.hidden = false;
     $('step-input').removeAttribute('aria-current');
