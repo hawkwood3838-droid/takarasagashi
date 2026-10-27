@@ -33,6 +33,18 @@
 
   <!-- 1. 入力 -->
   <form id="order-form" novalidate>
+    <!-- ほかの通販サイトで買った人の引き換え（?redeem=booth のときだけ出す） -->
+    <fieldset class="field redeem-field" id="redeem-field" hidden>
+      <legend><span class="q-num">★</span><span id="redeem-legend">BOOTHで買った方</span></legend>
+      <p class="hint" id="redeem-hint"></p>
+      <label class="sub-label" for="redeem-no">注文番号</label>
+      <input id="redeem-no" type="text" inputmode="numeric" autocomplete="off" placeholder="12345678" maxlength="20" aria-describedby="redeem-hint redeem-no-err">
+      <p class="err" id="redeem-no-err" hidden></p>
+      <label class="sub-label" for="redeem-email">PDFを受け取るメールアドレス</label>
+      <input id="redeem-email" type="email" autocomplete="email" placeholder="example@gmail.com" maxlength="254" aria-describedby="redeem-email-err">
+      <p class="err" id="redeem-email-err" hidden></p>
+    </fieldset>
+
     <fieldset class="field">
       <legend><span class="q-num"></span>種類</legend>
       <p class="hint" id="plan-hint">どれも名前入り・PDFでのお届けです。<a href="./#plans" target="_blank" rel="noopener">ちがいを見る</a></p>
@@ -158,6 +170,17 @@
       <button class="btn btn-ghost" type="button" id="back-btn">入力にもどる</button>
       <button class="btn" type="button" id="pay-btn">支払いへ進む（<span id="pay-price"></span>円）</button>
     </div>
+  </section>
+
+  <!-- 3. 引き換えの受付（?redeem= のときだけ） -->
+  <section id="redeem-done" hidden aria-labelledby="redeem-done-title">
+    <h2 class="page-title" id="redeem-done-title" tabindex="-1">受け付けました</h2>
+    <p class="notice notice-ok" id="redeem-done-msg"></p>
+    <div class="summary"><dl>
+      <dt>受付番号</dt><dd id="redeem-done-id">-</dd>
+      <dt>届かないとき</dt><dd>迷惑メールのフォルダも確かめてください。1日たっても届かないときは、受付番号を添えて <a href="#" data-kit-mail data-kit="contact">お問い合わせ先</a> までご連絡ください。</dd>
+    </dl></div>
+    <p>このページは閉じても大丈夫です。</p>
   </section>
 </main>
 

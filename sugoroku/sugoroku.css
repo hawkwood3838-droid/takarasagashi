@@ -123,3 +123,6 @@ input[type="email"] {
   .sg .brand { font-size: 15px; }
   .sg .brand .brand-tag { display: none; }
 }
+
+/* 引き換え（?redeem=booth）：値段は出さない */
+.is-redeem .plan-opt .yen, .is-redeem .jobs-sum { display: none; }

@@ -6,6 +6,11 @@
   const form = $('order-form');
   const confirmBox = $('confirm');
   const STORE = 'sugo-order-draft';
+  // ほかの通販サイト（BOOTHなど）で買った人の引き換え：?redeem=booth のとき、支払いのかわりに注文番号とメールを入れる
+  const RD_KEY = new URLSearchParams(location.search).get('redeem') || '';
+  const RD = (K.REDEEM || {})[RD_KEY] || null;
+  const rdNo = () => $('redeem-no').value.trim().replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[#＃\s]/g, '');
+  const rdEmail = () => $('redeem-email').value.trim();
   const KANA = /^[ぁ-ゖァ-ヺー]+$/;
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const squash = s => String(s || '').replace(/\s/g, '');
@@ -66,6 +71,7 @@
     if (!p || !p.chooseJobs) return;
     const n = chosenJobs().length;
     const add = Math.max(0, n - G.BASE_JOBS);
+    if (RD) { $('jobs-sum').textContent = n < G.BASE_JOBS ? `いま ${n}つ。あと ${G.BASE_JOBS - n}つ 選んでください` : `${n}職（引き換え）`; return; }
     $('jobs-sum').textContent = n < G.BASE_JOBS ? `いま ${n}つ。あと ${G.BASE_JOBS - n}つ 選んでください`
       : `${n}職（${add ? `追加 +${add}職 ${G.yen(G.ADD_JOB_PRICES[add])}円` : '追加なし'}）・合計 ${G.yen(p.price + G.ADD_JOB_PRICES[add])}円`;
   }
@@ -202,6 +208,11 @@
         form.querySelector('input[name="jobs"]:not(:checked)'));
       bad('likes-err', likesMsg(o.likes), form.querySelector('.like'));
     }
+    if (RD) {
+      bad('redeem-no-err', /^[0-9]{5,12}$/.test(rdNo()) ? '' : RD.label + 'の注文番号を、数字で入れてください', $('redeem-no'));
+      bad('redeem-email-err', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rdEmail()) ? '' : 'PDFを受け取るメールアドレスを入れてください', $('redeem-email'));
+      if (o.jobs && o.jobs.length > G.BASE_JOBS) bad('jobs-err', `引き換えで入れられる職業は${G.BASE_JOBS}つです`, form.querySelector('input[name="jobs"]:checked:not(:disabled)'));
+    }
     bad('req-err', o.job_request.length > G.REQUEST_MAX ? `リクエストは${G.REQUEST_MAX}文字までです` : '', $('job-request'));
     bad('msg-err', o.message.length > G.MESSAGE_MAX ? `メッセージは${G.MESSAGE_MAX}文字までです（いま${o.message.length}文字）`
       : o.from.length > G.FROM_MAX ? `贈る人は${G.FROM_MAX}文字までです` : '', o.message.length > G.MESSAGE_MAX ? $('message') : $('from'));
@@ -215,7 +226,14 @@
   form.addEventListener('change', e => {
     if (e.target.name === 'plan') refreshPlan();
     if (e.target.name === 'job') syncJobs();
-    if (e.target.name === 'jobs') { jobsTouched = true; refreshJobsSum(); }
+    if (e.target.name === 'jobs') {
+      jobsTouched = true;
+      if (RD && e.target.checked && chosenJobs().length > G.BASE_JOBS) {
+        e.target.checked = false;   // 引き換えでは 追加の職業を えらべない
+        showErr('jobs-err', `引き換えで入れられる職業は${G.BASE_JOBS}つです。ほかの職業を はずしてから選んでください。`);
+      }
+      refreshJobsSum();
+    }
     recheck();
   });
 
@@ -244,9 +262,9 @@
     rows.push(['メッセージ', o.message || '（なし）'], ['贈る人', o.from || '（なし）']);
     $('summary-order').innerHTML = rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
     const add = G.addJobs(o);
-    $('summary-plan').textContent = p.name + (add ? `＋追加の職業 +${add}職` : '');
-    $('summary-price').textContent = G.yen(G.priceOf(o));
-    $('pay-price').textContent = G.yen(G.priceOf(o));
+    if ($('summary-plan')) $('summary-plan').textContent = p.name + (add ? `＋追加の職業 +${add}職` : '');
+    if ($('summary-price')) $('summary-price').textContent = G.yen(G.priceOf(o));
+    if ($('pay-price')) $('pay-price').textContent = G.yen(G.priceOf(o));
     form.hidden = true;
     confirmBox.hidden = false;
     $('step-input').removeAttribute('aria-current');
@@ -269,6 +287,7 @@
   const canPay = () => !!K.API_URL && G.isOpen();
   $('pay-btn').addEventListener('click', async () => {
     if (!current || !canPay()) return;
+    if (RD) { redeem(); return; }
     const btn = $('pay-btn');
     btn.disabled = true;
     const label = btn.innerHTML;
@@ -285,6 +304,55 @@
       btn.innerHTML = label;
     }
   });
+
+  // ── 確認 → 引き換えの受付（支払いはなし） ──
+  async function redeem() {
+    const btn = $('pay-btn');
+    btn.disabled = true;
+    const label = btn.innerHTML;
+    btn.textContent = '受け付けています…';
+    showErr('submit-err', '');
+    try {
+      const res = await fetch(K.API_URL, { method: 'POST', body: JSON.stringify({ action: 'redeem', channel: RD_KEY, channel_order: rdNo(), email: rdEmail(), order: current }) });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || '受け付けられませんでした');
+      try { sessionStorage.removeItem(STORE); } catch (err) { /* 何もしない */ }
+      confirmBox.hidden = true;
+      $('redeem-done').hidden = false;
+      $('redeem-done-id').textContent = data.order_id;
+      $('redeem-done-msg').textContent = data.pending
+        ? `${RD.label}のご注文を確かめています。確かめられたら、すぐにすごろくを作って ${data.email} にPDFをお送りします（ふつうは10〜20分ほど）。`
+        : `すごろくを作っています。ふつうは数分で ${data.email} にPDFが届きます。`;
+      document.querySelectorAll('.steps li').forEach(li => li.removeAttribute('aria-current'));
+      document.querySelector('.steps li:last-child').setAttribute('aria-current', 'step');
+      window.scrollTo({ top: 0 });
+      $('redeem-done-title').focus();
+    } catch (err) {
+      showErr('submit-err', (err && err.message && !/fetch|network/i.test(err.message) ? err.message : '通信がうまくいきませんでした。電波のよい所で、もう一度お試しください。'));
+      btn.disabled = false;
+      btn.innerHTML = label;
+    }
+  }
+
+  // 引き換えのときは、値段と支払いの説明を 引き換えの説明に入れかえる
+  if (RD) {
+    document.title = document.title.replace('注文する', '引き換える');
+    form.classList.add('is-redeem');
+    $('redeem-field').hidden = false;
+    $('redeem-legend').textContent = RD.label + 'で買った方';
+    $('redeem-hint').textContent = RD.where + ' 名前などは、このページで入れてください。お支払いは' + RD.label + 'で済んでいるので、ここではかかりません。';
+    $('plan-hint').textContent = RD.label + 'で買った種類と 同じものを選んでください。';
+    $('jobs-hint').textContent = `人生シートを入れる職業を${G.BASE_JOBS}つ選べます（主役の職業は かならず入ります）。ほかの職業は「追加職業パック」で足せます。`;
+    document.querySelector('.page-title').textContent = '名前入りのすごろくに引き換える';
+    document.querySelector('.steps li:last-child').textContent = '3 お届け';
+    const pay = $('pay-btn').closest('section').querySelectorAll('.summary')[1];
+    pay.innerHTML = `<h2>お届け</h2><dl><dt>お支払い</dt><dd>${esc(RD.label)}で済んでいます</dd>`
+      + `<dt>お届け</dt><dd>${esc(RD.label)}のご注文を確かめてから、名前入りのPDFをメールでお送りします（ふつうは10〜20分ほど。遅くとも24時間以内）</dd>`
+      + '<dt>引き換え</dt><dd>1つの注文番号につき1回です</dd></dl>';
+    const note = $('pay-btn').closest('section').querySelector(':scope > .hint');
+    if (note) note.remove();
+    $('pay-btn').textContent = 'この内容で作る';
+  }
 
   // ── お知らせ（準備中／支払いを中断して戻ってきた） ──
   const notice = (cls, text) => { $('notice-area').innerHTML = `<p class="notice ${cls}">${text}</p>`; };
