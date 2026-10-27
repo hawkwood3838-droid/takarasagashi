@@ -48,7 +48,7 @@
   }
   $('add-name').addEventListener('click', () => { nameRow().querySelector('.kid-name').focus(); });
 
-  // ── 年齢とむずかしさ（5〜8さい と 9〜12さい は またがない） ──
+  // ── 年齢とむずかしさ（3〜8さい と 9〜12さい は またがない。4さい以下の むずかしさは 字を読まない絵のなぞ） ──
   $('age-list').innerHTML = A.AGES.map(a => `<label><input type="radio" name="age" value="${a}"><span>${a}さい</span></label>`).join('');
   $('level-list').innerHTML = K.LEVELS.map(l => `<label><input type="radio" name="level" value="${l.key}"${l.key === 'normal' ? ' checked' : ''}><span>${l.label}</span></label>`).join('');
   const age = () => Number((form.querySelector('input[name="age"]:checked') || {}).value || 0);
@@ -64,7 +64,7 @@
       if (i.disabled && i.checked) form.querySelector('input[name="level"][value="normal"]').checked = true;
     });
     $('level-note').textContent = !a ? 'やさしめは1さい下、むずかしめは1さい上の暗号になります。'
-      : `${levelOf(level()).label}：${puzzleAgeOf(a, level())}さい向けの暗号になります。`;
+      : `${levelOf(level()).label}：${puzzleAgeOf(a, level())}さい向けの${puzzleAgeOf(a, level()) <= (K.LITTLE_AGE || 4) ? '絵のなぞ（字を読まない版）' : '暗号'}になります。`;
   }
   refreshLevel();
 
