@@ -219,6 +219,8 @@
       : '<span class="btn btn-sm" aria-disabled="true">' + esc(soon) + '販売</span>';
     return '<article class="story"><div class="story-pic"><img src="img/stories/' + esc(s.key) + '.webp" alt="' + esc(s.host) + '" loading="lazy"></div>'
       + '<div class="story-body">' + season + '<h3>' + K.rubyOf(s) + '</h3><p class="story-host">' + esc(s.host) + '</p>'
+      + '<p class="story-meta"><span>' + esc(K.AGE_LABEL) + '</span><span>あそぶ時間 ' + esc(K.PLAY_TIME) + '</span>'
+      + (s.line === 'christmas' ? '<span>おすすめ：25日の朝</span>' : '') + '</p>'
       + '<p class="story-blurb">' + esc(s.blurb) + '</p>' + btn + '</div></article>';
   }
   document.getElementById('lineup-year').innerHTML = K.STORIES.filter(function (s) { return s.line === 'year'; }).map(card).join('');
