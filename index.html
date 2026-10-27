@@ -78,6 +78,12 @@
       <p class="sub">どのお話も、年齢に合わせて謎の難しさが変わります。おたんじょうび用と、ふだんの日（ごほうび・雨の日）用が選べます。</p>
       <div class="lineup" id="lineup-year"></div>
 
+      <a class="santa-band set-band" href="set.html">
+        <span class="set-mark" aria-hidden="true">3</span>
+        <span><span class="story-badge">まとめ買い</span><b><span class="js-set-title">3回分セット</span>　<span class="js-set-price">2,480</span>円</b>
+        <small>好きなお話を、好きな日に3回作れる引き換えコード。おたんじょうび・クリスマス・雨の日に。贈り物にも（3〜8さい）</small></span>
+      </a>
+
       <h3 class="lineup-head">季節のお話：クリスマス</h3>
       <p class="sub">3本は同じなかまが出てくるシリーズです。続けて遊ぶと、お話がつながります。</p>
       <div class="lineup" id="lineup-christmas"></div>
@@ -239,6 +245,11 @@
     document.querySelectorAll('.js-adv-letters').forEach(function (el) { el.textContent = K.ADVENT.LETTERS; });
     document.querySelectorAll('.js-adv-first').forEach(function (el) { el.textContent = 24 - K.ADVENT.LETTERS + 1; });
     document.querySelectorAll('.js-adv-price').forEach(function (el) { el.textContent = K.ADVENT.PRICE.toLocaleString('ja-JP'); });
+  }
+  // 3回分セット（set.html）の題と値段
+  if (K.SET) {
+    document.querySelectorAll('.js-set-title').forEach(function (el) { el.textContent = K.SET.TITLE; });
+    document.querySelectorAll('.js-set-price').forEach(function (el) { el.textContent = K.SET.PRICE.toLocaleString('ja-JP'); });
   }
   document.getElementById('lineup-shougatsu').innerHTML = K.STORIES.filter(function (s) { return s.line === 'shougatsu'; }).map(card).join('');
 
