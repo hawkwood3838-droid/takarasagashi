@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>サンタからの手紙（毎日1通のなぞとき）｜{product}</title>
+<meta name="description" content="12月、毎日1通サンタから名前入りの手紙が届く、なぞときのアドベントカレンダー。暗号をといて文字を集めると、24日にプレゼントの場所がわかります。5〜12さい・A4で印刷・PDFでお届け。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/config.js"></script>
+<style>
+.santa-hero { background: #F7E8E4; }
+.santa-hero .wrap { display: grid; gap: 22px; padding-top: 32px; padding-bottom: 36px; }
+.santa-hero h1 { margin: 0; font-size: clamp(28px, 7.6vw, 42px); line-height: 1.35; font-weight: 900; }
+.santa-hero .lead { margin: 12px 0 0; font-size: 17px; max-width: 32em; }
+.santa-points { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 16px 0 0; }
+.santa-points li { background: #fff; border: 2px solid var(--ink); border-radius: 999px; padding: 2px 12px; font-size: 14px; font-weight: 700; }
+.santa-shots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+.santa-shots figure { margin: 0; }
+.santa-shots img { width: 100%; height: auto; display: block; border: 2px solid var(--ink); border-radius: 10px; background: #fff; }
+.santa-shots figcaption { font-size: 13px; color: var(--ink-soft); margin-top: 4px; text-align: center; }
+.santa-flow { counter-reset: f; list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.santa-flow li { position: relative; padding: 12px 14px 12px 52px; border: 2px solid var(--ink); border-radius: var(--radius); background: #fff; }
+.santa-flow li::before { counter-increment: f; content: counter(f); position: absolute; left: 12px; top: 12px; width: 28px; height: 28px; border-radius: 50%; background: #B8322A; color: #fff; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+.santa-flow b { display: block; }
+.santa-faq dt { font-weight: 900; margin-top: 14px; }
+.santa-faq dd { margin: 4px 0 0; }
+@media (min-width: 820px) { .santa-hero .wrap { grid-template-columns: 1.1fr 1fr; align-items: center; padding-top: 52px; padding-bottom: 56px; } }
+</style>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="./"><svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="#B5452F" stroke-width="4" stroke-linecap="round"/></svg><span data-kit="product">おうちクエスト</span><span class="brand-tag">名前入り</span></a>
+    <a class="btn btn-sm" href="#santa-order">注文する</a>
+  </div>
+</header>
+
+<main>
+  <section class="santa-hero">
+    <div class="wrap">
+      <div>
+        <h1>サンタからの<span class="js-letters">12</span>通の手紙</h1>
+        <p class="lead">12月<span class="js-first">13</span>日から24日まで、毎日1通、サンタクロースから名前入りの手紙が届きます。手紙の暗号をといて「ひみつのカレンダー」に文字を集めると、24日にプレゼントの場所がわかる、なぞときのアドベントカレンダーです。</p>
+        <ul class="santa-points">
+          <li>5〜12さい</li><li>1日5〜10分</li><li>A4で印刷</li><li>PDFでお届け</li><li><span class="js-price">1,480</span>円（税込）</li>
+        </ul>
+        <div class="hero-cta"><a class="btn" href="#santa-order">名前を入れて注文する</a></div>
+      </div>
+      <div class="santa-shots">
+        <figure><img src="img/santa/calendar.webp" alt="ひみつのカレンダーの見本。文の中に日付の入った空き箱が並んでいる" width="600" height="875" loading="lazy"><figcaption>ひみつのカレンダー（見本）</figcaption></figure>
+        <figure><img src="img/santa/letter.webp" alt="サンタからの手紙の見本。サンタの絵と、その日の暗号" width="600" height="415" loading="lazy"><figcaption>毎日の手紙（見本）</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap narrow">
+      <h2>遊び方</h2>
+      <ol class="santa-flow">
+        <li><b>印刷して、手紙を切っておく</b>A4に印刷して、手紙を点線で切ります（<span class="js-letters">12</span>枚）。「ひみつのカレンダー」は切らずに使います。</li>
+        <li><b>毎晩、次の日の手紙を置く</b>お子さんが寝たあとに、まくら元や玄関などへ。12月<span class="js-first">13</span>日の朝は、カレンダーと一緒に最初の手紙を。</li>
+        <li><b>暗号をといて、カレンダーに文字を書く</b>手紙の暗号の答えのうち、黄色い箱の文字を、カレンダーの同じ日付の箱に書き写します。</li>
+        <li><b>24日に文がそろう</b>「ことしの クリスマスの プレゼントは、○○の ちかくに…」。24日の夜、寝たあとにプレゼントをその場所に置けば、25日の朝に探しに行けます。</li>
+      </ol>
+      <dl class="santa-faq">
+        <dt>途中から始めても大丈夫？</dt>
+        <dd>大丈夫です。それまでの日の手紙を、まとめて渡してください。注文は12月20日まで受け付けます。</dd>
+        <dt>3〜4さいでも遊べますか？</dt>
+        <dd>この手紙は字を読む版（5さいから）だけです。3〜4さいには、字を読まなくても遊べる <a href="./#lineup">クリスマスのお話</a> がおすすめです。</dd>
+        <dt>きょうだいで遊べますか？</dt>
+        <dd>名前は4人まで入れられます。暗号のむずかしさは、下の子の年齢に合わせるのがおすすめです。</dd>
+        <dt>いつ届きますか？</dt>
+        <dd>お支払いのあと、ふつうは数分でPDFがメールで届きます。</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section section-sea" id="santa-order">
+    <div class="wrap narrow">
+      <h2 class="page-title" style="margin-top:0">注文する</h2>
+      <ol class="steps" aria-label="注文の流れ">
+        <li id="step-input" aria-current="step">1 入力</li>
+        <li id="step-confirm">2 確認</li>
+        <li>3 お支払い</li>
+      </ol>
+      <div id="notice-area"></div>
+
+      <form id="santa-form" novalidate>
+        <fieldset class="field">
+          <legend><span class="q-num">1</span>お子さまの名前</legend>
+          <p class="hint" id="name-hint">ひらがな8文字まで。手紙とカレンダーにこの名前が入ります。きょうだいで遊ぶときは4人まで入れられます。</p>
+          <div id="name-rows"></div>
+          <button class="btn btn-ghost btn-sm" type="button" id="add-name">＋ 名前をふやす</button>
+          <p class="err" id="name-err" hidden></p>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend><span class="q-num">2</span>年齢</legend>
+          <p class="hint" id="age-hint">年齢に合わせて、暗号のむずかしさが変わります。</p>
+          <div class="seg" id="age-list" role="radiogroup" aria-describedby="age-hint age-err"></div>
+          <p class="hint" id="age-multi" hidden style="margin-top:8px">きょうだいで遊ぶときは、下の子の年齢に合わせるのがおすすめです。</p>
+          <p class="err" id="age-err" hidden></p>
+          <p class="hint" id="level-hint" style="margin:14px 0 6px">むずかしさ（迷ったら「ふつう」）</p>
+          <div class="seg" id="level-list" role="radiogroup" aria-describedby="level-hint level-note"></div>
+          <p class="hint" id="level-note" style="margin-top:8px"></p>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend><span class="q-num">3</span>好きなもの<span class="opt">なくても大丈夫</span></legend>
+          <p class="hint" id="likes-hint">ひらがな・カタカナ10文字まで。最初の手紙に「きょうりゅうが だいすきな きみの ために」のように入ります。</p>
+          <input id="likes" type="text" autocomplete="off" placeholder="きょうりゅう" maxlength="20" aria-describedby="likes-hint likes-err">
+          <p class="err" id="likes-err" hidden></p>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend><span class="q-num">4</span>25日の朝、プレゼントを置く場所</legend>
+          <p class="hint" id="treasure-hint">カレンダーの文がそろうと、この場所がわかります。プレゼントが置ける場所を選んでください。</p>
+          <div class="spots" id="treasure-list" role="radiogroup" aria-describedby="treasure-hint treasure-err"></div>
+          <p class="err" id="treasure-err" hidden></p>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend><span class="q-num">5</span>確認</legend>
+          <label class="agree">
+            <input type="checkbox" id="agree" aria-describedby="agree-err">
+            <span>デジタル商品のため、お届け後の返品・キャンセルはできないことを確認しました。（<a href="tokushoho.html" target="_blank" rel="noopener">特定商取引法に基づく表記</a>・<a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>）</span>
+          </label>
+          <p class="err" id="agree-err" hidden></p>
+        </fieldset>
+
+        <div class="form-actions">
+          <button class="btn" type="submit">確認へ進む</button>
+        </div>
+      </form>
+
+      <section id="confirm" hidden aria-labelledby="confirm-title">
+        <div class="summary">
+          <h2 id="confirm-title">ご注文の内容</h2>
+          <dl id="summary-order"></dl>
+        </div>
+        <div class="summary">
+          <h2>お支払いとお届け</h2>
+          <dl>
+            <dt>商品</dt><dd><span data-kit="product">おうちクエスト</span>「サンタからの<span class="js-letters">12</span>通の手紙」（名前入り・PDF）</dd>
+            <dt>数量</dt><dd>1</dd>
+            <dt>価格</dt><dd><span class="big-price"><span class="js-price">1,480</span>円</span>（税込・送料なし）</dd>
+            <dt>支払い方法</dt><dd>クレジットカード</dd>
+            <dt>支払いの時期</dt><dd>次の画面でカード情報を入れたときに決済されます</dd>
+            <dt>お届け</dt><dd>決済のあと、ふつうは数分でPDFをメールでお送りします（遅くとも24時間以内）</dd>
+            <dt>返品・キャンセル</dt><dd>デジタル商品のため、お届け後はできません。ファイルの不具合や内容の誤りは、作り直しか返金で対応します</dd>
+          </dl>
+        </div>
+        <p class="hint">次の画面（Stripeの支払い画面）で、カード情報と、PDFを受け取るメールアドレスを入れます。</p>
+        <p class="err" id="submit-err" hidden></p>
+        <div class="form-actions">
+          <button class="btn btn-ghost" type="button" id="back-btn">入力にもどる</button>
+          <button class="btn" type="button" id="pay-btn">支払いへ進む（<span class="js-price">1,480</span>円）</button>
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="サイトの情報">
+      <a href="tokushoho.html">特定商取引法に基づく表記</a>
+      <a href="privacy.html">プライバシーポリシー</a>
+      <a href="#" data-kit-mail>お問い合わせ</a>
+    </nav>
+    <p style="margin:0"><span data-kit="shop">ひなた あそび工房</span>（販売：<span data-kit="seller">髙木大資</span>）</p>
+  </div>
+</footer>
+
+<script src="assets/santa.js"></script>
+</body>
+</html>
