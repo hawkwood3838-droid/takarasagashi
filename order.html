@@ -59,7 +59,7 @@
 
     <fieldset class="field">
       <legend><span class="q-num">3</span>お子さまの名前</legend>
-      <p class="hint" id="name-hint">ひらがな8文字まで。手紙やカードにこの名前が入ります。きょうだいで遊ぶときは4人まで入れられます。</p>
+      <p class="hint" id="name-hint">ひらがな8文字まで。手紙やカードにこの名前が入ります。きょうだいで遊ぶときは4人まで（お正月のお話は6人まで）入れられます。</p>
       <div id="name-rows"></div>
       <button class="btn btn-ghost btn-sm" type="button" id="add-name">＋ 名前をふやす</button>
       <p class="hint" id="bday-note" hidden style="margin-top:8px">おたんじょうびのときは、1人目がおたんじょうびの子です。</p>
@@ -91,14 +91,31 @@
     </fieldset>
 
     <fieldset class="field">
-      <legend><span class="q-num">6</span>プレゼントを隠す場所</legend>
+      <legend><span class="q-num">6</span>手紙の差出人<span class="opt">ふつうは そのままで大丈夫</span></legend>
+      <p class="hint" id="sender-hint">おじいちゃん・おばあちゃんなどからの贈り物にするときに選びます。手紙の最初に「この ぼうけんは、じいじと ばあばからの プレゼントだよ。」と入り、ゴールのカードにも名前が入ります。</p>
+      <div class="seg seg-sm" id="sender-list" role="radiogroup" aria-describedby="sender-hint sender-err">
+        <label><input type="radio" name="sender" value="" checked><span>お話の案内役だけ</span></label>
+        <label><input type="radio" name="sender" value="じいじと ばあば"><span>じいじと ばあば</span></label>
+        <label><input type="radio" name="sender" value="じいじ"><span>じいじ</span></label>
+        <label><input type="radio" name="sender" value="ばあば"><span>ばあば</span></label>
+        <label><input type="radio" name="sender" value="*"><span>そのほか</span></label>
+      </div>
+      <div id="sender-other-box" hidden>
+        <p class="hint" style="margin:10px 0 6px">ひらがな・カタカナ10文字まで（例：おばあちゃん、パパと ママ）</p>
+        <input id="sender-other" type="text" autocomplete="off" placeholder="おばあちゃん" maxlength="20" aria-label="手紙の差出人（そのほか）" aria-describedby="sender-err">
+      </div>
+      <p class="err" id="sender-err" hidden></p>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend><span class="q-num">7</span>プレゼントを隠す場所</legend>
       <p class="hint" id="treasure-hint">最後の宝の場所です。プレゼントが入る場所を選んでください。</p>
       <div class="spots" id="treasure-list" role="radiogroup" aria-describedby="treasure-hint treasure-err"></div>
       <p class="err" id="treasure-err" hidden></p>
     </fieldset>
 
     <fieldset class="field">
-      <legend><span class="q-num">7</span>カードを隠す場所を<span id="need-n">5</span>つ</legend>
+      <legend><span class="q-num">8</span>カードを隠す場所を<span id="need-n">5</span>つ</legend>
       <p class="hint" id="cards-hint">家にある場所を選んでください。どの順番でめぐるかは、こちらで決めます。</p>
       <div class="spots" id="card-list" aria-describedby="cards-hint cards-err"></div>
       <p class="counter" id="card-counter" aria-live="polite"></p>
@@ -106,7 +123,7 @@
     </fieldset>
 
     <fieldset class="field">
-      <legend><span class="q-num">8</span>確認</legend>
+      <legend><span class="q-num">9</span>確認</legend>
       <label class="agree">
         <input type="checkbox" id="agree" aria-describedby="agree-err">
         <span>デジタル商品のため、お届け後の返品・キャンセルはできないことを確認しました。（<a href="tokushoho.html" target="_blank" rel="noopener">特定商取引法に基づく表記</a>・<a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>）</span>

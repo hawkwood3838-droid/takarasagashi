@@ -7,7 +7,7 @@
     kaizoku: 'りっぱな かいぞく', ninja: 'いちにんまえの にんじゃ', mahou: 'まほうつかいの でし', kyouryuu: 'きょうりゅう はかせ',
     uchuu: 'うちゅうの ぼうけんか', tantei: 'めいたんてい', yousei: 'もりの ともだち', ningyo: 'うみの ゆうしゃ',
     okashi: 'おかしの くにの ゆうしゃ', xmas_minarai: 'サンタの おてつだい めいじん', xmas_tonakai: 'トナカイ はかせ',
-    xmas_santa: 'サンタの なかま', other: 'ぼうけんの たつじん',
+    xmas_santa: 'サンタの なかま', shougatsu_fuku: 'ふくの かみの なかま', other: 'ぼうけんの たつじん',
   };
   const kana = s => s.title.replace(/\{([^|}]+)\|([^}]+)\}/g, '$2');  // {海賊|かいぞく} → かいぞく
   const toHira = s => s.replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
