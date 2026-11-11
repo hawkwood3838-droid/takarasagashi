@@ -27,6 +27,11 @@ window.SUGO = {
     { key: 'sports', name: 'スポーツ選手', color: '#7D4AA8' },
     { key: 'youtuber', name: 'YouTuber', color: '#C23B3B' },
     { key: 'model', name: 'モデル', color: '#C2487E' },
+    // 2026-11-11 追加の4職（kit-generator の sugoroku/data.js と同じ。受付の仕組み Code.gs の CONFIG.SUGOROKU.JOBS にも 足すこと）
+    { key: 'kangoshi', name: '看護師', color: '#17908F' },
+    { key: 'biyoushi', name: '美容師', color: '#D0672A' },
+    { key: 'game', name: 'ゲームクリエイター', color: '#4B53BC' },
+    { key: 'daiku', name: '大工', color: '#8A5A2B' },
   ],
   HONORIFICS: ['くん', 'ちゃん', 'さん', ''],
   NAME_MAX: 8,

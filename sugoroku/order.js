@@ -232,6 +232,12 @@
         e.target.checked = false;   // 引き換えでは 追加の職業を えらべない
         showErr('jobs-err', `引き換えで入れられる職業は${G.BASE_JOBS}つです。ほかの職業を はずしてから選んでください。`);
       }
+      // 値段の表（ADD_JOB_PRICES）に ある数までしか えらべない（2026-11-11：職業が12に なったので。値段が きまったら 表を のばす）
+      const maxJobs = G.BASE_JOBS + G.ADD_JOB_PRICES.length - 1;
+      if (!RD && e.target.checked && chosenJobs().length > maxJobs) {
+        e.target.checked = false;
+        showErr('jobs-err', `入れられる職業は${maxJobs}つまでです。ほかの職業を はずしてから選んでください。`);
+      }
       refreshJobsSum();
     }
     recheck();
