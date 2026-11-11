@@ -13,7 +13,11 @@
   // ほかの通販サイト（BOOTHなど）で買った人の引き換え：?redeem=booth のとき、支払いのかわりに注文番号とメールを入れる
   const RD_KEY = new URLSearchParams(location.search).get('redeem') || '';
   const RD = (K.REDEEM || {})[RD_KEY] || null;
-  const rdNo = () => $('redeem-no').value.trim().replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[#＃\s]/g, '');
+  const rdNo = () => {
+    const v = $('redeem-no').value.trim().replace(/[Ａ-Ｚａ-ｚ０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[#＃\s]/g, '');
+    return RD && RD.code ? v.toUpperCase().replace(/[ー－―‐]/g, '-') : v;  // 3回分セットのコードは 英字も使う
+  };
+  const RD_RE = new RegExp((RD && RD.re) || '^[0-9]{5,12}$');
   const rdEmail = () => $('redeem-email').value.trim();
 
   // ── お話 ──
@@ -246,7 +250,7 @@
     let first = null;
     const bad = (id, msg, input) => { showErr(id, msg, input); if (msg && !first) first = input || $(id); };
     if (RD) {
-      bad('redeem-no-err', /^[0-9]{5,12}$/.test(rdNo()) ? '' : RD.label + 'の注文番号を、数字で入れてください', $('redeem-no'));
+      bad('redeem-no-err', RD_RE.test(rdNo()) ? '' : (RD.bad || RD.label + 'の注文番号を、数字で入れてください'), $('redeem-no'));
       bad('redeem-email-err', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rdEmail()) ? '' : 'PDFを受け取るメールアドレスを入れてください', $('redeem-email'));
     }
     bad('story-err', o.story ? '' : 'お話を選んでください', form.querySelector('input[name="story"]:not(:disabled)'));
@@ -307,7 +311,7 @@
     if (o.age2) rows.push(['きょうだい版', `下の子 ${o.age2}さい${o.age2 <= K.LITTLE_AGE ? '（字を読まない絵のなぞ）' : ''}・＋${KD.PLUS.toLocaleString('ja-JP')}円`]);
     if (o.occasion === 'birthday' && o.names.length > 1) rows.push(['おたんじょうび', `${o.names[0].name}${o.names[0].suffix}・${o.birthday_age}さい`]);
     rows.push(['好きなもの', o.likes || '（なし）'], ['手紙の差出人', o.sender ? o.sender + '（と お話の案内役）' : 'お話の案内役'], ['プレゼントの場所', labelOf(o.treasure)], ['カードの場所', o.card_spots.map(labelOf).join('、')]);
-    if (RD) rows.unshift([RD.label + 'の注文番号', rdNo()], ['PDFの届け先', rdEmail()]);
+    if (RD) rows.unshift([RD.field || RD.label + 'の注文番号', rdNo()], ['PDFの届け先', rdEmail()]);
     $('summary-order').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('');
     if ($('summary-story')) $('summary-story').textContent = st.name;  // 引き換えのときは この欄がない
     refreshPrice();
@@ -367,7 +371,8 @@
       $('redeem-done-id').textContent = data.order_id;
       $('redeem-done-msg').textContent = data.pending
         ? `${RD.label}のご注文を確かめています。確かめられたら、すぐにキットを作って ${data.email} にPDFをお送りします（ふつうは10〜20分ほど）。`
-        : `キットを作っています。ふつうは数分で ${data.email} にPDFが届きます。`;
+        : `キットを作っています。ふつうは数分で ${data.email} にPDFが届きます。`
+          + (typeof data.remaining === 'number' ? `${RD.label}の残りは あと${data.remaining}回です。` : '');
       document.querySelectorAll('.steps li').forEach(li => li.removeAttribute('aria-current'));
       document.querySelector('.steps li:last-child').setAttribute('aria-current', 'step');
       window.scrollTo({ top: 0 });
@@ -383,14 +388,27 @@
   if (RD) {
     document.title = document.title.replace('注文する', '引き換える');
     $('redeem-field').hidden = false;
-    $('redeem-legend').textContent = RD.label + 'で買った方';
+    $('redeem-legend').textContent = RD.legend || RD.label + 'で買った方';
     $('redeem-hint').textContent = RD.where + ' 名前などは、このページで入れてください。お支払いは' + RD.label + 'で済んでいるので、ここではかかりません。';
-    document.querySelector('.page-title').textContent = '名前入りキットに引き換える';
+    document.querySelector('.page-title').textContent = RD.title || '名前入りキットに引き換える';
     document.querySelector('.steps li:last-child').textContent = '3 お届け';
+    if (RD.code) {  // 3回分セット：引き換えコード（英数字）。メールのリンクから来たら、コードを入れておく
+      const lab = document.querySelector('label[for="redeem-no"]');
+      if (lab) lab.textContent = RD.field;
+      $('redeem-no').setAttribute('inputmode', 'text');
+      $('redeem-no').setAttribute('placeholder', RD.placeholder);
+      $('redeem-no').setAttribute('autocapitalize', 'characters');
+      const c = new URLSearchParams(location.search).get('code');
+      if (c && !$('redeem-no').value) $('redeem-no').value = c;
+    }
     const pay = $('pay-btn').closest('section').querySelectorAll('.summary')[1];
-    pay.innerHTML = `<h2>お届け</h2><dl><dt>お支払い</dt><dd>${esc(RD.label)}で済んでいます</dd>`
-      + `<dt>お届け</dt><dd>${esc(RD.label)}のご注文を確かめてから、名前入りのPDFをメールでお送りします（ふつうは10〜20分ほど。遅くとも24時間以内）</dd>`
-      + '<dt>引き換え</dt><dd>1つの注文番号につき1回です</dd></dl>';
+    pay.innerHTML = RD.code
+      ? `<h2>お届け</h2><dl><dt>お支払い</dt><dd>${esc(RD.label)}で済んでいます</dd>`
+        + '<dt>お届け</dt><dd>すぐにキットを作り、ふつうは数分で名前入りのPDFをメールでお送りします</dd>'
+        + `<dt>引き換え</dt><dd>1回につき1つ。${esc(RD.label)}の残りの回数が1つへります</dd></dl>`
+      : `<h2>お届け</h2><dl><dt>お支払い</dt><dd>${esc(RD.label)}で済んでいます</dd>`
+        + `<dt>お届け</dt><dd>${esc(RD.label)}のご注文を確かめてから、名前入りのPDFをメールでお送りします（ふつうは10〜20分ほど。遅くとも24時間以内）</dd>`
+        + '<dt>引き換え</dt><dd>1つの注文番号につき1回です</dd></dl>';
     const note = $('pay-btn').closest('section').querySelector(':scope > .hint');
     if (note) note.remove();
     $('pay-btn').textContent = 'この内容で作る';

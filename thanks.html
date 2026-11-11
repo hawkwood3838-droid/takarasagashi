@@ -41,6 +41,21 @@
     <p>このページは閉じても大丈夫です。</p>
   </div>
 
+  <div id="state-set" hidden>
+    <h1 class="page-title">ご購入ありがとうございます</h1>
+    <p class="notice notice-ok">3回分セットの引き換えコードを、<b id="set-mail-to">ご登録のメールアドレス</b> にお送りしました。</p>
+    <div class="summary">
+      <h2>引き換えコード</h2>
+      <dl>
+        <dt>コード</dt><dd><b id="set-code" style="font-size:22px;letter-spacing:.04em">-</b></dd>
+        <dt>使える回数</dt><dd><span id="set-count">3</span>回</dd>
+        <dt>有効期限</dt><dd id="set-until">-</dd>
+        <dt>作るとき</dt><dd><a class="btn btn-sm" id="set-link" href="order.html?redeem=set">このコードで1回目を作る</a><br>お話・名前・年齢・隠し場所を入れると、数分でPDFが届きます。贈り物にするときは、メールのコードとリンクを贈る方に伝えてください。</dd>
+      </dl>
+    </div>
+    <p>このページは閉じても大丈夫です（コードはメールにも書いてあります）。</p>
+  </div>
+
   <div id="state-unpaid" hidden>
     <h1 class="page-title">お支払いが確認できませんでした</h1>
     <p>お支払いが完了していないようです。もう一度、注文の画面からお進みください。</p>
@@ -65,7 +80,7 @@
 
 <script>
 (async function () {
-  const show = id => ['checking', 'paid', 'unpaid', 'error'].forEach(s => {
+  const show = id => ['checking', 'paid', 'set', 'unpaid', 'error'].forEach(s => {
     document.getElementById('state-' + s).hidden = s !== id;
   });
   const sid = new URLSearchParams(location.search).get('session_id') || '';
@@ -76,6 +91,15 @@
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
       if (!data.paid) { show('unpaid'); return; }
+      if (data.set) {  // 3回分セット：キットは作らず、引き換えコードを見せる
+        document.getElementById('set-code').textContent = data.code || data.order_id || '-';
+        document.getElementById('set-count').textContent = String(data.count || 3);
+        document.getElementById('set-until').textContent = (data.until || '') + 'まで';
+        if (data.email) document.getElementById('set-mail-to').textContent = data.email;
+        document.getElementById('set-link').href = 'order.html?redeem=set&code=' + encodeURIComponent(data.code || data.order_id || '');
+        show('set');
+        return;
+      }
       document.getElementById('order-id').textContent = data.order_id || '-';
       if (data.email) document.getElementById('mail-to').textContent = data.email;
       try { sessionStorage.removeItem('kit-order-draft'); } catch (e) { /* 何もしない */ }
