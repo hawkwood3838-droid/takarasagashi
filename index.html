@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{product}｜名前入りの宝さがし（3〜12さい）</title>
-<meta name="description" content="お子さまの名前を入れて注文すると、その子のための暗号と宝の地図がPDFで届きます。13のお話から選べて、3〜8さいは980円、9〜12さいは「なぞときチャレンジ」1,280円（税込）。印刷して家の中に隠すだけ。準備は5分。">
+<meta name="description" content="お子さまの名前を入れて注文すると、その子のための暗号と宝の地図がPDFで届きます。18のお話から選べて、3〜8さいは980円、9〜12さいは「なぞときチャレンジ」1,280円（税込）。印刷して家の中に隠すだけ。準備は5分。">
 <meta property="og:type" content="website">
 <meta property="og:title" content="前の晩でも間に合う、名前入りの宝さがし">
-<meta property="og:description" content="名前を入れて注文すると、その子のための暗号と宝の地図がPDFで届きます。13のお話・3〜8さい 980円・9〜12さい 1,280円。">
+<meta property="og:description" content="名前を入れて注文すると、その子のための暗号と宝の地図がPDFで届きます。18のお話・3〜8さい 980円・9〜12さい 1,280円。">
 <meta property="og:image" content="img/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -96,6 +96,14 @@
       <h3 class="lineup-head">季節のお話：お正月</h3>
       <p class="sub">家族やいとこが集まるお正月に。名前は6人まで入れられます。</p>
       <div class="lineup" id="lineup-shougatsu"></div>
+
+      <h3 class="lineup-head">季節のお話：節分</h3>
+      <p class="sub">豆まきの前に。こわくない赤鬼が、家に「福」を残していきます。</p>
+      <div class="lineup" id="lineup-setsubun"></div>
+
+      <h3 class="lineup-head">季節のお話：ひなまつり</h3>
+      <p class="sub">子どもみんなの成長のお祝いに。きょうだいで一緒に遊べます。</p>
+      <div class="lineup" id="lineup-hinamatsuri"></div>
     </div>
   </section>
 
@@ -227,7 +235,8 @@
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function card(s) {
     var open = K.inSeason(s.occasions);
-    var season = s.line === 'christmas' ? '<span class="story-badge">クリスマス</span>' : s.line === 'shougatsu' ? '<span class="story-badge">お正月</span>' : '';
+    var season = s.line === 'christmas' ? '<span class="story-badge">クリスマス</span>' : s.line === 'shougatsu' ? '<span class="story-badge">お正月</span>'
+      : s.line === 'setsubun' ? '<span class="story-badge">節分</span>' : s.line === 'hinamatsuri' ? '<span class="story-badge">ひなまつり</span>' : '';
     var soon = (K.SEASONS[s.occasions[0]] || {}).soon || '';
     var btn = open
       ? '<a class="btn btn-sm" href="order.html?story=' + encodeURIComponent(s.key) + '">このお話で注文する</a>'
@@ -252,6 +261,8 @@
     document.querySelectorAll('.js-set-price').forEach(function (el) { el.textContent = K.SET.PRICE.toLocaleString('ja-JP'); });
   }
   document.getElementById('lineup-shougatsu').innerHTML = K.STORIES.filter(function (s) { return s.line === 'shougatsu'; }).map(card).join('');
+  document.getElementById('lineup-setsubun').innerHTML = K.STORIES.filter(function (s) { return s.line === 'setsubun'; }).map(card).join('');
+  document.getElementById('lineup-hinamatsuri').innerHTML = K.STORIES.filter(function (s) { return s.line === 'hinamatsuri'; }).map(card).join('');
 
   // 手紙の見本に名前を入れる
   var nameEl = document.getElementById('try-name');

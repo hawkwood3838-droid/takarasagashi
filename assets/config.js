@@ -36,6 +36,8 @@ window.KIT = {
     everyday: { label: 'ふだんの日', note: 'ごほうびや雨の日の遊びに。合言葉はお話ごとにちがいます' },
     christmas: { label: 'クリスマス', note: 'クリスマスだけのお話です' },
     shougatsu: { label: 'お正月', note: 'お正月だけのお話です。家族やいとこと遊べるよう、名前は6人まで入れられます', names_max: 6 },
+    setsubun: { label: '節分', note: '節分だけのお話です。豆まきの前に遊べます。合言葉は「ふくはうち」' },
+    hinamatsuri: { label: 'ひなまつり', note: 'ひなまつりだけのお話です。きょうだいみんなで遊べます。合言葉は「ひなあられ」' },
   },
   // ほかの通販サイトで買った人の引き換え（order.html?redeem=booth）。受付の仕組みの CONFIG.REDEEM.CHANNELS と同じキー
   REDEEM: {
@@ -52,6 +54,8 @@ window.KIT = {
   SEASONS: {
     christmas: { from: '11-01', until: '12-25', soon: '11月から' },
     shougatsu: { from: '12-01', until: '01-07', soon: '12月から' },
+    setsubun: { from: '01-10', until: '02-03', soon: '1月から' },
+    hinamatsuri: { from: '02-01', until: '03-03', soon: '2月から' },
   },
   // お話（キット作成の stories.py と同じキー）
   // title は {漢字|よみ} の形で書く。販売ページでは漢字の上に小さくふりがなが付き、
@@ -76,6 +80,12 @@ window.KIT = {
       blurb: '人魚のマリンと、しんじゅの宝箱を探します。' },
     { key: 'okashi', title: 'お{菓子|かし}の {国|くに}', host: 'パティシエの ショコラ', line: 'year', occasions: ['birthday', 'everyday'],
       blurb: 'おかしの家をめぐって、とびきりのごほうびへ。' },
+    { key: 'densha', title: 'でんしゃの {旅|たび}', host: 'うんてんしの ゴトン', line: 'year', occasions: ['birthday', 'everyday'],
+      blurb: '運転士のゴトンと、家の中の駅をめぐって届け物を探します。' },
+    { key: 'oshiro', title: 'お{城|しろ}の {冒険|ぼうけん}', host: 'もんばんの カッチン', line: 'year', occasions: ['birthday', 'everyday'],
+      blurb: 'お城の門番カッチンの暗号を解いて、自分の力でお城の宝へ。' },
+    { key: 'shouboutai', title: 'まちの ヒーロー {消防隊|しょうぼうたい}', host: 'しょうぼうしの ポンプ', line: 'year', occasions: ['birthday', 'everyday'],
+      blurb: '消防士ポンプの訓練を一つずつこなして、勇気のメダルを探します。' },
     { key: 'xmas_minarai', title: '{見習|みなら}いサンタの お{手伝|てつだ}い', host: 'みならいサンタ ポポ', line: 'christmas', occasions: ['christmas'],
       blurb: '地図をなくした見習いサンタを助けて、プレゼントを探します。' },
     { key: 'xmas_tonakai', title: 'いたずらトナカイ', host: 'トナカイの ベル', line: 'christmas', occasions: ['christmas'],
@@ -84,6 +94,10 @@ window.KIT = {
       blurb: 'サンタクロースからの挑戦状。暗号をといてプレゼントへ。' },
     { key: 'shougatsu_fuku', title: '{福|ふく}の{神|かみ}の お{年玉|としだま}', host: 'ふくのかみ ニコ', line: 'shougatsu', occasions: ['shougatsu'],
       blurb: '福の神が隠したお年玉を、家族やいとこと探します。' },
+    { key: 'setsubun', title: 'おに{退治|たいじ} クエスト', host: 'あかおにの ツノスケ', line: 'setsubun', occasions: ['setsubun'],
+      blurb: 'こわくない赤鬼ツノスケが隠した福を、豆まきの前に探します。' },
+    { key: 'hinamatsuri', title: 'おひなさまの ひみつ', host: 'ぼんぼりの アカリ', line: 'hinamatsuri', occasions: ['hinamatsuri'],
+      blurb: 'ぼんぼりのアカリが隠したお祝いの箱を、きょうだいみんなで探します。' },
   ],
   // 隠し場所（キット作成側の SPOTS と同じ並び・同じキー）
   SPOTS: [
