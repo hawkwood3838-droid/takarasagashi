@@ -38,7 +38,7 @@ window.KIT = {
   },
   // サンタからの手紙（12月の毎日1通の なぞとき。santa.html）。受付の CONFIG.ADVENT・キット作成の advent.py と同じ。
   // 通数は決まるまで仮に12（12/13〜12/24）。変えるときは3か所そろえる
-  ADVENT: { TITLE: 'サンタからの手紙', LETTERS: 12, PRICE: 1480, AGES: [5, 6, 7, 8, 9, 10, 11, 12], SALE_FROM: '11-01', SALE_UNTIL: '12-20' },
+  ADVENT: { TITLE: 'サンタからの手紙', LETTERS: 12, PRICE: 1480, AGES: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12], SALE_FROM: '11-01', SALE_UNTIL: '12-20' },
   // 季節のお話を売る期間（月-日）。期間の外は「〇月から」と出して選べなくする
   SEASONS: {
     christmas: { from: '11-01', until: '12-25', soon: '11月から' },
