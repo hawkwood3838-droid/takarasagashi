@@ -77,6 +77,7 @@
     $('add-name').hidden = rows.length >= namesMax();
     $('age-multi').hidden = rows.length < 2;
     refreshBirthday();
+    if (typeof refreshKd === 'function') refreshKd();
   }
   $('add-name').addEventListener('click', () => { nameRow().querySelector('.kid-name').focus(); });
 
@@ -91,6 +92,13 @@
   for (let a = 1; a <= 15; a++) $('bday-age').insertAdjacentHTML('beforeend', `<option value="${a}">${a}さい</option>`);
   const age = () => Number((form.querySelector('input[name="age"]:checked') || {}).value || 0);
 
+  // ── きょうだい版（2026-10-28）：名前が2人以上のとき選べる。下の子用（●）の手紙とカードを足す（＋300円）。引き換えでは選べない ──
+  const KD = K.KYOUDAI || { PLUS: 300, AGES: [3, 4, 5, 6, 7, 8] };
+  document.querySelectorAll('[data-kit="kd_plus"]').forEach(el => { el.textContent = KD.PLUS.toLocaleString('ja-JP'); });
+  $('age2-list').innerHTML = KD.AGES.map(a => `<label><input type="radio" name="age2" value="${a}"><span>${a}さい</span></label>`).join('');
+  const kdOn = () => !RD && !$('kd-box').hidden && $('kd-on').checked;
+  const age2 = () => (kdOn() ? Number((form.querySelector('input[name="age2"]:checked') || {}).value || 0) : 0);
+
   // ── むずかしさ（謎だけ1さい上・下にずらす。3〜8におさめる） ──
   $('level-list').innerHTML = K.LEVELS.map(l => `<label><input type="radio" name="level" value="${l.key}"${l.key === 'normal' ? ' checked' : ''}><span>${l.label}</span></label>`).join('');
   const levelOf = key => K.LEVELS.find(l => l.key === key) || K.LEVELS[1];
@@ -100,13 +108,15 @@
   const ageMin = a => Math.min(...band(a)), ageMax = a => Math.max(...band(a));
   const puzzleAgeOf = (a, lv) => (a ? Math.min(Math.max(a + levelOf(lv).shift, ageMin(a)), ageMax(a)) : 0);
   const isOlder = a => a >= K.OLDER_AGE;
-  const priceOf = a => (isOlder(a) ? K.PRICE_OLDER : K.PRICE);
+  const priceOf = a => (isOlder(a) ? K.PRICE_OLDER : K.PRICE) + (kdOn() ? KD.PLUS : 0);
   // 値段の表示（確認画面・支払いボタン）を年齢に合わせる
   function refreshPrice() {
     const a = age();
     document.querySelectorAll('#confirm [data-kit="price"]').forEach(el => { el.textContent = priceOf(a).toLocaleString('ja-JP'); });
     const nm = $('summary-older');
     if (nm) nm.textContent = isOlder(a) ? ' ' + K.OLDER_NAME : '';
+    const kd = $('summary-kd');
+    if (kd) kd.textContent = kdOn() ? `＋きょうだい版（下の子用の手紙とカード ${KD.PLUS.toLocaleString('ja-JP')}円）` : '';
   }
   const puzzleAge = () => puzzleAgeOf(age(), level());
   const need = () => (puzzleAge() && puzzleAge() <= K.LITTLE_AGE ? 4 : 5);
@@ -126,6 +136,26 @@
         + (a === ageMax(a) ? `${a}さいは、${isOlder(a) ? K.OLDER_NAME + 'の' : '3〜8さい版の'}いちばんむずかしい謎です。` : '');
   }
   refreshLevel();
+  // きょうだい版の欄：名前2人以上で出す。下の子は上の子より下の年齢だけ。上の子の謎が字を読まない版なら選べない
+  function refreshKd() {
+    const multi = document.querySelectorAll('.name-row').length > 1;
+    $('kd-box').hidden = !!RD || !multi;
+    const a = age(), p = puzzleAge();
+    const tooYoung = !!p && p <= K.LITTLE_AGE;
+    $('kd-on').disabled = tooYoung;
+    if (tooYoung) $('kd-on').checked = false;
+    $('kd-age-box').hidden = !kdOn();
+    form.querySelectorAll('input[name="age2"]').forEach(i => {
+      i.disabled = !!a && Number(i.value) >= a;
+      if (i.disabled && i.checked) i.checked = false;
+    });
+    const y = age2();
+    $('age2-note').textContent = !y ? '下の子用は、4さい以下なら字を読まない絵のなぞ、5さい以上ならその年齢の文字の暗号です。'
+      : y <= K.LITTLE_AGE ? `下の子用は ${y}さい向けの絵のなぞ（字を読まない版）です。` : `下の子用は ${y}さい向けの文字の暗号です。`;
+    if (tooYoung && multi) $('age2-note').textContent = 'きょうだい版は、上の子の謎が5さい以上（字を読む版）のときに選べます。';
+    refreshPrice();
+  }
+  $('kd-on').addEventListener('change', refreshKd);
   // おたんじょうびで2人以上のときだけ、おたんじょうびの子の年齢をたずねる（1人なら年齢と同じ）
   function refreshBirthday() {
     const multi = document.querySelectorAll('.name-row').length > 1;
@@ -171,8 +201,9 @@
     const nm = e.target.name;
     if (nm === 'story') refreshOccasions();
     if (nm === 'occasion') { refreshOccasionNote(); refreshNames(); }
-    if (nm === 'age') { refreshBirthday(); refreshLevel(); refreshSpots(); refreshPrice(); }
-    if (nm === 'level') { refreshLevel(); refreshSpots(); }
+    if (nm === 'age') { refreshBirthday(); refreshLevel(); refreshSpots(); refreshKd(); refreshPrice(); }
+    if (nm === 'level') { refreshLevel(); refreshSpots(); refreshKd(); }
+    if (nm === 'age2') refreshKd();
     if (nm === 'treasure' || nm === 'cards') refreshSpots();
   });
   $('likes').addEventListener('blur', () => { $('likes').value = $('likes').value.trim().replace(/\s/g, ''); });
@@ -207,6 +238,7 @@
       sender: sender(),
       treasure: treasure(),
       card_spots: cards(),
+      ...(kdOn() ? { age2: age2() } : {}),
     };
   }
 
@@ -231,6 +263,9 @@
     if (!nameMsg && o.names.length > namesMax()) { nameMsg = `この用途では、名前は${namesMax()}人までです`; nameInput = nameInputs[nameInputs.length - 1]; }
     bad('name-err', nameMsg, nameInput);
     bad('age-err', o.age ? '' : '年齢を選んでください', form.querySelector('input[name="age"]'));
+    if (kdOn()) bad('age2-err', !o.age2 ? '下の子の年齢を選んでください' : o.age && o.age2 >= o.age ? '下の子の年齢は、上の子より下を選んでください' : '',
+      form.querySelector('input[name="age2"]:not(:disabled)') || $('kd-on'));
+    else showErr('age2-err', '');
     bad('likes-err', !o.likes ? '' : !KANA.test(o.likes) ? '好きなものは、ひらがな・カタカナで入れてください'
       : o.likes.length > K.LIKES_MAX ? `好きなものは${K.LIKES_MAX}文字までです` : '', $('likes'));
     bad('sender-err', senderPick() === '*' && !o.sender ? '差出人の名前を入れてください（例：おばあちゃん）'
@@ -266,9 +301,10 @@
       ['お話', st.name],
       ['いつ遊ぶか', K.OCCASIONS[o.occasion].label],
       ['お子さまの名前', who],
-      ['年齢', o.age + 'さい' + (o.names.length > 1 ? '（むずかしさ）' : '') + (o.level !== 'normal' ? '・' + levelOf(o.level).label : '')
+      ['年齢', o.age + 'さい' + (o.age2 ? '（上の子）' : o.names.length > 1 ? '（むずかしさ）' : '') + (o.level !== 'normal' ? '・' + levelOf(o.level).label : '')
         + (puzzleAgeOf(o.age, o.level) <= K.LITTLE_AGE ? '・字を読まない版' : '')],
     ];
+    if (o.age2) rows.push(['きょうだい版', `下の子 ${o.age2}さい${o.age2 <= K.LITTLE_AGE ? '（字を読まない絵のなぞ）' : ''}・＋${KD.PLUS.toLocaleString('ja-JP')}円`]);
     if (o.occasion === 'birthday' && o.names.length > 1) rows.push(['おたんじょうび', `${o.names[0].name}${o.names[0].suffix}・${o.birthday_age}さい`]);
     rows.push(['好きなもの', o.likes || '（なし）'], ['手紙の差出人', o.sender ? o.sender + '（と お話の案内役）' : 'お話の案内役'], ['プレゼントの場所', labelOf(o.treasure)], ['カードの場所', o.card_spots.map(labelOf).join('、')]);
     if (RD) rows.unshift([RD.label + 'の注文番号', rdNo()], ['PDFの届け先', rdEmail()]);
@@ -381,6 +417,13 @@
     if (lv) lv.checked = true;
     refreshLevel();
     if (o.birthday_age) { $('bday-age').value = String(o.birthday_age); $('bday-age').dataset.touched = '1'; }
+    if (o.age2) {
+      $('kd-on').checked = true;
+      refreshKd();
+      const a2 = form.querySelector(`input[name="age2"][value="${o.age2}"]`);
+      if (a2) a2.checked = true;
+    }
+    refreshKd();
     $('likes').value = o.likes || '';
     const preset = form.querySelector(`input[name="sender"][value="${o.sender || ''}"]`);
     if (preset) preset.checked = true;

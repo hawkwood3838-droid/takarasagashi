@@ -70,8 +70,20 @@
       <legend><span class="q-num">4</span>年齢</legend>
       <p class="hint" id="age-hint">年齢に合わせて、謎の難しさが変わります。3〜4さいは字を読まなくても解ける絵のなぞ（隠し場所4か所）、5さい以上は文字の暗号（5か所）です。9〜12さいは「<span data-kit="older_name">なぞときチャレンジ</span>」（漢字にふりがなの手紙と、むずかしい暗号。<span data-kit="price_older">1,280</span>円）になります。</p>
       <div class="seg" id="age-list" role="radiogroup" aria-describedby="age-hint age-err"></div>
-      <p class="hint" id="age-multi" hidden style="margin-top:8px">きょうだいで遊ぶときは、下の子の年齢に合わせるのがおすすめです。</p>
+      <p class="hint" id="age-multi" hidden style="margin-top:8px">きょうだいで遊ぶときは、下の子の年齢に合わせるか、下の「きょうだい版」で上の子と下の子の両方に合わせられます。</p>
       <p class="err" id="age-err" hidden></p>
+      <div id="kd-box" hidden style="margin-top:14px">
+        <label class="agree">
+          <input type="checkbox" id="kd-on" aria-describedby="kd-hint">
+          <span><b>きょうだい版にする</b>（＋<span data-kit="kd_plus">300</span>円）<br><span class="hint" id="kd-hint" style="margin:0">上の子と下の子で、ちがう むずかしさの謎になります。手紙とカードが上の子用（★）と下の子用（●）の2枚ずつになり、どちらの謎を解いても同じ場所に着きます。このときは、上の「年齢」で上の子の年齢を選んでください。</span></span>
+        </label>
+        <div id="kd-age-box" hidden>
+          <p class="hint" style="margin:14px 0 6px">下の子の年齢</p>
+          <div class="seg" id="age2-list" role="radiogroup" aria-describedby="age2-note age2-err"></div>
+          <p class="hint" id="age2-note" style="margin-top:8px"></p>
+          <p class="err" id="age2-err" hidden></p>
+        </div>
+      </div>
       <div id="level-box">
         <p class="hint" id="level-hint" style="margin:14px 0 6px">むずかしさ（同じ年でも得意・にがてがあるので、迷ったら「ふつう」）</p>
         <div class="seg" id="level-list" role="radiogroup" aria-describedby="level-hint level-note"></div>
@@ -145,7 +157,7 @@
     <div class="summary">
       <h2>お支払いとお届け</h2>
       <dl>
-        <dt>商品</dt><dd><span data-kit="product">おうちクエスト</span><span id="summary-older"></span>「<span id="summary-story"></span>」（名前入り・PDF）</dd>
+        <dt>商品</dt><dd><span data-kit="product">おうちクエスト</span><span id="summary-older"></span>「<span id="summary-story"></span>」（名前入り・PDF）<span id="summary-kd"></span></dd>
         <dt>数量</dt><dd>1</dd>
         <dt>価格</dt><dd><span class="big-price"><span data-kit="price">980</span>円</span>（税込・送料なし）</dd>
         <dt>支払い方法</dt><dd>クレジットカード</dd>

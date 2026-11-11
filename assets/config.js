@@ -20,6 +20,8 @@ window.KIT = {
   AGE_LABEL: '3〜12さい',
   PLAY_TIME: '15〜30分',
   LITTLE_AGE: 4, // この年齢以下は字を読まない版（隠し場所は4か所）
+  // きょうだい版（2026-10-28）：下の子用（●）の手紙とカードを足す。受付の CONFIG.KYOUDAI・キット作成の KYOUDAI_AGES と同じ
+  KYOUDAI: { PLUS: 300, AGES: [3, 4, 5, 6, 7, 8] },
   // むずかしさえらび（受付の CONFIG.LEVELS・キット作成の LEVELS と同じ）。謎の年齢を本当の年齢から shift だけずらす
   LEVELS: [
     { key: 'easy', label: 'やさしめ', shift: -1 },
