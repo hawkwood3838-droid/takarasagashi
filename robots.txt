@@ -1,0 +1,6 @@
+# GitHub Pages のプロジェクトサイト（/takarasagashi/）では、検索エンジンはこのファイルを読みません。
+# 独自ドメインにしたとき用。いまは Search Console に sitemap.xml を登録してください。
+User-agent: *
+Allow: /
+
+Sitemap: https://hawkwood3838-droid.github.io/takarasagashi/sitemap.xml
