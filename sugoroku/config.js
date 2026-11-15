@@ -3,7 +3,7 @@ window.SUGO = {
   PRODUCT_NAME: 'なりたい自分すごろく',
   // 販売を始めたら true にする。false のあいだは「準備中」と出して、支払いボタンを押せなくする
   // （?test=1 を付けて開くと、テスト用のキーで ためせる）
-  OPEN: false,
+  OPEN: true,
   // 種類と値段（受付の仕組み Code.gs の CONFIG.SUGOROKU.PLANS と同じ）。price が 0 のものは「準備中」
   PLANS: [
     { key: 'yasashii', name: '名前入り やさしい版', price: 1480, pages: 15, chooseJobs: true,
