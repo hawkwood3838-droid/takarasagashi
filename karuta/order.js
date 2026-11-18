@@ -109,7 +109,7 @@
     dl.innerHTML = '<dt>家族</dt><dd>' + o.members.map(m => esc(m.name) + (m.pet ? '（ペット）' : '')).join('・') + '</dd>'
       + '<dt>思い出</dt><dd>' + o.memories.map(esc).join('<br>') + '</dd>'
       + '<dt>小さい子</dt><dd>' + esc(ageLabel) + (o.youngest_age <= G.LITTLE_AGE ? '（ひらがなだけ・短め）' : '') + '</dd>';
-    const edText = o.edition === 'oiwai' ? 'お祝い版（' + esc(o.members[o.honoree].name) + 'の ' + esc($('occasion').selectedOptions[0].textContent) + '）' : 'ふつう';
+    const edText = o.edition === 'oiwai' ? 'お祝い版（' + esc(o.members[o.honoree].name) + 'の ' + esc($('occasion').selectedOptions[0].textContent.replace(/（.*）$/, '')) + '）' : 'ふつう';
     $('summary-ed').innerHTML = edText;
     $('summary-price').textContent = G.yen(G.PRICE);
     $('pay-price').textContent = G.yen(G.PRICE);
