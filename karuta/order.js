@@ -54,12 +54,11 @@
   function refreshHonoree() {
     const sel = $('honoree'), keep = sel.value;
     sel.innerHTML = '';
-    let j = 0;  // 空の行を数えない番号（collect の members と同じ並び）
     [...rows.querySelectorAll('.member-row')].forEach(r => {
       const n = r.querySelector('.m-name').value.replace(/[\s　]+/g, '');
       if (!n) return;
-      if (!r.querySelector('.m-pet').checked) sel.insertAdjacentHTML('beforeend', '<option value="' + j + '">' + esc(n) + '</option>');
-      j++;
+      // 値は呼び名（行を消しても、選んだ人がずれないように。番号は collect で決める）
+      if (!r.querySelector('.m-pet').checked) sel.insertAdjacentHTML('beforeend', '<option value="' + esc(n) + '">' + esc(n) + '</option>');
     });
     if ([...sel.options].some(o => o.value === keep)) sel.value = keep;
   }
@@ -76,7 +75,7 @@
     const consent = {};
     document.querySelectorAll('.consent').forEach(c => { consent[c.dataset.key] = c.checked; });
     const o = { product: 'karuta', members, memories, youngest_age: parseInt($('age').value, 10), edition: edition(), consent };
-    if (o.edition === 'oiwai') { o.honoree = parseInt($('honoree').value, 10); o.occasion = $('occasion').value; }
+    if (o.edition === 'oiwai') { const hn = $('honoree').value; o.honoree = members.findIndex(m => m.name === hn && !m.pet); o.occasion = $('occasion').value; }
     return o;
   }
 
@@ -145,7 +144,7 @@
     saved.members.forEach(m => addMember(m.name, m.pet));
     (saved.memories || []).forEach((x, i) => { if (mrows.children[i]) mrows.children[i].value = x; });
     if (saved.youngest_age) $('age').value = String(saved.youngest_age);
-    if (saved.edition === 'oiwai') { document.querySelector('input[value="oiwai"]').checked = true; $('oiwai-box').hidden = false; refreshHonoree(); $('honoree').value = String(saved.honoree); $('occasion').value = saved.occasion || 'kanreki'; }
+    if (saved.edition === 'oiwai') { document.querySelector('input[value="oiwai"]').checked = true; $('oiwai-box').hidden = false; refreshHonoree(); if (saved.members[saved.honoree]) $('honoree').value = saved.members[saved.honoree].name; $('occasion').value = saved.occasion || 'kanreki'; }
   }
   while (rows.children.length < 3) addMember('', false);
   if (new URLSearchParams(location.search).get('canceled') === '1') {
