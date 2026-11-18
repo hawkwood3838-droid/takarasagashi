@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>注文する｜うちの かぞく かるた</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="karuta.css">
+<script src="../assets/config.js"></script>
+<script src="config.js"></script>
+</head>
+<body class="kr">
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="./"><svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="4" fill="#fff8ec" stroke="#e07a4f" stroke-width="2"/><circle cx="12" cy="12" r="6" fill="#fff" stroke="#e07a4f" stroke-width="1.8"/></svg>うちの かぞく かるた<span class="brand-tag">名入れ</span></a>
+  </div>
+</header>
+
+<main class="wrap narrow">
+  <h1 class="page-title">注文する</h1>
+  <ol class="steps" aria-label="注文の流れ">
+    <li id="step-input" aria-current="step">1 入力</li>
+    <li id="step-confirm">2 確認</li>
+    <li>3 お支払い</li>
+  </ol>
+
+  <div id="notice-area"></div>
+
+  <form id="order-form" novalidate>
+    <fieldset class="field">
+      <legend>家族の呼び名</legend>
+      <p class="hint" id="members-hint">2〜6人（ペットも1人と数えます）。ひらがな・カタカナ10文字まで。「はると」「パパ」「じいじ」のように、ふだん呼んでいる名前で。名字は入れないでください。</p>
+      <div id="member-rows"></div>
+      <button class="btn btn-ghost btn-sm" type="button" id="add-member">＋ 1人ふやす</button>
+      <p class="err" id="members-err" hidden></p>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend>わが家の思い出・すきなもの</legend>
+      <p class="hint" id="mem-hint">3〜10こ。1こ20文字まで。「パパの たまごやき」「みんなで どうぶつえん」「コロの さんぽ」のように短くて大丈夫です。<b>病気やけが・家庭の事情・住所・学校や園の名前は書かないでください。</b></p>
+      <div class="memories" id="memory-rows"></div>
+      <p class="err" id="mem-err" hidden></p>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend>いちばん小さい子の年齢</legend>
+      <p class="hint" id="age-hint">3〜4さいまでなら、読み札を ひらがなだけ・短め（15字まで）にします。5さい以上は25字まで。</p>
+      <select id="age" aria-describedby="age-hint age-err" style="max-width:280px"></select>
+      <p class="err" id="age-err" hidden></p>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend>版</legend>
+      <div class="seg" role="radiogroup" aria-label="版">
+        <label><input type="radio" name="edition" value="normal" checked><span>ふつう</span></label>
+        <label><input type="radio" name="edition" value="oiwai"><span>お祝い版</span></label>
+      </div>
+      <div class="oiwai-box" id="oiwai-box" hidden>
+        <p class="hint">表紙にお祝いの言葉が入り、主役が多めに（6まい以上）出てきます。</p>
+        <label class="sub-label" for="honoree">お祝いする人</label><br>
+        <select id="honoree"></select><br>
+        <label class="sub-label" for="occasion">何のお祝い</label><br>
+        <select id="occasion"></select>
+      </div>
+      <p class="err" id="ed-err" hidden></p>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend>注文の前の確認（5つ ぜんぶ）</legend>
+      <div id="consents"></div>
+      <p class="hint">くわしくは <a href="../privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>・<a href="../tokushoho.html" target="_blank" rel="noopener">特定商取引法に基づく表記</a></p>
+      <p class="err" id="consent-err" hidden></p>
+    </fieldset>
+
+    <div class="form-actions">
+      <button class="btn" type="submit">確認へ進む</button>
+    </div>
+  </form>
+
+  <section id="confirm" hidden aria-labelledby="confirm-title">
+    <div class="summary">
+      <h2 id="confirm-title">ご注文の内容</h2>
+      <dl id="summary-order"></dl>
+    </div>
+    <div class="summary">
+      <h2>お支払いとお届け</h2>
+      <dl>
+        <dt>商品</dt><dd>うちの かぞく かるた（名入れ・PDF・<span id="summary-ed"></span>）</dd>
+        <dt>分量</dt><dd>PDF 1つ（A4・10ページ：表紙・あそびかた・読み札46まい・絵札46まい、自分で書ける札が2まいずつ）</dd>
+        <dt>数量</dt><dd>1</dd>
+        <dt>価格</dt><dd><span id="summary-price"></span>円（税込・送料なし）</dd>
+        <dt>支払い方法</dt><dd>クレジットカード</dd>
+        <dt>支払いの時期</dt><dd>次の画面でカード情報を入れたときに決済されます</dd>
+        <dt>お届け</dt><dd data-karuta="delivery">ご注文の翌日の正午（12時）までに、PDFをメールでお送りします</dd>
+        <dt>返品・キャンセル</dt><dd>名前を入れて作るデジタル商品のため、お届け後の返品・キャンセルはできません。ファイルの不具合や内容の誤りは、作り直しか返金で対応します</dd>
+      </dl>
+    </div>
+    <p class="hint">次の画面（Stripeの支払い画面）で、カード情報と、PDFを受け取るメールアドレスを入れます。</p>
+    <p class="err" id="submit-err" hidden></p>
+    <div class="form-actions">
+      <button class="btn btn-ghost" type="button" id="back-btn">入力にもどる</button>
+      <button class="btn" type="button" id="pay-btn">支払いへ進む（<span id="pay-price"></span>円）</button>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <nav aria-label="サイトの情報">
+      <a href="../tokushoho.html">特定商取引法に基づく表記</a>
+      <a href="../privacy.html">プライバシーポリシー</a>
+      <a href="#" data-kit-mail>お問い合わせ</a>
+    </nav>
+    <p style="margin:0"><span data-kit="shop">ひなた あそび工房</span>（販売：<span data-kit="seller">髙木大資</span>）</p>
+  </div>
+</footer>
+
+<script src="order.js"></script>
+</body>
+</html>

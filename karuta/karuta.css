@@ -1,0 +1,21 @@
+/* うちの かぞく かるた（../assets/style.css の上に足す） */
+.kr .brand-mark { width: 26px; height: 26px; }
+.kr .member-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.kr .member-row input[type="text"] { flex: 1; min-width: 0; }
+.kr .member-row label { display: flex; gap: 4px; align-items: center; font-size: 14px; font-weight: 700; white-space: nowrap; }
+.kr .member-row label input { width: 20px; height: 20px; accent-color: var(--ink); }
+.kr .member-row .del { min-height: 38px; padding: 4px 10px; }
+.kr .memories input { margin-bottom: 8px; }
+.kr .agree + .agree { margin-top: 8px; }
+.kr .oiwai-box { margin-top: 12px; padding: 12px 14px; border: 2px dashed var(--line); border-radius: 12px; }
+.kr .oiwai-box select { max-width: 280px; margin-bottom: 8px; }
+.kr .sample-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 12px 0 18px; }
+@media (min-width: 560px) { .kr .sample-cards { grid-template-columns: repeat(4, 1fr); } }
+.kr .kcard { aspect-ratio: 60 / 68; border: 3px solid #e07a4f; border-radius: 10px; background: #fff; padding: 8px; position: relative; font-weight: 700; font-size: 14px; line-height: 1.55; }
+.kr .kcard .mk { width: 30px; height: 30px; border: 2px solid #e07a4f; border-radius: 50%; color: #e07a4f; text-align: center; line-height: 26px; font-weight: 900; margin-bottom: 6px; }
+.kr .kcard.e { background: #fff8ec; text-align: center; }
+.kr .kcard.e .mk { position: absolute; left: 6px; top: 6px; width: 40px; height: 40px; line-height: 35px; font-size: 22px; background: #fff; }
+.kr .kcard.e img { width: 74%; margin-top: 14%; border-radius: 6px; background: #fff; }
+.kr .kcard.e .cap { font-size: 12px; }
+.kr .price-line { font-size: 22px; font-weight: 900; }
+.kr .delivery { font-weight: 700; }
