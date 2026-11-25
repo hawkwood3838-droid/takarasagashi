@@ -96,6 +96,15 @@
       <h3 class="lineup-head">季節のお話：お正月</h3>
       <p class="sub">家族やいとこが集まるお正月に。名前は6人まで入れられます。</p>
       <div class="lineup" id="lineup-shougatsu"></div>
+      <!-- うちの かぞく かるた：12月のあいだだけ出す（髙木さんのOKのあと公開。2026-11-25 下書き） -->
+      <a class="santa-band" href="karuta/" id="karuta-band" hidden>
+        <img src="karuta/img/tamagoyaki.jpg" alt="" width="420" height="420" loading="lazy">
+        <span><span class="story-badge">12月だけ</span><b>うちの かぞく かるた　1,480円</b>
+        <small>家族の呼び名と思い出で作る、わが家だけの かるた（読み札46まい・絵札46まいのPDF）。お正月や帰省に、じいじ・ばあばも いっしょに。12月20日までのご注文は、お正月に間に合います</small></span>
+      </a>
+      <script>
+        (function () { var m = new Date().getMonth() + 1; if (m === 12) document.getElementById('karuta-band').hidden = false; })();
+      </script>
 
       <h3 class="lineup-head">季節のお話：節分</h3>
       <p class="sub">豆まきの前に。こわくない赤鬼が、家に「福」を残していきます。</p>
